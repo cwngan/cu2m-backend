@@ -44,4 +44,11 @@ ruff check --fix
 5. Remember to add tests to your newly developed API endpoint using `pytest`.
 
 # Running with Docker
-(To be implemented)
+1. Use the following command for (re)building and running the docker container.
+```bash
+docker compose up --build
+```
+2. You may want to run it in detach mode. Type the following command to do so.
+```bash
+docker compose up -d
+```
