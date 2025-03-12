@@ -24,16 +24,16 @@ python3 -m pip install -r requirements.txt
 flask --app flaskr run --debug
 ```
 
-# Coding Conventions
-1. Use the following command to format your code. You can also setup auto formatting in Visual Studio Code (install "Black Formatter" from Microsoft).
+# Development Conventions
+1. Use `black` for code formatting. Use the following command to format your code. You can also setup auto formatting in Visual Studio Code (install "Black Formatter" from Microsoft).
 ```bash
 black .
 ```
-2. Use the following command to lint your code. You can also setup auto linting in Visual Studio Code (install "Ruff" from Astral Software).
+2. Use `ruff` for code linting. Use the following command to lint your code. You can also setup auto linting in Visual Studio Code (install "Ruff" from Astral Software).
 ```bash
 ruff check
 ```
-3. Fix your errors linted by linter automatically with this. Note that some errors have to be fixed manually.
+3. Fix your errors linted by linter automatically with the following command. Note that some errors have to be fixed manually.
 ```bash
 ruff check --fix
 ```
@@ -41,6 +41,7 @@ ruff check --fix
 - Class names should be in `PascalCase`.
 - Function and variable names should be in `snake_case`.
 - Constants names should be written in all capital letters with underscores separating words.
+5. Remember to add tests to your newly developed API endpoint using `pytest`.
 
 # Running with Docker
 (To be implemented)
