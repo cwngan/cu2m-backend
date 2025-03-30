@@ -13,3 +13,7 @@ class RootResponseModel(ResponseModel):
 
 class PingResponseModel(ResponseModel):
     data: str
+
+
+class HealthResponseModel(ResponseModel):
+    data: dict[str, bool]

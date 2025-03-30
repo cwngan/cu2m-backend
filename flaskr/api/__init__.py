@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_pydantic import validate
 
 from flaskr.models import RootResponseModel
-from flaskr.api import ping
+from flaskr.api import ping, health
 
 route = Blueprint("api", __name__, url_prefix="/api")
 
@@ -14,3 +14,4 @@ def root():
 
 
 route.register_blueprint(ping.route)
+route.register_blueprint(health.route)
