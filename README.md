@@ -3,7 +3,7 @@
 # Prerequisites
 - Python with pip install
 
-# Environment Setup
+# Environment Setup (Flask Server Only)
 1. Setup a virtual environment.
 ```bash
 python3 -m venv .venv
@@ -24,6 +24,21 @@ python3 -m pip install -r requirements.txt
 flask --app flaskr run --debug
 ```
 
+# Environment Setup (With Database)
+1. Download Docker and Docker Compose.
+2. Use the following command for (re)building and running the docker container with watching. With watching, you can edit the source code and docker will try to reflect those changes as soon as possible.
+```bash
+docker compose up --build --watch
+```
+3. Use the following command to start the server with watching.
+```bash
+docker compose up --watch
+```
+4. You may want to run it in detach mode. Type the following command to do so (doesn't support watch).
+```bash
+docker compose up -d
+```
+
 # Development Conventions
 1. Use `black` for code formatting. Use the following command to format your code. You can also setup auto formatting in Visual Studio Code (install "Black Formatter" from Microsoft).
 ```bash
@@ -42,13 +57,3 @@ ruff check --fix
 - Function and variable names should be in `snake_case`.
 - Constants names should be written in all capital letters with underscores separating words.
 5. Remember to add tests to your newly developed API endpoint using `pytest`.
-
-# Running with Docker
-1. Use the following command for (re)building and running the docker container.
-```bash
-docker compose up --build
-```
-2. You may want to run it in detach mode. Type the following command to do so.
-```bash
-docker compose up -d
-```
