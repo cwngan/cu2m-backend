@@ -1,5 +1,24 @@
 services:
+  mongodb:
+    image: mongo
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=tmp
+      - MONGO_INITDB_ROOT_PASSWORD=tmp
+    volumes:
+      - './database/data:/data/db'
+    ports:
+      - '27017:27017'
+    command: --quiet
   cu2m-backend:
     build: .
     ports:
       - 8080:8080
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./flaskr
+          target: /app/flaskr
+          ignore:
+            - __pycache__/
+        - action: rebuild
+          path: requirements.txt
