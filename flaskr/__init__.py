@@ -1,9 +1,12 @@
 import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_pydantic import validate
 
-from flaskr.models import ResponseModel 
+from flaskr.models import ResponseModel
 from flaskr import api
+
+load_dotenv()
 
 
 def create_app(test_config=None):
