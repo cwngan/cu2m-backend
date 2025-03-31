@@ -6,8 +6,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=tmp
     volumes:
       - './database/data:/data/db'
-    ports:
-      - '27017:27017'
     command: --quiet
   cu2m-backend:
     build: .
