@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_pydantic import validate
 
-from flaskr.models import ResponseModel
+from flaskr.api.models import ResponseModel
 from flaskr import api
+
 
 load_dotenv()
 
