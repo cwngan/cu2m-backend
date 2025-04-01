@@ -8,6 +8,7 @@ _mongo = None
 def init_db():
     db = get_db()
     db.users.create_index("username", unique=True)
+    db.users.create_index("email", unique=True)
 
 
 def get_db():
