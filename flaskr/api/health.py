@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_pydantic import validate
 
-from flaskr.api.models import HealthResponseModel
+from flaskr.api.respmodels import HealthResponseModel
 from flaskr.db.database import get_db
 
 route = Blueprint("health", __name__, url_prefix="/health")
