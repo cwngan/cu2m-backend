@@ -3,9 +3,9 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_pydantic import validate
 
-from flaskr.api.respmodels import ResponseModel
 from flaskr import api
-
+from flaskr.api.respmodels import ResponseModel
+from flaskr.db.database import init_db
 
 load_dotenv()
 
@@ -13,6 +13,8 @@ load_dotenv()
 def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(SECRET_KEY="dev")
+
+    init_db()
 
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
