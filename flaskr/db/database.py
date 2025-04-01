@@ -16,7 +16,7 @@ def init_db():
     for json_course in json_courses.values():
         json_string = json.dumps(json_course.get("data"))
         course = json.loads(json_string, object_hook=lambda d: SimpleNamespace(**d))
-        course.original, course.parsed = json_course.get("parsed"), '\n'.join(json_course.get("original"))
+        course.original, course.parsed = '\n'.join(json_course.get("original")), json_course.get("parsed")
         db.courses.update_one({"code": course.code}, {"$set": course.__dict__}, upsert=True)
 
 
