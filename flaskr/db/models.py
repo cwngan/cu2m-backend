@@ -1,11 +1,11 @@
 from datetime import datetime
-from bson import ObjectId
 from pydantic import BaseModel, Field
+from pydantic_mongo import PydanticObjectId
 from typing import Optional
 
 
 class User(BaseModel):
-    id: Optional[ObjectId] = Field(alias="_id", default=None)
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     first_name: str
     last_login: datetime
@@ -16,8 +16,33 @@ class User(BaseModel):
     username: str
 
 
+class UserCreate(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+    major: str
+    password: str
+    username: str
+
+
+class UserRead(BaseModel):
+    id: PydanticObjectId = Field(alias="_id", default=None)
+    email: str
+    first_name: str
+    last_login: datetime
+    last_name: str
+    major: str
+    username: str
+
+
+class UserUpdate(BaseModel):
+    major: str
+    password: str
+    username: str
+
+
 class Course(BaseModel):
-    id: Optional[ObjectId] = Field(alias="_id", default=None)
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     code: str
     corequisites: str
     description: str
@@ -30,17 +55,17 @@ class Course(BaseModel):
 
 
 class SemesterPlan(BaseModel):
-    id: Optional[ObjectId] = Field(alias="_id", default=None)
-    course_plan_id: ObjectId
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    course_plan_id: PydanticObjectId
     courses: list[str]
     semester: int
     year: int
 
 
 class CoursePlan(BaseModel):
-    id: Optional[ObjectId] = Field(alias="_id", default=None)
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     description: str
     favourite: bool
     name: str
     updated_at: datetime
-    user_id: ObjectId
+    user_id: PydanticObjectId
