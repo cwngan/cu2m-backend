@@ -2,7 +2,8 @@ from datetime import datetime
 from flask import Blueprint
 from flask_pydantic import validate
 
-from flaskr.api.models import PingResponseModel
+from flaskr.api.respmodels import PingResponseModel
+
 
 route = Blueprint("ping", __name__, url_prefix="/ping")
 
