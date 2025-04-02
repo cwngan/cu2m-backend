@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Literal, Optional
 
+from flaskr.db.models import Course
+
 
 class ResponseModel(BaseModel):
     status: Literal["OK", "ERROR"] = "OK"
@@ -17,3 +19,7 @@ class PingResponseModel(ResponseModel):
 
 class HealthResponseModel(ResponseModel):
     data: dict[str, bool]
+
+
+class CoursesResponseModel(ResponseModel):
+    data: Optional[list[Course]] = None
