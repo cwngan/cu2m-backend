@@ -53,7 +53,7 @@ class Course(BaseModel):
     parsed: bool
     prerequisites: str
     title: str
-    units: str
+    units: float
 
 
 class SemesterPlan(BaseModel):
