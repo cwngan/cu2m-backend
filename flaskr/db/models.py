@@ -7,7 +7,6 @@ from pydantic_mongo import PydanticObjectId
 
 class User(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
-    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     first_name: str
     last_login: datetime
@@ -47,7 +46,6 @@ class UserUpdate(BaseModel):
 
 class Course(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
-    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     code: str
     corequisites: str
     description: str
@@ -62,8 +60,6 @@ class Course(BaseModel):
 class SemesterPlan(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
-    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
-    course_plan_id: PydanticObjectId
     courses: list[str]
     semester: int
     year: int
@@ -71,10 +67,8 @@ class SemesterPlan(BaseModel):
 
 class CoursePlan(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
-    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     description: str
     favourite: bool
     name: str
     updated_at: datetime
-    user_id: PydanticObjectId
     user_id: PydanticObjectId
