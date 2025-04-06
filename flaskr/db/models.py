@@ -23,6 +23,8 @@ class UserCreate(BaseModel):
     major: str
     password: str
     username: str
+    license_key: str
+    password_hash: Optional[str] = None  # Add this field
 
 
 class UserRead(BaseModel):

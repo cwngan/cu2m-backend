@@ -12,5 +12,3 @@ COPY flaskr .
 WORKDIR /app
 ENV PORT=8080
 CMD ["gunicorn", "-w", "4", "flaskr:create_app()"]
-
-

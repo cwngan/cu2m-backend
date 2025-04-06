@@ -44,6 +44,7 @@ class PasswordHasher:
     @classmethod
     def verify_password(self, hash: str, password: str):
         n, r, p, salt, password_hash = hash.split("$")
+        n, r, p = int(n), int(r), int(p)
         return PasswordHasher.__hash_password(
             password, b64decode(salt), n, r, p
         ) == b64decode(password_hash)
