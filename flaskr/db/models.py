@@ -1,10 +1,12 @@
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from pydantic_mongo import PydanticObjectId
-from typing import Optional
 
 
 class User(BaseModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     first_name: str
@@ -45,6 +47,7 @@ class UserUpdate(BaseModel):
 
 class Course(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     code: str
     corequisites: str
     description: str
@@ -59,6 +62,8 @@ class Course(BaseModel):
 class SemesterPlan(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    course_plan_id: PydanticObjectId
     courses: list[str]
     semester: int
     year: int
@@ -66,8 +71,10 @@ class SemesterPlan(BaseModel):
 
 class CoursePlan(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     description: str
     favourite: bool
     name: str
     updated_at: datetime
+    user_id: PydanticObjectId
     user_id: PydanticObjectId

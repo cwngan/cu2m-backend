@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask_pydantic import validate
 
+from flaskr.api import health, ping, user
 from flaskr.api.respmodels import RootResponseModel
-from flaskr.api import ping, health, user
 
 route = Blueprint("api", __name__, url_prefix="/api")
 
