@@ -15,5 +15,7 @@ jobs:
         run: docker ps -a
       - name: Check logs
         run: docker compose logs
+      - name: List dir
+        run: ls -l
       - name: Test with pytest
-        run: docker compose exec cu2m-backend sh -c "pytest tests/"
+        run: docker compose exec cu2m-backend sh -c "pytest ./tests/"
