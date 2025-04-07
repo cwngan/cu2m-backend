@@ -45,6 +45,7 @@ class UserUpdate(BaseModel):
     major: str
     password: str
     username: str
+    last_login: datetime
 
 
 class Course(BaseModel):

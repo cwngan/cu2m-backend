@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
@@ -7,8 +9,14 @@ from flaskr.api.reqmodels import (
     UserLoginRequestModel,
 )
 from flaskr.api.respmodels import UserResponseModel
-from flaskr.db.crud import activate_user, delete_user, get_precreated_user, read_user
-from flaskr.db.models import UserRead
+from flaskr.db.crud import (
+    activate_user,
+    delete_user,
+    get_precreated_user,
+    read_user,
+    update_user,
+)
+from flaskr.db.models import UserRead, UserUpdate
 from flaskr.utils import LicenseKeyGenerator, PasswordHasher
 
 route = Blueprint("user", __name__, url_prefix="/user")
@@ -80,12 +88,11 @@ def login(body: UserLoginRequestModel):
     try:
         username, password = body.username, body.password
         user = read_user(username)
-        if not user or not PasswordHasher.verify_password(
-            user.password_hash, password
-        ):
+        if not user or not PasswordHasher.verify_password(user.password_hash, password):
             raise InvalidCredential("Invalid username or password.")
         session["username"] = username
         user_read = UserRead.model_validate(user)
+        update_user(username, UserUpdate(last_login=datetime.now()))
         return UserResponseModel(data=user_read), 200
     except InvalidCredential as e:
         return (UserResponseModel(status="ERROR", error=str(e)), 401)
