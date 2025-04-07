@@ -86,6 +86,5 @@ def update_user(username: str, user_update: UserUpdate, db=get_db()) -> User | N
 def delete_user(username: str, db=get_db()):
     user = db.users.find_one({"username": username})
     if user:
-        db.users.find_one_and_delete(user, projection=DataProjection.user)
-        return user
+        return db.users.find_one_and_delete(user, projection=DataProjection.user)
     return None
