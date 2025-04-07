@@ -16,4 +16,4 @@ jobs:
       - name: Check logs
         run: docker compose logs
       - name: Test with pytest
-        run: docker compose exec cu2m-backend python -m pytest /app/tests/
+        run: docker compose exec cu2m-backend python -m pytest
