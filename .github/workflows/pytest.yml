@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: /app  # Adjust this path to the correct directory inside your container
     steps:
       - uses: actions/checkout@v2
       - name: docker compose up
@@ -15,5 +17,9 @@ jobs:
         run: docker ps -a
       - name: Check logs
         run: docker compose logs
+      - name: List files in /app
+        run: docker compose exec cu2m-backend ls /app  # Make sure your tests are in this directory
+      - name: Print PYTHONPATH
+        run: docker compose exec cu2m-backend echo $PYTHONPATH
       - name: Test with pytest
         run: docker compose exec cu2m-backend python -m pytest
