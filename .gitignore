@@ -175,3 +175,6 @@ cython_debug/
 
 # Mongo volumes
 database
+
+# Courses JSON data
+courses*.json
