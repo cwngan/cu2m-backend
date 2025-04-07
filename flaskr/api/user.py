@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, session
-from flask_pydantic import validate  # type: ignore
+from flask_pydantic import validate  # type: ignore[import]
 
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,

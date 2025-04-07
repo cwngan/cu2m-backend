@@ -1,11 +1,38 @@
 import re
 from datetime import datetime
+
 import pytest
+from flask import Flask
+from flask.testing import FlaskClient
+
 from flaskr import create_app
-from flaskr.db.database import get_db
+from flaskr.db.crud import create_precreated_user, get_precreated_user
+from flaskr.db.database import get_mongo_client
 
 # Use a separate database name for testing to avoid clashing with production data.
-TEST_MONGODB_URI = "mongodb://tmp:tmp@mongodb:27017/test_cu2m"
+TEST_DB_NAME = "TESTDB"
+
+
+@pytest.fixture(autouse=True)
+def setup(monkeypatch: pytest.MonkeyPatch):
+    """
+    Setup testing environment.
+    Monkeypatches the `get_db` function to return a test database.
+
+    This fixture is automatically applied to all tests.
+    """
+
+    def mock_get_db():
+        return get_mongo_client()[TEST_DB_NAME]
+
+    # Note: setattr must be done to all files that imports get_db directly
+    # https://stackoverflow.com/a/45466846
+    monkeypatch.setattr("flaskr.db.database.get_db", mock_get_db)
+    monkeypatch.setattr("flaskr.db.crud.get_db", mock_get_db)
+
+    yield
+    # Clean up the test database after tests
+    get_mongo_client().drop_database(TEST_DB_NAME)
 
 
 @pytest.fixture
@@ -15,28 +42,20 @@ def app():
     """
     test_config = {
         "TESTING": True,
-        "MONGODB_URI": TEST_MONGODB_URI,
-        "SECRET_KEY": "test-secret",
     }
     app = create_app(test_config)
-
-    # Initialize the database (drop existing data)
-    db = get_db()
-    db.users.delete_many({})
     yield app
-    # Clean up after tests if needed
-    db.users.delete_many({})
 
 
 @pytest.fixture
-def client(app):
+def client(app: Flask):
     """
     Provide a test client for the Flask app.
     """
     return app.test_client()
 
 
-def test_api_root(client):
+def test_api_root(client: FlaskClient):
     """
     Tests if the Flask app API root endpoint is reachable.
     """
@@ -48,7 +67,7 @@ def test_api_root(client):
     assert data.get("data") == "CU^2M API"
 
 
-def test_api_ping(client):
+def test_api_ping(client: FlaskClient):
     """
     Tests if the Flask app ping endpoint is reachable and returns the correct response.
     """
@@ -67,3 +86,27 @@ def test_api_ping(client):
         datetime.strptime(match_.group(1), "%d-%m-%Y %H:%M:%S.%f").timestamp()
         < datetime.now().timestamp()
     )
+
+
+def test_db_rw():
+    """
+    Tests if the app is reading and writing to the correct database.
+    """
+    from flaskr.db.database import get_db
+
+    TEST_EMAIL = "test@test.test"
+    db = get_db()
+    assert db is not None
+    assert db.name == TEST_DB_NAME
+
+    userdb = db.users
+    assert userdb is not None
+
+    userdb.delete_many({})
+    assert userdb.count_documents({}) == 0
+
+    create_precreated_user(TEST_EMAIL)
+    assert userdb.count_documents({}) == 1
+
+    userdb.delete_many({})
+    assert get_precreated_user(TEST_EMAIL) is None

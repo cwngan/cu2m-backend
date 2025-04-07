@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask
-from flask_pydantic import validate
+from flask_pydantic import validate  # type: ignore[import]
 
 from flaskr import api
 from flaskr.api.respmodels import ResponseModel
