@@ -78,7 +78,7 @@ def update_user(username: str, user_update: UserUpdate):
     userdb = get_db().users
     doc = userdb.find_one_and_update(
         {"username": username},
-        {"$set": user_update.__dict__},
+        {"$set": user_update.model_dump(exclude_unset=True)},
         return_document=ReturnDocument.AFTER,
     )
     return User.model_validate(doc) if doc else None

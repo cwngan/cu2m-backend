@@ -42,10 +42,10 @@ class UserRead(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    major: str
-    password: str
-    username: str
-    last_login: datetime
+    major: Optional[str] = None
+    password: Optional[str] = None
+    username: Optional[str] = None
+    last_login: Optional[datetime] = None
 
 
 class Course(BaseModel):
