@@ -76,9 +76,13 @@ def update_user(username: str, user_update: UserUpdate):
     Update a user's details.
     """
     userdb = get_db().users
+    data = user_update.model_dump(exclude_none=True, exclude={"password"})
+    if user_update.password:
+        data["password_hash"] = PasswordHasher.hash_password(user_update.password)
+
     doc = userdb.find_one_and_update(
         {"username": username},
-        {"$set": user_update.model_dump(exclude_unset=True)},
+        {"$set": data},
         return_document=ReturnDocument.AFTER,
     )
     return User.model_validate(doc) if doc else None

@@ -8,20 +8,20 @@ from flaskr.db.models import UserCreate
 class LicenseKeyGenerator:
     @classmethod
     def generate_new_key(cls, email: str):
-        key, value = os.urandom(24), os.urandom(24)
-        license_key_hash = sha256(email.encode("ascii") + key + value)
+        key, salt = os.urandom(24), os.urandom(24)
+        license_key_hash = sha256(email.encode("ascii") + key + salt)
         return (
-            f"{license_key_hash.hexdigest()}.{value.hex()}",
+            f"{license_key_hash.hexdigest()}.{salt.hex()}",
             b64encode(key).decode("ascii"),
         )
 
     @classmethod
     def verify_key(cls, user: UserCreate, license_key_hash: str):
-        expected_license_hash, value = license_key_hash.split(".")
+        expected_license_hash, salt = license_key_hash.split(".")
         user_license_hash = sha256(
             user.email.encode("ascii")
-            + user.license_key.encode("ascii")
-            + bytes.fromhex(value)
+            + b64decode(user.license_key.encode("ascii"))
+            + bytes.fromhex(salt)
         )
         return user_license_hash.hexdigest() == expected_license_hash
 
