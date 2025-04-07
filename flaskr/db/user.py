@@ -60,7 +60,7 @@ def create_precreated_user(email: str):
     return license_key, preuser
 
 
-def read_user(username: str):
+def get_user(username: str):
     """
     Fetch a user by username.
 

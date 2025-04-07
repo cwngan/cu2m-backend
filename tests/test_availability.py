@@ -6,8 +6,8 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from flaskr import create_app
-from flaskr.db.crud import create_precreated_user, get_precreated_user
 from flaskr.db.database import get_mongo_client
+from flaskr.db.user import create_precreated_user, get_precreated_user
 
 # Use a separate database name for testing to avoid clashing with production data.
 TEST_DB_NAME = "TESTDB"

@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from flask import Flask
 from flask_pydantic import validate  # type: ignore[import]
@@ -8,7 +9,7 @@ from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
 
 
-def create_app(test_config=None):
+def create_app(test_config: dict[str, Any] | None = None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(SECRET_KEY="dev")
     init_db()
@@ -26,7 +27,7 @@ def create_app(test_config=None):
     # default root response
     @app.route("/", methods=["GET"])
     @validate()
-    def root():
+    def root(): # type: ignore
         return ResponseModel()
 
     app.register_blueprint(api.route)

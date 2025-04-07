@@ -9,14 +9,14 @@ from flaskr.api.reqmodels import (
     UserLoginRequestModel,
 )
 from flaskr.api.respmodels import UserResponseModel
-from flaskr.db.crud import (
+from flaskr.db.models import UserRead, UserUpdate
+from flaskr.db.user import (
     activate_user,
     delete_user,
     get_precreated_user,
-    read_user,
+    get_user,
     update_user,
 )
-from flaskr.db.models import UserRead, UserUpdate
 from flaskr.utils import LicenseKeyGenerator, PasswordHasher
 
 route = Blueprint("user", __name__, url_prefix="/user")
@@ -49,7 +49,7 @@ def register(body: UserCreateRequestModel):
         )
 
     # Username regex and availability can be handled in reqmodels validation
-    if read_user(user_create.username):
+    if get_user(user_create.username):
         return (
             UserResponseModel(status="ERROR", error="Username already taken."),
             400,
@@ -87,7 +87,7 @@ def delete(body: UserDeleteRequestModel):
 def login(body: UserLoginRequestModel):
     try:
         username, password = body.username, body.password
-        user = read_user(username)
+        user = get_user(username)
         if not user or not PasswordHasher.verify_password(user.password_hash, password):
             raise InvalidCredential("Invalid username or password.")
         session["username"] = username

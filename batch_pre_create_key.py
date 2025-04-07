@@ -1,4 +1,4 @@
-from flaskr.db.crud import create_precreated_user
+from flaskr.db.user import create_precreated_user
 
 
 def create_precreated_users(input_path: str, out_path: str = "new_users_pre.txt"):

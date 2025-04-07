@@ -1,9 +1,11 @@
-import os
-import pytest
 import csv
+import os
+
+import pytest
+
 from flaskr import create_app
 from flaskr.db.database import get_db
-from flaskr.db.crud import create_precreated_user, delete_user
+from flaskr.db.user import create_precreated_user, delete_user
 from flaskr.utils import PasswordHasher
 
 # Use a separate database name for testing to avoid clashing with production data.
