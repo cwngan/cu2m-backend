@@ -30,7 +30,6 @@ class InvalidCredential(Exception):
     pass
 
 
-
 @route.route("/register", methods=["POST"])
 @validate()
 def register(body: UserCreateRequestModel):
@@ -40,15 +39,30 @@ def register(body: UserCreateRequestModel):
     # For example, fetch the pre-created user by email with is_active=False.
     pre_created = get_precreated_user(user_create.email)
     if not pre_created:
-        return UserResponseModel(status="ERROR", error="Pre-registration not found.", data=None), 400
+        return (
+            UserResponseModel(
+                status="ERROR", error="Pre-registration not found.", data=None
+            ),
+            400,
+        )
 
     # Use PasswordHasher to verify provided license key against license_hash
-    if not PasswordHasher.verify_password(pre_created["license_hash"], user_create.license_key):
-        return UserResponseModel(status="ERROR", error="Invalid license key.", data=None), 400
+    if not PasswordHasher.verify_password(
+        pre_created["license_hash"], user_create.license_key
+    ):
+        return (
+            UserResponseModel(status="ERROR", error="Invalid license key.", data=None),
+            400,
+        )
 
     # Username regex and availability can be handled in reqmodels validation
     if read_user_full(user_create.username):
-        return UserResponseModel(status="ERROR", error="Username already taken.", data=None), 400
+        return (
+            UserResponseModel(
+                status="ERROR", error="Username already taken.", data=None
+            ),
+            400,
+        )
 
     # Hash provided password
     user_create.password_hash = PasswordHasher.hash_password(user_create.password)
@@ -56,7 +70,10 @@ def register(body: UserCreateRequestModel):
     # Update pre-created record to activate account and update with credentials.
     user = activate_user(pre_created, user_create)
     if not user:
-        return UserResponseModel(status="ERROR", error="Registration failed.", data=None), 400
+        return (
+            UserResponseModel(status="ERROR", error="Registration failed.", data=None),
+            400,
+        )
     user_read = UserRead(**user)
     return UserResponseModel(data=user_read), 201
 

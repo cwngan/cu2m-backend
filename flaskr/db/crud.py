@@ -9,7 +9,7 @@ from flaskr.utils import PasswordHasher, DataProjection
 def activate_user(pre_created: dict, user_create: UserCreate, db=get_db()):
     """
     Activate a pre-created user record by updating it with the registration details.
-    
+
     Steps:
     - Update the record with credentials from user_create (username, first_name, last_name, password_hash, major, etc.)
     - Mark is_active as True and set an activation timestamp.
@@ -27,24 +27,23 @@ def activate_user(pre_created: dict, user_create: UserCreate, db=get_db()):
     return db.users.find_one_and_update(
         {"_id": pre_created["_id"]},
         {"$set": update_data},
-        return_document=ReturnDocument.AFTER
+        return_document=ReturnDocument.AFTER,
     )
+
 
 def get_precreated_user(email: str):
     """Fetch a pre-created user by email (that is still inactive)."""
     db = get_db()
     return db.users.find_one({"email": email, "is_active": False})
 
+
 def create_precreated_user(email: str, plain_license: str):
     db = get_db()
-    license_hash = PasswordHasher.hash_password(plain_license) 
-    user_document = {
-        "email": email,
-        "license_hash": license_hash,
-        "is_active": False
-    }
+    license_hash = PasswordHasher.hash_password(plain_license)
+    user_document = {"email": email, "license_hash": license_hash, "is_active": False}
     result = db.users.insert_one(user_document)
     return result.inserted_id
+
 
 def create_user(user_create: UserCreate, license_key_hash: str, db=get_db()):
     if read_user(user_create.username):

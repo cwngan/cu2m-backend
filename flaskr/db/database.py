@@ -22,7 +22,7 @@ def get_db():
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@mongodb:27017/"
         print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
-        print("MongoDB connected",flush=True)
+        print("MongoDB connected", flush=True)
         print(_mongo)
         print(_mongo.database)
 
