@@ -1,20 +1,20 @@
-import csv
-import sys
 from flaskr.db.crud import create_precreated_user
-from flaskr.utils import PasswordHasher
 
-def batch_pre_create(csv_filepath):
-    with open(csv_filepath, newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            email = row["email"]
-            plain_license = row["license_key"]
-            license_hash = PasswordHasher.hash_password(plain_license)
-            # Create a pre-created user record with inactive status.
-            create_precreated_user(email=email, license_hash=license_hash, is_active=False)
-            print(f"Pre-created user for: {email}")
+
+def create_precreated_users(input_path: str, out_path: str = "new_users_pre.txt"):
+    with open(input_path, "r") as file:
+        lines = file.readlines()
+
+    with open(out_path, "a") as output_file:
+        for line in lines:
+            email = line.strip()
+            try:
+                license_key, _user = create_precreated_user(email)
+                output_file.write(f"{email},{license_key}\n")
+            except Exception as e:
+                print(f"Error creating user for {email}: {e}")
+                continue
+
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.exit("Usage: python batch_pre_create.py <csv_file>")
-    batch_pre_create(sys.argv[1])
+    create_precreated_users("new_users.txt")

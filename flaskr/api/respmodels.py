@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Literal, Optional
+
+from pydantic import BaseModel
 
 from flaskr.db.models import UserRead
 
@@ -22,4 +23,4 @@ class HealthResponseModel(ResponseModel):
 
 
 class UserResponseModel(ResponseModel):
-    data: UserRead | None
+    data: UserRead | None = None

@@ -175,3 +175,6 @@ cython_debug/
 
 # Mongo volumes
 database
+
+new_users*.txt
+temp*

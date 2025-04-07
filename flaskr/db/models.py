@@ -5,13 +5,17 @@ from pydantic import BaseModel, Field
 from pydantic_mongo import PydanticObjectId
 
 
-class User(BaseModel):
+class PreUser(BaseModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
+    license_key_hash: str
+    activated_at: datetime = datetime.fromtimestamp(0)
+
+
+class User(PreUser):
     first_name: str
     last_login: datetime
     last_name: str
-    license_key_hash: str
     major: str
     password_hash: str
     username: str
@@ -25,11 +29,10 @@ class UserCreate(BaseModel):
     password: str
     username: str
     license_key: str
-    password_hash: Optional[str] = None  # Add this field
 
 
 class UserRead(BaseModel):
-    id: PydanticObjectId = Field(alias="_id", default=None)
+    id: PydanticObjectId = Field(alias="_id")
     email: str
     first_name: str
     last_login: datetime
