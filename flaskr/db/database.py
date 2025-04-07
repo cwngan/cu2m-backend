@@ -16,9 +16,9 @@ def init_db():
 def get_db():
     global _mongo
     if not _mongo:
-        # from dotenv import load_dotenv
+        from dotenv import load_dotenv
 
-        # load_dotenv()
+        load_dotenv()
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@mongodb:27017/"
         print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)

@@ -5,7 +5,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=tmp
       - MONGO_INITDB_ROOT_PASSWORD=tmp
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
       - './database/data:/data/db'
     command: --quiet
@@ -13,15 +13,6 @@ services:
     build: .
     ports:
       - 8080:8080
-
-    environment:
-      MONGO_DB_USERNAME: tmp
-      MONGO_DB_PASSWORD: tmp
-      MONGODB_URI: mongodb://tmp:tmp@mongodb:27017/ 
-    volumes:
-      - .:/app
-    # test runner:
-    # command: ["pytest", "tests/<test_name>.py"]
     develop:
       watch:
         - action: sync+restart
