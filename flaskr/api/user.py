@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, session
 from flask_pydantic import validate
 from pydantic import ValidationError
@@ -8,9 +9,17 @@ from flaskr.api.reqmodels import (
     UserDeleteRequestModel,
     UserLoginRequestModel,
 )
-from flaskr.db.crud import create_user, read_user, read_user_full, delete_user, get_precreated_user,activate_user
+from flaskr.db.crud import (
+    create_user,
+    read_user,
+    read_user_full,
+    delete_user,
+    get_precreated_user,
+    activate_user,
+    update_user,
+)
 from flaskr.utils import LicenseKeyGenerator, PasswordHasher
-from flaskr.db.models import UserCreate, UserRead
+from flaskr.db.models import UserCreate, UserRead, UserUpdate
 
 
 route = Blueprint("user", __name__, url_prefix="/user")
@@ -74,7 +83,8 @@ def login(body: UserLoginRequestModel):
             raise InvalidCredential("Invalid username or password.")
         session["username"] = username
         user = read_user(username)
-        return UserResponseModel(data=user),200
+        update_user(username, UserUpdate(last_login=datetime.now()))
+        return UserResponseModel(data=user), 200
     except ValidationError as e:
         raise InvalidCredential(str(e))
     except InvalidCredential as e:
