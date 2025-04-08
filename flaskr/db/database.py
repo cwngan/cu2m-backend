@@ -79,7 +79,7 @@ def init_db():
             db.courses.update_one(
                 {"code": course.code}, {"$set": course.__dict__}, upsert=True
             )
-
+    print(">> DB ", db.courses.find({}).to_list(), flush=True)
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
 
@@ -94,7 +94,7 @@ def get_mongo_client():
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@{os.getenv('MONGO_DB_HOST')}:{os.getenv('MONGO_DB_PORT')}/"
         print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
-        init_db()
+
         print("MongoDB connected", flush=True)
         print(_mongo, flush=True)
     return _mongo
