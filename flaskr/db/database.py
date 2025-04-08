@@ -90,7 +90,7 @@ def get_mongo_client():
 
         load_dotenv()
 
-        mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@localhost:27017/"
+        mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@{os.getenv('MONGO_DB_HOST')}:{os.getenv('MONGO_DB_PORT')}/"
         print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
 

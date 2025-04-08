@@ -15,6 +15,9 @@ services:
       - COURSE_DATA_FILENAME=courses.json
     ports:
       - 8080:8080
+    environment:
+      - MONGO_DB_HOST=mongodb
+      - MONGO_DB_PORT=27017
     develop:
       watch:
         - action: sync+restart
