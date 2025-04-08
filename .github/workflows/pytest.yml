@@ -10,6 +10,7 @@ jobs:
     env:
       MONGO_DB_USERNAME: ${{ secrets.MONGO_DB_USERNAME }}
       MONGO_DB_PASSWORD: ${{ secrets.MONGO_DB_PASSWORD }}
+      COURSE_DATA_FILENAME: ${{ vars.COURSE_DATA_FILENAME }}
     steps:
       - uses: actions/checkout@v2
       - name: docker compose up
