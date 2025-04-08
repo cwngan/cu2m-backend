@@ -51,7 +51,7 @@ def create_precreated_user(email: str):
     Create a pre-created user record with a license key.
     """
     userdb = get_db().users
-    license_key_hash, license_key = LicenseKeyGenerator.generate_new_key(email)
+    license_key_hash, license_key = LicenseKeyGenerator.generate_new_key()
     preuser = PreUser(
         email=email,
         license_key_hash=license_key_hash,
