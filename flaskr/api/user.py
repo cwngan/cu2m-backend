@@ -103,8 +103,8 @@ def me():
     user = get_user(username) if username else None
     if not user:
         return (
-            UserResponseModel(status="ERROR", error="Not authenticated."),
-            404,
+            UserResponseModel(status="ERROR", error="Unauthorized"),
+            401,
         )
     user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 200

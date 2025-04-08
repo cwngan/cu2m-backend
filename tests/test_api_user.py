@@ -171,13 +171,13 @@ def test_sessions(client: FlaskClient):
                 assert session.get("username") == user.username
         response = client.get("/api/user/me")
         if user is None:
-            assert response.status_code == 404
+            assert response.status_code == 401
         else:
             assert response.status_code == 200
         res = UserResponseModel.model_validate(response.json)
         if user is None:
             assert res.status == "ERROR"
-            assert res.error == "Not authenticated."
+            assert res.error == "Unauthorized"
         else:
             assert res.status == "OK"
             assert res.data is not None
