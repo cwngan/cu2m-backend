@@ -26,5 +26,5 @@ jobs:
           python -m venv ./venv
           source ./venv/bin/activate
           pip install -r requirements.txt
-          tell courses.json
+          tail courses.json
           pytest --log-cli-level=INFO
