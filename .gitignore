@@ -176,8 +176,7 @@ cython_debug/
 # Mongo volumes
 database
 
-# Courses JSON data
-courses*.json
+# User registration
 new_users*.txt
 temp*
 
