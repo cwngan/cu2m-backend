@@ -1,6 +1,8 @@
 import pytest
 
-from flaskr import create_app
+from flask.testing import FlaskClient
+
+from flaskr.db.models import Course
 
 
 @pytest.mark.parametrize(
@@ -12,28 +14,69 @@ from flaskr import create_app
         ("CSCI3100", "Software Engineering"),
     ],
 )
-def test_if_exact_code_gets_exact_course(input, expected):
+def test_single_exact_course_code(client: FlaskClient, input, expected):
     """
     Test if the given exact course code returns the exact expected name
     """
-    app = create_app()
+    response = client.get(f"/api/courses/?code={input}")
+    assert response.status_code == 200
+    data = response.json
+    assert data.get("status") == "OK"
+    courses = data.get("data")
+    assert len(courses) == 1
+    assert courses[0].get("code") == input
+    assert courses[0].get("title") == expected
 
-    with app.test_client() as client:
-        response = client.get(f"/api/courses/?code={input}")
-        assert (
-            response.status_code == 200
-        ), f"Invalid status code ({response.status_code} returned)."
-        data = response.json
-        assert (
-            data.get("status") == "OK"
-        ), f"Error while accessing this API endpoint (error message: {data.get('error')})."
-        courses = data.get("data")
-        assert (
-            len(courses) == 1
-        ), f"Exact course code should only return exactly 1 course ({len(courses)} courses found)."
-        assert (
-            courses[0].get("code") == input
-        ), f"Course code cannot be matched (expected: {input}, found: {courses[0].get('code')})"
-        assert (
-            courses[0].get("title") == expected
-        ), f"Incorrect course tile (expected: {expected}, found: {courses[0].get('title')})"
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        (["ENGG1110", "CSCI3100"]),
+        (["ENGG", "CSCI", "CENG", "MATH"]),
+        (["E", "LING"]),
+    ],
+)
+def test_multiple_prefix_course_code(client: FlaskClient, input):
+    """
+    Test if the multiple prefix course code returns the all the courses with either prefix
+    """
+    response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
+    assert response.status_code == 200
+    data = response.json
+    assert data.get("status") == "OK"
+    courses = data.get("data")
+    for course in courses:
+        assert course.get("code").startswith(input)
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        (["ENGG11101"]),
+        (["ENGG11101", "CENG"]),
+        (["ENGGG"]),
+        (["ENG1"]),
+        (["", "CSCI"]),
+    ],
+)
+def test_invalid_prefix_course_code(client: FlaskClient, input):
+    """
+    Test if the multiple prefix course code returns the all the courses with either prefix
+    """
+    response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
+    assert response.status_code == 200
+    data = response.json
+    assert data.get("status") == "ERROR"
+    assert data.get("error") == "Invalid course code prefix."
+
+
+def test_courses_match_schema(client: FlaskClient):
+    response = client.get("/api/courses")
+
+    assert response.status_code == 200
+    data = response.json
+    assert data.get("status") == "OK"
+    courses = data.get("data")
+    for course in courses:
+        res = Course.model_validate(courses)
+        assert res.status == "OK"
