@@ -92,7 +92,4 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    import logging
-
-    logging.info(response.json)
     assert len(res.data) >= 1

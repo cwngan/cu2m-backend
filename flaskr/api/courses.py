@@ -14,6 +14,7 @@ def courses():
     patterns = request.args.getlist("code")
     if not patterns:
         courses = get_all_courses()
+        print(courses, flush=True)
         return CoursesResponseModel(data=courses)
     else:
         for pattern in patterns:
