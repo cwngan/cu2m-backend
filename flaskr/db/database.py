@@ -1,11 +1,13 @@
 import os
 import json
+from typing import Any
+
 from pymongo import MongoClient
 from types import SimpleNamespace
 from jsonschema import validate
 
 
-_mongo = None
+_mongo: MongoClient[dict[str, Any]] | None = None
 
 schema = {
     "type": "object",
@@ -77,21 +79,25 @@ def init_db():
                 {"code": course.code}, {"$set": course.__dict__}, upsert=True
             )
 
+    db.users.create_index("email", unique=True)
+    db.users.create_index("username", unique=True, sparse=True)
 
-def get_db():
+
+def get_mongo_client():
     global _mongo
     if not _mongo:
         from dotenv import load_dotenv
 
         load_dotenv()
-        import sys
 
-        print(os.getenv("DEBUG"), file=sys.stdout)
-        mongo_uri = ""
-        if os.getenv("DEBUG"):
-            mongo_uri = "mongodb://localhost:27017/"
-        else:
-            mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@mongodb:27017/"
-
+        mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@localhost:27017/"
+        print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
-    return _mongo.database
+        init_db()
+        print("MongoDB connected", flush=True)
+        print(_mongo)
+    return _mongo
+
+
+def get_db():
+    return get_mongo_client().database

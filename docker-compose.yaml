@@ -4,6 +4,8 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=tmp
       - MONGO_INITDB_ROOT_PASSWORD=tmp
+    ports:
+      - 27017:27017
     volumes:
       - './database/data:/data/db'
     command: --quiet
@@ -20,3 +22,4 @@ services:
             - __pycache__/
         - action: rebuild
           path: requirements.txt
+

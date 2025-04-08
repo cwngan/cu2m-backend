@@ -178,3 +178,8 @@ database
 
 # Courses JSON data
 courses*.json
+new_users*.txt
+temp*
+
+# .DS_Store
+**/.DS_Store
