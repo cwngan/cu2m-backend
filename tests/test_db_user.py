@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flaskr.db import user as pkg
 from flaskr.db.models import PreUser, UserCreate, UserUpdate
@@ -16,7 +16,7 @@ def test_precreated_user():
     license_key, preuser = pkg.create_precreated_user(TEST_EMAIL)
     assert preuser is not None
     assert preuser.email == TEST_EMAIL
-    assert preuser.activated_at == datetime.fromtimestamp(0)
+    assert preuser.activated_at == datetime.fromtimestamp(0, timezone.utc)
     assert preuser.license_key_hash is not None
     assert preuser.id is not None
 
