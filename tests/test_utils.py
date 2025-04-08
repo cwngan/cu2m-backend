@@ -56,14 +56,14 @@ def test_password_hasher():
     )
     assert (
         utils.PasswordHasher.verify_password(
-            f"16384$8$1${password_hash.split("$")[-2]}${b64encode(b"wronghash").decode('ascii')}",
+            f"16384$8$1${password_hash.split('$')[-2]}${b64encode(b'wronghash').decode('ascii')}",
             TEST_PASSWORD,
         )
         is False
     )  # wrong hash
     assert (
         utils.PasswordHasher.verify_password(
-            f"16384$8$1${b64encode(b"wrong_salt").decode('ascii')}${password_hash.split('$')[-1]}",
+            f"16384$8$1${b64encode(b'wrong_salt').decode('ascii')}${password_hash.split('$')[-1]}",
             TEST_PASSWORD,
         )
         is False
