@@ -53,6 +53,7 @@ def signup(body: UserCreateRequestModel):
             400,
         )
 
+    session["username"] = user.username
     user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 201
 
@@ -83,8 +84,9 @@ def login(body: UserLoginRequestModel):
             401,
         )
     session["username"] = username
+    user = update_user(username, UserUpdate(last_login=datetime.now()))
+    assert user is not None, "User should be updated successfully."
     user_read = UserRead.model_validate(user.model_dump())
-    update_user(username, UserUpdate(last_login=datetime.now()))
     return UserResponseModel(data=user_read), 200
 
 
@@ -92,3 +94,17 @@ def login(body: UserLoginRequestModel):
 def logout():
     session.pop("username", None)
     return "", 204
+
+
+@route.route("/me", methods=["GET"])
+@validate(response_by_alias=True)
+def me():
+    username = session.get("username")
+    user = get_user(username) if username else None
+    if not user:
+        return (
+            UserResponseModel(status="ERROR", error="Unauthorized"),
+            401,
+        )
+    user_read = UserRead.model_validate(user.model_dump())
+    return UserResponseModel(data=user_read), 200
