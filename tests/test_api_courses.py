@@ -94,5 +94,5 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert res.status == "OK"
     import logging
 
-    logging.info(res.data)
+    logging.info(response.json)
     assert len(res.data) >= 1
