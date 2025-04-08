@@ -54,7 +54,9 @@ def init_db():
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
     course_data = json.load(open(course_data_filename))
-    print(course_data, flush=True)
+    import logging
+
+    logging.info(course_data)
     validate(instance=course_data, schema=schema)
 
     db = get_db()
