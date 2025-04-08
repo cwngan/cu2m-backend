@@ -93,9 +93,9 @@ def get_mongo_client():
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@localhost:27017/"
         print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
-        init_db()
+
         print("MongoDB connected", flush=True)
-        print(_mongo)
+        print(_mongo, flush=True)
     return _mongo
 
 
