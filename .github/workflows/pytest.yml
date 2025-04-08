@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      MONGO_DB_USERNAME: ${{ secrets.MONGO_DB_USERNAME }}
+      MONGO_DB_PASSWORD: ${{ secrets.MONGO_DB_PASSWORD }}
     steps:
       - uses: actions/checkout@v2
       - name: docker compose up
