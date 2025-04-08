@@ -33,8 +33,8 @@ class LicenseKeyGenerator:
             expected_license_hash, value = license_key_hash.split(".")
             user_license_hash = sha256(user.license_key.encode() + value.encode())
             return user_license_hash.hexdigest() == expected_license_hash
-        except:
-            return False
+        except Exception as e:
+            raise e
 
 
 class PasswordHasher:
@@ -60,8 +60,8 @@ class PasswordHasher:
             return cls.__hash_password(
                 password, b64decode(salt.encode("ascii")), n, r, p
             ) == b64decode(password_hash.encode("ascii"))
-        except:
-            return False
+        except Exception as e:
+            raise e
 
 
 class DataProjection:
