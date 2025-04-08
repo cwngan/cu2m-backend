@@ -6,7 +6,7 @@ from flaskr.db.models import UserCreate
 
 def test_license_key_generator():
     TEST_EMAIL = "test@test.test"
-    key_hash, key = utils.LicenseKeyGenerator.generate_new_key(TEST_EMAIL)
+    key_hash, key = utils.LicenseKeyGenerator.generate_new_key()
     assert key_hash is not None
     assert key is not None
     assert key_hash != key

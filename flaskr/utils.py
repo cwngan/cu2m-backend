@@ -12,9 +12,9 @@ class LicenseKeyGenerator:
 
     @classmethod
     def __generate_subkey(cls, size: int):
-        subkeys = []
-        for i in range(size):
-            subkey = "".join(secrets.choice(cls.charset) for i in range(4))
+        subkeys: list[str] = []
+        for _ in range(size):
+            subkey = "".join(secrets.choice(cls.charset) for _ in range(4))
             subkeys.append(subkey)
         return "-".join(subkeys)
 
@@ -29,9 +29,12 @@ class LicenseKeyGenerator:
 
     @classmethod
     def verify_key(cls, user: UserCreate, license_key_hash: str):
-        expected_license_hash, value = license_key_hash.split(".")
-        user_license_hash = sha256(user.license_key.encode() + value.encode())
-        return user_license_hash.hexdigest() == expected_license_hash
+        try:
+            expected_license_hash, value = license_key_hash.split(".")
+            user_license_hash = sha256(user.license_key.encode() + value.encode())
+            return user_license_hash.hexdigest() == expected_license_hash
+        except:
+            return False
 
 
 class PasswordHasher:
@@ -40,7 +43,7 @@ class PasswordHasher:
     p = 1
 
     @classmethod
-    def __hash_password(cls, password: str, salt: str, n: int, r: int, p: int):
+    def __hash_password(cls, password: str, salt: bytes, n: int, r: int, p: int):
         return scrypt(password.encode("ascii"), salt=b64encode(salt), n=n, r=r, p=p)
 
     @classmethod
@@ -51,9 +54,14 @@ class PasswordHasher:
 
     @classmethod
     def verify_password(cls, hash: str, password: str):
-        n, r, p, salt, password_hash = hash.split("$")
-        n, r, p = int(n), int(r), int(p)
-        return cls.__hash_password(password, salt, n, r, p) == b64decode(password_hash)
+        try:
+            n, r, p, salt, password_hash = hash.split("$")
+            n, r, p = int(n), int(r), int(p)
+            return cls.__hash_password(
+                password, b64decode(salt.encode("ascii")), n, r, p
+            ) == b64decode(password_hash.encode("ascii"))
+        except:
+            return False
 
 
 class DataProjection:
