@@ -131,7 +131,7 @@ def test_update_delete_user():
 
     original_user = pkg.get_user(users[1])
     assert original_user is not None
-    tm = datetime.now()
+    tm = datetime.now(timezone.utc)
     tm = tm.replace(
         microsecond=(tm.microsecond // 1000) * 1000
     )  # trunk to milliseconds because of MongoDB precision
