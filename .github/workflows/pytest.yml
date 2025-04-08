@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: docker compose up
-        run: docker compose up -d
+        run: docker compose up -d mongodb
       - name: Check running containers
         run: docker ps -a
       - name: Check logs
