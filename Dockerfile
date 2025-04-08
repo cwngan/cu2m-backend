@@ -10,6 +10,6 @@ WORKDIR /app/flaskr
 COPY flaskr .
 
 WORKDIR /app
-COPY req_fmt.json .
+COPY courses*.json .
 ENV PORT=8080
 CMD ["gunicorn", "-w", "4", "flaskr:create_app()"]
