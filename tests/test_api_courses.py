@@ -2,7 +2,7 @@ import pytest
 
 from flask.testing import FlaskClient
 
-from flaskr.db.models import Course
+from flaskr.api.respmodels import CoursesResponseModel
 
 
 @pytest.mark.parametrize(
@@ -20,12 +20,12 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     """
     response = client.get(f"/api/courses/?code={input}")
     assert response.status_code == 200
-    data = response.json
-    assert data.get("status") == "OK"
-    courses = data.get("data")
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    courses = res.data
     assert len(courses) == 1
-    assert courses[0].get("code") == input
-    assert courses[0].get("title") == expected
+    assert courses[0].code == input
+    assert courses[0].title == expected
 
 
 @pytest.mark.parametrize(
@@ -34,6 +34,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
         (["ENGG1110", "CSCI3100"]),
         (["ENGG", "CSCI", "CENG", "MATH"]),
         (["E", "LING"]),
+        (["ZZZZ"]),
     ],
 )
 def test_multiple_prefix_course_code(client: FlaskClient, input):
@@ -42,11 +43,15 @@ def test_multiple_prefix_course_code(client: FlaskClient, input):
     """
     response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
     assert response.status_code == 200
-    data = response.json
-    assert data.get("status") == "OK"
-    courses = data.get("data")
-    for course in courses:
-        assert course.get("code").startswith(input)
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    for course in res.data:
+        ok = False
+        for prefix in input:
+            if course.code.startswith(prefix):
+                ok = True
+                break
+        assert ok
 
 
 @pytest.mark.parametrize(
@@ -64,19 +69,15 @@ def test_invalid_prefix_course_code(client: FlaskClient, input):
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
     response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
+    assert response.status_code == 400
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert res.error == "Invalid course code prefix."
+
+
+def test_all_courses_match_schema(client: FlaskClient):
+    response = client.get("/api/courses/")
+
     assert response.status_code == 200
-    data = response.json
-    assert data.get("status") == "ERROR"
-    assert data.get("error") == "Invalid course code prefix."
-
-
-def test_courses_match_schema(client: FlaskClient):
-    response = client.get("/api/courses")
-
-    assert response.status_code == 200
-    data = response.json
-    assert data.get("status") == "OK"
-    courses = data.get("data")
-    for course in courses:
-        res = Course.model_validate(courses)
-        assert res.status == "OK"
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
