@@ -1,8 +1,9 @@
 from datetime import datetime
 
 from flaskr.db import user as pkg
-from flaskr.db.models import PreUser, User, UserCreate, UserUpdate
+from flaskr.db.models import PreUser, UserCreate, UserUpdate
 from flaskr.utils import LicenseKeyGenerator
+from tests.utils import random_user
 
 
 def test_precreated_user():
@@ -104,7 +105,6 @@ def test_activate_get_user():
 
 
 def test_update_delete_user():
-    from os import urandom
 
     from flaskr.db.database import get_db
 
@@ -112,17 +112,7 @@ def test_update_delete_user():
     N = 10
     users: list[str] = []
     for i in range(N):
-        user = User(
-            email=urandom(16).hex(),
-            username=urandom(16).hex(),
-            first_name=urandom(16).hex(),
-            last_name=urandom(16).hex(),
-            major=urandom(16).hex(),
-            password_hash=urandom(16).hex(),
-            license_key_hash=urandom(16).hex(),
-            last_login=datetime.fromtimestamp(int.from_bytes(urandom(4), "big")),
-            activated_at=datetime.fromtimestamp(int.from_bytes(urandom(4), "big")),
-        )
+        user = random_user()
         users.append(user.username)
         userdb.insert_one(user.model_dump(exclude_none=True))
         assert userdb.count_documents({}) == i + 1

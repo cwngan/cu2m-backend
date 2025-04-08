@@ -17,13 +17,16 @@ class LicenseKeyGenerator:
 
     @classmethod
     def verify_key(cls, user: UserCreate, license_key_hash: str):
-        expected_license_hash, salt = license_key_hash.split(".")
-        user_license_hash = sha256(
-            user.email.encode("ascii")
-            + b64decode(user.license_key.encode("ascii"))
-            + bytes.fromhex(salt)
-        )
-        return user_license_hash.hexdigest() == expected_license_hash
+        try:
+            expected_license_hash, salt = license_key_hash.split(".")
+            user_license_hash = sha256(
+                user.email.encode("ascii")
+                + b64decode(user.license_key.encode("ascii"))
+                + bytes.fromhex(salt)
+            )
+            return user_license_hash.hexdigest() == expected_license_hash
+        except:
+            return False
 
 
 class PasswordHasher:
@@ -45,11 +48,14 @@ class PasswordHasher:
 
     @classmethod
     def verify_password(cls, hash: str, password: str):
-        n, r, p, salt, password_hash = hash.split("$")
-        n, r, p = int(n), int(r), int(p)
-        return PasswordHasher.__hash_password(
-            password, b64decode(salt), n, r, p
-        ) == b64decode(password_hash)
+        try:
+            n, r, p, salt, password_hash = hash.split("$")
+            n, r, p = int(n), int(r), int(p)
+            return PasswordHasher.__hash_password(
+                password, b64decode(salt), n, r, p
+            ) == b64decode(password_hash)
+        except:
+            return False
 
 
 class DataProjection:

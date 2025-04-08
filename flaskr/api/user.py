@@ -1,22 +1,12 @@
 from datetime import datetime
 
 from flask import Blueprint, session
-from flask_pydantic import validate  # type: ignore[import]
+from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.reqmodels import (
-    UserCreateRequestModel,
-    UserDeleteRequestModel,
-    UserLoginRequestModel,
-)
+from flaskr.api.reqmodels import UserCreateRequestModel, UserLoginRequestModel
 from flaskr.api.respmodels import UserResponseModel
 from flaskr.db.models import UserRead, UserUpdate
-from flaskr.db.user import (
-    activate_user,
-    delete_user,
-    get_precreated_user,
-    get_user,
-    update_user,
-)
+from flaskr.db.user import activate_user, get_precreated_user, get_user, update_user
 from flaskr.utils import LicenseKeyGenerator, PasswordHasher
 
 route = Blueprint("user", __name__, url_prefix="/user")
@@ -27,9 +17,9 @@ class InvalidCredential(Exception):
     pass
 
 
-@route.route("/register", methods=["POST"])
-@validate()
-def register(body: UserCreateRequestModel):
+@route.route("/signup", methods=["POST"])
+@validate(response_by_alias=True)
+def signup(body: UserCreateRequestModel):
     user_create = body
 
     # Verify the provided license key against the pre-created record.
@@ -63,39 +53,39 @@ def register(body: UserCreateRequestModel):
             400,
         )
 
-    user_read = UserRead.model_validate(user)
+    user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 201
 
 
-@route.route("/delete", methods=["DELETE"])
-@validate()
-def delete(body: UserDeleteRequestModel):
-    username = body.username
-    user = delete_user(username)
-    if not user:
-        return (
-            UserResponseModel(status="ERROR", error="The user does not exist."),
-            404,
-        )
+# @route.route("/delete", methods=["DELETE"])
+# @validate(response_by_alias=True)
+# def delete(body: UserDeleteRequestModel):
+#     username = body.username
+#     user = delete_user(username)
+#     if not user:
+#         return (
+#             UserResponseModel(status="ERROR", error="The user does not exist."),
+#             404,
+#         )
 
-    user_read = UserRead.model_validate(user)
-    return UserResponseModel(data=user_read), 200
+#     user_read = UserRead.model_validate(user)
+#     return UserResponseModel(data=user_read), 200
 
 
 @route.route("/login", methods=["POST"])
-@validate()
+@validate(response_by_alias=True)
 def login(body: UserLoginRequestModel):
-    try:
-        username, password = body.username, body.password
-        user = get_user(username)
-        if not user or not PasswordHasher.verify_password(user.password_hash, password):
-            raise InvalidCredential("Invalid username or password.")
-        session["username"] = username
-        user_read = UserRead.model_validate(user)
-        update_user(username, UserUpdate(last_login=datetime.now()))
-        return UserResponseModel(data=user_read), 200
-    except InvalidCredential as e:
-        return (UserResponseModel(status="ERROR", error=str(e)), 401)
+    username, password = body.username, body.password
+    user = get_user(username)
+    if not user or not PasswordHasher.verify_password(user.password_hash, password):
+        return (
+            UserResponseModel(status="ERROR", error="Invalid username or password."),
+            401,
+        )
+    session["username"] = username
+    user_read = UserRead.model_validate(user.model_dump())
+    update_user(username, UserUpdate(last_login=datetime.now()))
+    return UserResponseModel(data=user_read), 200
 
 
 @route.route("/logout", methods=["POST"])

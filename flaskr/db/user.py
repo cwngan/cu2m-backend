@@ -32,7 +32,7 @@ def activate_user(pre_user: PreUser, user_create: UserCreate):
     userdb = get_db().users
     doc = userdb.find_one_and_update(
         {"_id": user.id},
-        {"$set": user.model_dump(exclude_none=True)},
+        {"$set": user.model_dump(exclude_none=True, exclude={"id"})},
         return_document=ReturnDocument.AFTER,
     )
 

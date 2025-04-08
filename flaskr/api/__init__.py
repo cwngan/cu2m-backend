@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask_pydantic import validate
+from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import health, ping, user
 from flaskr.api.respmodels import RootResponseModel

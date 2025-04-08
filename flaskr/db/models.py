@@ -1,11 +1,15 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_mongo import PydanticObjectId
 
 
-class PreUser(BaseModel):
+class CoreModel(BaseModel):
+    model_config = ConfigDict(serialize_by_alias=True)
+
+
+class PreUser(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     license_key_hash: str
@@ -21,7 +25,7 @@ class User(PreUser):
     username: str
 
 
-class UserCreate(BaseModel):
+class UserCreate(CoreModel):
     email: str
     first_name: str
     last_name: str
@@ -31,7 +35,7 @@ class UserCreate(BaseModel):
     license_key: str
 
 
-class UserRead(BaseModel):
+class UserRead(CoreModel):
     id: PydanticObjectId = Field(alias="_id")
     email: str
     first_name: str
@@ -41,14 +45,14 @@ class UserRead(BaseModel):
     username: str
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(CoreModel):
     major: Optional[str] = None
     password: Optional[str] = None
     username: Optional[str] = None
     last_login: Optional[datetime] = None
 
 
-class Course(BaseModel):
+class Course(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     code: str
     corequisites: str
@@ -61,7 +65,7 @@ class Course(BaseModel):
     units: str
 
 
-class SemesterPlan(BaseModel):
+class SemesterPlan(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
     courses: list[str]
@@ -69,7 +73,7 @@ class SemesterPlan(BaseModel):
     year: int
 
 
-class CoursePlan(BaseModel):
+class CoursePlan(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     description: str
     favourite: bool

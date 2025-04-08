@@ -39,6 +39,11 @@ def test_license_key_generator():
         utils.LicenseKeyGenerator.verify_key(user, key_hash) is False
     )  # wrong license key
 
+    user.license_key = "!@#$%^&*()ADKMW31';]"
+    assert (
+        utils.LicenseKeyGenerator.verify_key(user, "asdaksdwqeqwe") is False
+    )  # garbage
+
 
 def test_password_hasher():
     TEST_PASSWORD = "test_password"
@@ -63,3 +68,7 @@ def test_password_hasher():
         )
         is False
     )  # wrong salt
+
+    assert (
+        utils.PasswordHasher.verify_password("123k12op3123qk123", "asdl120123") is False
+    )  # garbage
