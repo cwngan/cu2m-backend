@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from flask import Blueprint
 from flask_pydantic import validate
 

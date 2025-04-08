@@ -1,14 +1,34 @@
 import os
+from typing import Any
+
 from pymongo import MongoClient
 
-_mongo = None
+# from flask import current_app
 
-def get_db():
+_mongo: MongoClient[dict[str, Any]] | None = None
+
+
+def init_db():
+    db = get_db()
+    db.users.create_index("email", unique=True)
+    db.users.create_index("username", unique=True, sparse=True)
+
+
+def get_mongo_client():
     global _mongo
     if not _mongo:
-        mongo_uri = f"mongodb://{os.getenv("MONGO_DB_USERNAME")}:{os.getenv("MONGO_DB_PASSWORD")}@mongodb:27017/"
         from dotenv import load_dotenv
-        
-        load_dotenv
+
+        load_dotenv()
+
+        mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@localhost:27017/"
+        print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri)
-    return _mongo.database
+        init_db()
+        print("MongoDB connected", flush=True)
+        print(_mongo)
+    return _mongo
+
+
+def get_db():
+    return get_mongo_client().database

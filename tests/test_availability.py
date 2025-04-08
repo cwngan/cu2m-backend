@@ -1,59 +1,64 @@
 import re
 from datetime import datetime
-from flaskr import create_app
+
+from conftest import TEST_DB_NAME
+from flask.testing import FlaskClient
+
+from flaskr.db.user import create_precreated_user, get_precreated_user
 
 
-def test_root():
+def test_api_root(client: FlaskClient):
     """
-    Tests if the Flask app can be started up
-
+    Tests if the Flask app API root endpoint is reachable.
     """
-    app = create_app()
-
-    with app.test_client() as client:
-        response = client.get("/")
-        assert response.status_code == 200
-        data = response.json
-        assert data is not None
-        assert data.get("status") == "OK"
+    response = client.get("/api/")
+    assert response.status_code == 200
+    data = response.json
+    assert data is not None
+    assert data.get("status") == "OK"
+    assert data.get("data") == "CU^2M API"
 
 
-def test_api_root():
+def test_api_ping(client: FlaskClient):
     """
-    Tests if the Flask app API endpoint is reachable
-
+    Tests if the Flask app ping endpoint is reachable and returns the correct response.
     """
-    app = create_app()
+    response = client.get("/api/ping/")
+    assert response.status_code == 200
+    data = response.json
+    assert data is not None
+    assert data.get("status") == "OK"
+    assert type(data.get("data")) is str
+    match_ = re.search(
+        r"^Request arrived at ([0-9]{2}\-[0-9]{2}\-[0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6})$",
+        data.get("data"),
+    )
+    assert match_ is not None
+    assert (
+        datetime.strptime(match_.group(1), "%d-%m-%Y %H:%M:%S.%f").timestamp()
+        < datetime.now().timestamp()
+    )
 
-    with app.test_client() as client:
-        response = client.get("/api/")
-        assert response.status_code == 200
-        data = response.json
-        assert data is not None
-        assert data.get("status") == "OK"
-        assert data.get("data") == "CU^2M API"
 
-
-def test_api_ping():
+def test_db_rw():
     """
-    Tests if the Flask app is pingable
-
+    Tests if the app is reading and writing to the correct database.
     """
-    app = create_app()
+    from flaskr.db.database import get_db
 
-    with app.test_client() as client:
-        response = client.get("/api/ping/")
-        assert response.status_code == 200
-        data = response.json
-        assert data is not None
-        assert data.get("status") == "OK"
-        assert type(data.get("data")) is str
-        match_ = re.search(
-            r"^Request arrived at ([0-9]{2}\-[0-9]{2}\-[0-9]{4} [0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6})$",
-            data.get("data"),
-        )
-        assert match_ is not None
-        assert (
-            datetime.strptime(match_.group(1), "%d-%m-%Y %H:%M:%S.%f").timestamp()
-            < datetime.now().timestamp()
-        )
+    TEST_EMAIL = "test@test.test"
+    db = get_db()
+    assert db is not None
+    assert db.name == TEST_DB_NAME
+
+    userdb = db.users
+    assert userdb is not None
+
+    userdb.delete_many({})
+    assert userdb.count_documents({}) == 0
+
+    create_precreated_user(TEST_EMAIL)
+    assert userdb.count_documents({}) == 1
+
+    userdb.delete_many({})
+    assert get_precreated_user(TEST_EMAIL) is None

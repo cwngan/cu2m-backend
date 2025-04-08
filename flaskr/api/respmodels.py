@@ -1,5 +1,8 @@
-from pydantic import BaseModel
 from typing import Literal, Optional
+
+from pydantic import BaseModel
+
+from flaskr.db.models import UserRead
 
 
 class ResponseModel(BaseModel):
@@ -17,3 +20,7 @@ class PingResponseModel(ResponseModel):
 
 class HealthResponseModel(ResponseModel):
     data: dict[str, bool]
+
+
+class UserResponseModel(ResponseModel):
+    data: UserRead | None = None

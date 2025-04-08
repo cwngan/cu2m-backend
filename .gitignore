@@ -176,5 +176,8 @@ cython_debug/
 # Mongo volumes
 database
 
+new_users*.txt
+temp*
+
 # .DS_Store
 **/.DS_Store
