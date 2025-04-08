@@ -11,6 +11,8 @@ services:
     command: --quiet
   cu2m-backend:
     build: .
+    environment:
+      - COURSE_DATA_FILENAME=courses.json
     ports:
       - 8080:8080
     develop:
