@@ -1,0 +1,23 @@
+name: Test with Pytest in Docker Compose
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: docker compose up
+        run: docker compose up -d
+      - name: Check running containers
+        run: docker ps -a
+      - name: Check logs
+        run: docker compose logs
+      - name: Create virtual env and run test
+        run: |
+          python -m venv ./venv
+          source ./venv/bin/activate
+          pip install -r requirements.txt
+          pytest
