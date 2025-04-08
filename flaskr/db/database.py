@@ -80,9 +80,6 @@ def init_db():
                 {"code": course.code}, {"$set": course.__dict__}, upsert=True
             )
 
-    import logging
-
-    logging.info(db.courses.count_documents({}))
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
 
