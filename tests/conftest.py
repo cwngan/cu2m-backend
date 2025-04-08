@@ -24,6 +24,7 @@ def monkeypatch_setup(monkeypatch: pytest.MonkeyPatch):
     # https://stackoverflow.com/a/45466846
     monkeypatch.setattr("flaskr.db.database.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
+    monkeypatch.setattr("flaskr.db.courses.get_db", mock_get_db)
 
     yield
     # Clean up the test database after tests (automatically)

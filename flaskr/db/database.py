@@ -79,7 +79,7 @@ def init_db():
             db.courses.update_one(
                 {"code": course.code}, {"$set": course.__dict__}, upsert=True
             )
-    print(">> DB ", db.courses.find({}).to_list(), flush=True)
+    # print(">> DB ", db.courses.find({}).to_list(), flush=True)
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
 
