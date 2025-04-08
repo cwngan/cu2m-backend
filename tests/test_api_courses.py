@@ -34,7 +34,6 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
         (["ENGG1110", "CSCI3100"]),
         (["ENGG", "CSCI", "CENG", "MATH"]),
         (["E", "LING"]),
-        (["ZZZZ"]),
     ],
 )
 def test_multiple_prefix_course_code(client: FlaskClient, input):
@@ -45,6 +44,7 @@ def test_multiple_prefix_course_code(client: FlaskClient, input):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert len(res.data) >= 1
     for course in res.data:
         ok = False
         for prefix in input:
@@ -52,6 +52,17 @@ def test_multiple_prefix_course_code(client: FlaskClient, input):
                 ok = True
                 break
         assert ok
+
+
+def test_empty_course_code(client: FlaskClient):
+    """
+    Test if unused course code returns nothing
+    """
+    response = client.get("/api/courses/?code=ZZZZ")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    assert len(res.data) == 0
 
 
 @pytest.mark.parametrize(
@@ -81,3 +92,4 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert len(res.data) >= 1
