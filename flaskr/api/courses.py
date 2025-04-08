@@ -18,7 +18,7 @@ def courses():
     else:
         for pattern in patterns:
             if not re.fullmatch(
-                "[A-Z]{0,4}|[A-Z]{4}[0-9]{1,4}", pattern, flags=re.IGNORECASE
+                "[A-Z]{1,4}|[A-Z]{4}[0-9]{1,4}", pattern, flags=re.IGNORECASE
             ):
                 return (
                     CoursesResponseModel(
