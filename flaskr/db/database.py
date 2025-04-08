@@ -54,9 +54,7 @@ def init_db():
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
     course_data = json.load(open(course_data_filename))
-    import logging
 
-    logging.info(course_data)
     validate(instance=course_data, schema=schema)
 
     db = get_db()
@@ -82,6 +80,9 @@ def init_db():
                 {"code": course.code}, {"$set": course.__dict__}, upsert=True
             )
 
+    import logging
+
+    logging.info(db.courses.count_documents())
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
 
