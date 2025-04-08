@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from flask_pydantic import validate
 
 from flaskr.api.respmodels import CoursesResponseModel
-from flaskr.db.crud import get_all_courses, get_courses
+from flaskr.db.courses import get_all_courses, get_courses
 
 route = Blueprint("courses", __name__, url_prefix="/courses")
 
