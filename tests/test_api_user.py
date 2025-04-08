@@ -87,12 +87,12 @@ def test_signup(client: FlaskClient):
     assert response.status_code == 201
     res = UserResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    user_read = UserRead.model_validate(res.data)
-    TEST_USER.id = user_read.id
-    test_user_read = UserRead.model_validate(TEST_USER.model_dump())
-    test_user_read.last_login = user_read.last_login
-    assert user_read == test_user_read
-    assert user_read.last_login != datetime.fromtimestamp(0)
+    assert res.data is not None
+    TEST_USER.id = res.data.id
+    user_read = UserRead.model_validate(TEST_USER.model_dump())
+    user_read.last_login = res.data.last_login
+    assert res.data == user_read
+    assert res.data.last_login != datetime.fromtimestamp(0)
 
     TEST_USER.email = "test@test.test"
     key, preuser = create_precreated_user(TEST_USER.email)
@@ -100,16 +100,10 @@ def test_signup(client: FlaskClient):
     res = _test_fail_ret_res(response)
     assert res.error == "Username already taken."
 
-    # test for sessions?
-
 
 def test_login(client: FlaskClient):
     TEST_USER = random_user()
-    TEST_USER.first_name = "AA"
-    TEST_USER.username = "AAAAA"
-    key, preuser = create_precreated_user(TEST_USER.email)
-    assert preuser is not None
-    TEST_USER.license_key_hash = key
+    key, _ = create_precreated_user(TEST_USER.email)
     response = client.post(
         "/api/user/signup",
         json=UserCreate.model_validate(
@@ -133,12 +127,12 @@ def test_login(client: FlaskClient):
     assert response.status_code == 200
     res = UserResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    user_read = UserRead.model_validate(res.data)
-    TEST_USER.id = user_read.id
-    test_user_read = UserRead.model_validate(TEST_USER.model_dump())
-    test_user_read.last_login = user_read.last_login
-    assert user_read == test_user_read
-    assert user_read.last_login != datetime.fromtimestamp(0)
+    assert res.data is not None
+    TEST_USER.id = res.data.id
+    user_read = UserRead.model_validate(TEST_USER.model_dump())
+    user_read.last_login = res.data.last_login
+    assert res.data == user_read
+    assert res.data.last_login != datetime.fromtimestamp(0)
 
     response = client.post(
         "/api/user/login",
@@ -166,4 +160,83 @@ def test_login(client: FlaskClient):
     assert res.status == "ERROR"
     assert res.error == "Invalid username or password."
     assert res.data is None
-    # test for sessions?
+
+
+def test_sessions(client: FlaskClient):
+    def _test_session(user: User | None):
+        with client.session_transaction() as session:
+            if user is None:
+                assert session.get("username") is None
+            else:
+                assert session.get("username") == user.username
+        response = client.get("/api/user/me")
+        if user is None:
+            assert response.status_code == 404
+        else:
+            assert response.status_code == 200
+        res = UserResponseModel.model_validate(response.json)
+        if user is None:
+            assert res.status == "ERROR"
+            assert res.error == "Not authenticated."
+        else:
+            assert res.status == "OK"
+            assert res.data is not None
+            user_read = UserRead.model_validate(user.model_dump())
+            assert res.data == user_read
+            assert res.data.last_login != datetime.fromtimestamp(0)
+
+    _test_session(None)
+
+    def _test_user_creation(user: User):
+        key, _ = create_precreated_user(user.email)
+        res = UserResponseModel.model_validate(
+            client.post(
+                "/api/user/signup",
+                json=UserCreate.model_validate(
+                    {
+                        **user.model_dump(),
+                        "license_key": key,
+                        "password": user.password_hash,
+                    }
+                ).model_dump(),
+            ).json
+        )
+        assert res.status == "OK"
+        assert res.data is not None
+        user.id = res.data.id
+        user.last_login = res.data.last_login
+        _test_session(user)
+        return user
+
+    user1 = _test_user_creation(random_user())
+    user2 = _test_user_creation(random_user())
+
+    response = client.post("/api/user/logout")
+    assert response.status_code == 204
+    _test_session(None)
+
+    def _login(uname: str, pwd: str, user: User):
+        res = UserResponseModel.model_validate(
+            client.post(
+                "/api/user/login",
+                json={
+                    "username": uname,
+                    "password": pwd,
+                },
+            ).json
+        )
+        if res.data:
+            user.last_login = res.data.last_login
+        return user
+
+    user1 = _login(user1.username, user1.password_hash, user1)
+    _test_session(user1)
+    user2 = _login(user2.username, user2.password_hash, user2)
+    _test_session(user2)
+    _login(user1.username, user2.password_hash, user1)
+    _test_session(user2)
+    response = client.post("/api/user/logout")
+    assert response.status_code == 204
+    _test_session(None)
+    _login(user2.username, user1.password_hash, user1)
+    _test_session(None)
