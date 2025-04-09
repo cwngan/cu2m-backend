@@ -92,7 +92,7 @@ def test_activate_get_user():
     assert pkg.get_precreated_user(TEST_USER.email) is None
     assert userdb.count_documents({}) == 1
 
-    user = pkg.get_user(TEST_USER.username)
+    user = pkg.get_by_username(TEST_USER.username)
     assert user is not None
     assert user == res_user
 
@@ -103,11 +103,11 @@ def test_activate_get_user():
     assert pkg.activate_user(preuser, TEST_USER) is None
     assert userdb.count_documents({}) == 1
 
-    assert pkg.get_user("wrong_username") is None
+    assert pkg.get_by_username("wrong_username") is None
 
     userdb.delete_many({})
     assert userdb.count_documents({}) == 0
-    assert pkg.get_user(TEST_USER.username) is None
+    assert pkg.get_by_username(TEST_USER.username) is None
 
 
 def test_update_delete_user():
@@ -123,19 +123,19 @@ def test_update_delete_user():
         userdb.insert_one(user.model_dump(exclude_none=True))
         assert userdb.count_documents({}) == i + 1
 
-    original_user = pkg.get_user(users[0])
+    original_user = pkg.get_by_username(users[0])
     assert original_user is not None
 
     res = pkg.update_user(original_user.username, UserUpdate(username="new_username"))
     assert res is not None
     assert res.username == "new_username"
     assert res.username != original_user.username
-    assert pkg.get_user(original_user.username) is None
-    assert pkg.get_user(res.username) == res
+    assert pkg.get_by_username(original_user.username) is None
+    assert pkg.get_by_username(res.username) == res
     original_user.username = res.username
     assert res == original_user
 
-    original_user = pkg.get_user(users[1])
+    original_user = pkg.get_by_username(users[1])
     assert original_user is not None
     tm = datetime.now(timezone.utc)
     tm = tm.replace(
@@ -143,19 +143,19 @@ def test_update_delete_user():
     )  # trunk to milliseconds because of MongoDB precision
     res = pkg.update_user(original_user.username, UserUpdate(last_login=tm))
     assert res is not None
-    assert pkg.get_user(original_user.username) == res
+    assert pkg.get_by_username(original_user.username) == res
     assert res.last_login.timestamp() == tm.timestamp()
     assert res.last_login.timestamp() >= original_user.last_login.timestamp()
     original_user.last_login = res.last_login
     assert res == original_user
 
-    original_user = pkg.get_user(users[2])
+    original_user = pkg.get_by_username(users[2])
     assert original_user is not None
     res = pkg.update_user(
         original_user.username, UserUpdate(password="new_password", major="new_major")
     )
     assert res is not None
-    assert pkg.get_user(original_user.username) == res
+    assert pkg.get_by_username(original_user.username) == res
     assert res.password_hash != original_user.password_hash
     assert res.major != original_user.major
     assert res.major == "new_major"
@@ -164,12 +164,12 @@ def test_update_delete_user():
     assert res == original_user
 
     assert pkg.delete_user(original_user.username) is not None
-    assert pkg.get_user(original_user.username) is None
+    assert pkg.get_by_username(original_user.username) is None
     assert userdb.count_documents({}) == N - 1
     assert pkg.delete_user(original_user.username) is None
 
     for user in users[3:]:
         assert pkg.delete_user(user) is not None
-        assert pkg.get_user(user) is None
+        assert pkg.get_by_username(user) is None
 
     assert userdb.count_documents({}) == 2
