@@ -4,10 +4,8 @@ import string
 from base64 import b64decode, b64encode
 from hashlib import scrypt, sha256
 
-from flaskr.db.models import UserCreate
 
-
-class LicenseKeyGenerator:
+class KeyGenerator:
     charset: str = string.digits + string.ascii_uppercase
 
     @classmethod
@@ -21,18 +19,18 @@ class LicenseKeyGenerator:
     @classmethod
     def generate_new_key(cls):
         key, value = cls.__generate_subkey(4), cls.__generate_subkey(2)
-        license_key_hash = sha256(key.encode() + value.encode())
+        key_hash = sha256(key.encode() + value.encode())
         return (
-            f"{license_key_hash.hexdigest()}.{value}",
+            f"{key_hash.hexdigest()}.{value}",
             key,
         )
 
     @classmethod
-    def verify_key(cls, user: UserCreate, license_key_hash: str):
+    def verify_key(cls, key: str, key_hash: str):
         try:
-            expected_license_hash, value = license_key_hash.split(".")
-            user_license_hash = sha256(user.license_key.encode() + value.encode())
-            return user_license_hash.hexdigest() == expected_license_hash
+            expected_hash, value = key_hash.split(".")
+            user_hash = sha256(key.encode() + value.encode())
+            return user_hash.hexdigest() == expected_hash
         except:
             return False
 

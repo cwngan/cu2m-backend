@@ -7,7 +7,7 @@ from flaskr.api.reqmodels import UserCreateRequestModel, UserLoginRequestModel
 from flaskr.api.respmodels import UserResponseModel
 from flaskr.db.models import UserRead, UserUpdate
 from flaskr.db.user import activate_user, get_precreated_user, get_user, update_user
-from flaskr.utils import LicenseKeyGenerator, PasswordHasher
+from flaskr.utils import KeyGenerator, PasswordHasher
 
 route = Blueprint("user", __name__, url_prefix="/user")
 
@@ -32,7 +32,7 @@ def signup(body: UserCreateRequestModel):
         )
 
     # Use PasswordHasher to verify provided license key against license_hash
-    if not LicenseKeyGenerator.verify_key(user_create, pre_created.license_key_hash):
+    if not KeyGenerator.verify_key(user_create.license_key, pre_created.license_key_hash):
         return (
             UserResponseModel(status="ERROR", error="Invalid license key."),
             400,

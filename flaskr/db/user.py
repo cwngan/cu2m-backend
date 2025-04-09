@@ -4,7 +4,7 @@ from pymongo.collection import ReturnDocument
 
 from flaskr.db.database import get_db
 from flaskr.db.models import PreUser, User, UserCreate, UserUpdate
-from flaskr.utils import LicenseKeyGenerator, PasswordHasher
+from flaskr.utils import KeyGenerator, PasswordHasher
 
 
 def activate_user(pre_user: PreUser, user_create: UserCreate):
@@ -53,7 +53,7 @@ def create_precreated_user(email: str):
     Create a pre-created user record with a license key.
     """
     userdb = get_db().users
-    license_key_hash, license_key = LicenseKeyGenerator.generate_new_key()
+    license_key_hash, license_key = KeyGenerator.generate_new_key()
     preuser = PreUser(
         email=email,
         license_key_hash=license_key_hash,
