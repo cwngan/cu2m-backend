@@ -3,11 +3,13 @@ from datetime import datetime
 from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
+from flaskr.api import email_service
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,
     UserForgotPasswordModel,
     UserLoginRequestModel,
     UserResetPasswordModel,
+    UserVerifyTokenModel,
 )
 from flaskr.api.respmodels import ResponseModel, UserResponseModel
 from flaskr.db.models import UserRead, UserUpdate
@@ -129,12 +131,12 @@ def me():
 def forgot_password(body: UserForgotPasswordModel):
     token, user = create_reset_token(body.email)
     if token and user:
-        url = f"frontendlink/?token={token}&username={user.username}"
-        print(url)
+        # Send the reset password token to the user's email.
+        email_service.send_reset_password_token(user, token)
     return "", 204
 
 
-def _verify_token(body: UserResetPasswordModel):
+def _verify_token(body: UserVerifyTokenModel):
     token = get_reset_token(body.username)
     if not token or not KeyGenerator.verify_key(body.token, token.token_hash):
         return False
@@ -144,7 +146,7 @@ def _verify_token(body: UserResetPasswordModel):
 
 @route.route("/verify-token", methods=["POST"])
 @validate()
-def verify_token(body: UserResetPasswordModel):
+def verify_token(body: UserVerifyTokenModel):
     if not _verify_token(body):
         return (
             ResponseModel(status="ERROR", error="Invalid token"),
@@ -153,7 +155,7 @@ def verify_token(body: UserResetPasswordModel):
     return ResponseModel(), 200
 
 
-@route.route("/reset-password", methods=["POST"])
+@route.route("/reset-password", methods=["PUT"])
 @validate()
 def reset_password(body: UserResetPasswordModel):
     if not _verify_token(body):

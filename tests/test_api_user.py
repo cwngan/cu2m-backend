@@ -1,10 +1,18 @@
 import json
 
 from flask.testing import FlaskClient
+from pytest import MonkeyPatch
 from werkzeug.test import TestResponse
 
+from flaskr.api.reqmodels import (
+    UserCreateRequestModel,
+    UserForgotPasswordModel,
+    UserLoginRequestModel,
+    UserResetPasswordModel,
+    UserVerifyTokenModel,
+)
 from flaskr.api.respmodels import ResponseModel, UserResponseModel
-from flaskr.db.models import User, UserCreate, UserRead
+from flaskr.db.models import User, UserRead
 from flaskr.db.user import create_precreated_user
 from tests.utils import random_user
 
@@ -13,7 +21,7 @@ def test_signup(client: FlaskClient):
     TEST_USER = random_user()
 
     def _send_request(usr: User, key: str):
-        user_create = UserCreate.model_validate(
+        user_create = UserCreateRequestModel.model_validate(
             {
                 **usr.model_dump(),
                 "license_key": key,
@@ -105,7 +113,7 @@ def test_login(client: FlaskClient):
     key, _ = create_precreated_user(TEST_USER.email)
     response = client.post(
         "/api/user/signup",
-        json=UserCreate.model_validate(
+        json=UserCreateRequestModel.model_validate(
             {
                 **TEST_USER.model_dump(),
                 "license_key": key,
@@ -191,7 +199,7 @@ def test_sessions(client: FlaskClient):
         res = UserResponseModel.model_validate(
             client.post(
                 "/api/user/signup",
-                json=UserCreate.model_validate(
+                json=UserCreateRequestModel.model_validate(
                     {
                         **user.model_dump(),
                         "license_key": key,
@@ -218,10 +226,12 @@ def test_sessions(client: FlaskClient):
         res = UserResponseModel.model_validate(
             client.post(
                 "/api/user/login",
-                json={
-                    "username": uname,
-                    "password": pwd,
-                },
+                json=UserLoginRequestModel.model_validate(
+                    {
+                        "username": uname,
+                        "password": pwd,
+                    }
+                ),
             ).json
         )
         if res.data:
@@ -240,3 +250,142 @@ def test_sessions(client: FlaskClient):
     _test_session(None)
     _login(user2.username, user1.password_hash, user1)
     _test_session(None)
+
+
+def test_forgot_verify_reset_password(monkeypatch: MonkeyPatch, client: FlaskClient):
+    from flaskr.db.database import get_db
+
+    curr_user: User | None = None
+    curr_token: str | None = None
+
+    def mock_send_reset_password_token(user: User, token: str):
+        nonlocal curr_user, curr_token
+        curr_user = user
+        curr_token = token
+
+    monkeypatch.setattr(
+        "flaskr.api.email_service.send_reset_password_token",
+        mock_send_reset_password_token,
+    )
+
+    userdb = get_db().users
+    tokendb = get_db().tokens
+    TEST_USER = random_user()
+
+    TEST_USER.id = userdb.insert_one(
+        TEST_USER.model_dump(exclude_none=True)
+    ).inserted_id
+
+    assert (
+        client.post(
+            "/api/user/forgot-password",
+            json=UserForgotPasswordModel(email="fakeemail").model_dump(),
+        ).status_code
+        == 204
+    )
+    assert curr_user is None
+    assert (
+        client.post(
+            "/api/user/forgot-password",
+            json=UserForgotPasswordModel(email=TEST_USER.email).model_dump(),
+        ).status_code
+        == 204
+    )
+    assert tokendb.count_documents({}) == 1
+    assert curr_user is not None
+    assert curr_user == TEST_USER
+
+    response = client.post(
+        "/api/user/verify-token",
+        json=UserVerifyTokenModel(
+            username=TEST_USER.username, token="fake_token"
+        ).model_dump(),
+    )
+    assert response.status_code == 400
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert res.error == "Invalid token"
+
+    response = client.post(
+        "/api/user/verify-token",
+        json=UserVerifyTokenModel(
+            username=TEST_USER.username, token=curr_token
+        ).model_dump(),
+    )
+    assert response.status_code == 200
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+
+    prev_token = curr_token
+    curr_token = None
+    assert (
+        client.post(
+            "/api/user/forgot-password",
+            json=UserForgotPasswordModel(email=TEST_USER.email).model_dump(),
+        ).status_code
+        == 204
+    )
+    assert tokendb.count_documents({}) == 1
+    assert curr_user is not None
+    assert curr_user == TEST_USER
+    assert curr_token != prev_token
+
+    response = client.post(
+        "/api/user/verify-token",
+        json=UserVerifyTokenModel(
+            username=TEST_USER.username, token=prev_token
+        ).model_dump(),
+    )
+    assert response.status_code == 400
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert res.error == "Invalid token"
+
+    response = client.post(
+        "/api/user/verify-token",
+        json=UserVerifyTokenModel(
+            username="wrong_username", token=curr_token
+        ).model_dump(),
+    )
+    assert response.status_code == 400
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert res.error == "Invalid token"
+
+    response = client.post(
+        "/api/user/verify-token",
+        json=UserVerifyTokenModel(
+            username="wrong_username", token="wrong_token"
+        ).model_dump(),
+    )
+    assert response.status_code == 400
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert res.error == "Invalid token"
+
+    # assume reset password invalid token handling the exact same as verify
+    response = client.put(
+        "/api/user/reset-password",
+        json=UserResetPasswordModel(
+            username=TEST_USER.username, token=curr_token, password="new_password"
+        ).model_dump(),
+    )
+    assert response.status_code == 200
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+
+    response = client.post(
+        "/api/user/login",
+        json=UserLoginRequestModel.model_validate(
+            {
+                "username": TEST_USER.username,
+                "password": "new_password",
+            }
+        ).model_dump(),
+    )
+    assert response.status_code == 200
+    res = UserResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    assert res.data.last_login >= TEST_USER.last_login
+    TEST_USER.last_login = res.data.last_login
+    assert res.data == UserRead.model_validate(TEST_USER.model_dump())
