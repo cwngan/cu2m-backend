@@ -5,14 +5,13 @@ from pytest import MonkeyPatch
 from werkzeug.test import TestResponse
 
 from flaskr.api.reqmodels import (
-    UserCreateRequestModel,
     UserForgotPasswordModel,
     UserLoginRequestModel,
     UserResetPasswordModel,
     UserVerifyTokenModel,
 )
 from flaskr.api.respmodels import ResponseModel, UserResponseModel
-from flaskr.db.models import User, UserRead
+from flaskr.db.models import User, UserCreate, UserRead
 from flaskr.db.user import create_precreated_user
 from tests.utils import random_user
 
@@ -21,7 +20,7 @@ def test_signup(client: FlaskClient):
     TEST_USER = random_user()
 
     def _send_request(usr: User, key: str):
-        user_create = UserCreateRequestModel.model_validate(
+        user_create = UserCreate.model_validate(
             {
                 **usr.model_dump(),
                 "license_key": key,
@@ -113,7 +112,7 @@ def test_login(client: FlaskClient):
     key, _ = create_precreated_user(TEST_USER.email)
     response = client.post(
         "/api/user/signup",
-        json=UserCreateRequestModel.model_validate(
+        json=UserCreate.model_validate(
             {
                 **TEST_USER.model_dump(),
                 "license_key": key,
@@ -199,7 +198,7 @@ def test_sessions(client: FlaskClient):
         res = UserResponseModel.model_validate(
             client.post(
                 "/api/user/signup",
-                json=UserCreateRequestModel.model_validate(
+                json=UserCreate.model_validate(
                     {
                         **user.model_dump(),
                         "license_key": key,
@@ -231,7 +230,7 @@ def test_sessions(client: FlaskClient):
                         "username": uname,
                         "password": pwd,
                     }
-                ),
+                ).model_dump(),
             ).json
         )
         if res.data:
