@@ -186,7 +186,8 @@ def test_reset_token():
     ).inserted_id
 
     key, user = pkg.create_reset_token(TEST_USER.email)
-
+    
+    assert tokendb.count_documents({}) == 1
     assert user == TEST_USER
     assert key is not None
 
@@ -205,3 +206,19 @@ def test_reset_token():
 
     assert pkg.get_reset_token("wrong_username") is None
     assert pkg.create_reset_token("wrong_email") == (None, None)
+
+    
+    key1, user1 = pkg.create_reset_token(TEST_USER.email)
+    assert user1 == TEST_USER
+    assert key1 is not None
+
+    key2, user2 = pkg.create_reset_token(TEST_USER.email)
+    assert user2 == TEST_USER
+    assert key2 is not None
+    assert key1 != key2
+    assert tokendb.count_documents({}) == 1
+
+    token = pkg.get_reset_token(TEST_USER.username)
+    assert token is not None
+    assert KeyGenerator.verify_key(key1, token.token_hash) is False
+    assert KeyGenerator.verify_key(key2, token.token_hash) is True
