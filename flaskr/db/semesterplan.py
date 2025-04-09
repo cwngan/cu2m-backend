@@ -6,7 +6,12 @@ from flaskr.db.database import get_db
 from flaskr.db.models import SemesterPlan
 
 
-def create_semester_plan(course_plan_id: str, semester_plan: SemesterPlan):
+def create_semester_plan(
+    course_plan_id: str,
+    semester: int,
+    year: int,
+):
+    semester_plan = SemesterPlan(courses=[], semester=semester, year=year)
     semester_plan.course_plan_id = ObjectId(course_plan_id)
     semester_plan.created_at = datetime.now()
 
