@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from flaskr.db import user as pkg
 from flaskr.db.models import PreUser, UserCreate, UserUpdate
-from flaskr.utils import LicenseKeyGenerator
+from flaskr.utils import KeyGenerator
 from tests.utils import random_user
 
 
@@ -42,7 +42,7 @@ def test_precreated_user():
         license_key=license_key,
     )
     assert (
-        LicenseKeyGenerator.verify_key(user_create, pkg_preuser.license_key_hash)
+        KeyGenerator.verify_key(user_create.license_key, pkg_preuser.license_key_hash)
         is True
     )
 
