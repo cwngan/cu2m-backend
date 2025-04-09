@@ -11,8 +11,7 @@ from flaskr.api.reqmodels import (
 from flaskr.api.respmodels import SemesterPlanResponseModel
 from flaskr.db.models import SemesterPlanRead, SemesterPlanUpdate
 from flaskr.db.semesterplan import create_semester_plan, get_semester_plan
-from flaskr.db.user import activate_user, get_precreated_user, get_user, update_user
-from flaskr.utils import LicenseKeyGenerator, PasswordHasher
+from flaskr.db.user import get_user
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester_plans")
 
