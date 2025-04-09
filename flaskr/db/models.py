@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,7 +13,7 @@ class PreUser(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     license_key_hash: str
-    activated_at: datetime = datetime.fromtimestamp(0)
+    activated_at: datetime = datetime.fromtimestamp(0, timezone.utc)
 
 
 class User(PreUser):
