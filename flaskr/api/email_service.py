@@ -28,7 +28,7 @@ def send_reset_password_token(user: User, token: str):
         server.login(SMTP_EMAIL, SMTP_PASSWORD)
         server.sendmail(
             SMTP_EMAIL,
-            SMTP_EMAIL,
+            user.email,
             "Subject: {}\n\n{}".format(
                 TITLE,
                 f"Click the following link to reset your CU2M account password: "
