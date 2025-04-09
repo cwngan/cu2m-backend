@@ -79,4 +79,10 @@ class CoursePlan(CoreModel):
     favourite: bool
     name: str
     updated_at: datetime
-    user_id: PydanticObjectId
+    user_id: Optional[PydanticObjectId]
+
+
+class CoursePlanUpdate(CoreModel):
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None
