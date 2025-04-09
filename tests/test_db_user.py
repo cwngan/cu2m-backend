@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from flaskr.db import user as pkg
-from flaskr.db.models import PreUser, UserCreate, UserUpdate
+from flaskr.db.models import PreUser, ResetToken, UserCreate, UserUpdate
 from flaskr.utils import KeyGenerator
 from tests.utils import random_user
 
@@ -173,3 +173,35 @@ def test_update_delete_user():
         assert pkg.get_by_username(user) is None
 
     assert userdb.count_documents({}) == 2
+
+
+def test_reset_token():
+    from flaskr.db.database import get_db
+
+    userdb = get_db().users
+    tokendb = get_db().tokens
+    TEST_USER = random_user()
+    TEST_USER.id = userdb.insert_one(
+        TEST_USER.model_dump(exclude_none=True)
+    ).inserted_id
+
+    key, user = pkg.create_reset_token(TEST_USER.email)
+
+    assert user == TEST_USER
+    assert key is not None
+
+    token = pkg.get_reset_token(TEST_USER.username)
+    assert token is not None
+    assert token.username == TEST_USER.username
+    assert KeyGenerator.verify_key(key, token.token_hash) is True
+    assert token.expires_at.timestamp() > datetime.now().timestamp()
+    assert token.expires_at.timestamp() <= datetime.now().timestamp() + ResetToken.TTL
+    tokendb.update_one(
+        {"_id": token.id},
+        {"$set": {"expires_at": datetime.fromtimestamp(0, timezone.utc)}},
+    )
+    token = pkg.get_reset_token(TEST_USER.username)
+    assert token is None
+
+    assert pkg.get_reset_token("wrong_username") is None
+    assert pkg.create_reset_token("wrong_email") == (None, None)
