@@ -18,6 +18,7 @@ def setup(monkeypatch: pytest.MonkeyPatch):
     """
 
     mock_used = False
+
     def mock_get_db():
         nonlocal mock_used
         mock_used = True
@@ -27,11 +28,20 @@ def setup(monkeypatch: pytest.MonkeyPatch):
     # https://stackoverflow.com/a/45466846
     monkeypatch.setattr("flaskr.db.database.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
+    monkeypatch.setattr("flaskr.db.course_plans.get_db", mock_get_db)
 
     yield
-    # Clean up the test database after tests
-    if mock_used:
-        get_mongo_client().drop_database(TEST_DB_NAME)
+    # Clean up the test database after tests (automatically)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def database_setup():
+    """
+    Setup data of database.
+    This fixture is automatically applied to all tests and drop database after the whole test ends.
+    """
+    yield
+    get_mongo_client().drop_database(TEST_DB_NAME)
 
 
 @pytest.fixture
