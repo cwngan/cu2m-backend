@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from pymongo.collection import ReturnDocument
 
 from flaskr.db.database import get_db
-from flaskr.db.models import PreUser, User, UserCreate, UserUpdate
+from flaskr.db.models import PreUser, ResetToken, User, UserCreate, UserUpdate
 from flaskr.utils import KeyGenerator, PasswordHasher
 
 
@@ -62,7 +62,7 @@ def create_precreated_user(email: str):
     return license_key, preuser
 
 
-def get_user(username: str):
+def get_by_username(username: str):
     """
     Fetch a user by username.
 
@@ -70,6 +70,22 @@ def get_user(username: str):
     """
     userdb = get_db().users
     doc = userdb.find_one({"username": username})
+    return User.model_validate(doc) if doc else None
+
+
+def get_by_email(email: str):
+    """
+    Fetch a user by email.
+
+    Note: Remember to parse with `UserRead` model to avoid exposing sensitive data.
+    """
+    userdb = get_db().users
+    doc = userdb.find_one(
+        {
+            "email": email,
+            "activated_at": {"$ne": datetime.fromtimestamp(0, timezone.utc)},
+        }
+    )
     return User.model_validate(doc) if doc else None
 
 
@@ -101,3 +117,43 @@ def delete_user(username: str):
         doc = userdb.find_one_and_delete(user)
         return User.model_validate(doc) if doc else None
     return None
+
+
+def create_reset_token(email: str):
+    """
+    Create a forgot password token for the user.
+    """
+    user = get_by_email(email)
+    if not user:
+        return None, None
+
+    tokendb = get_db().tokens
+    key_hash, key = KeyGenerator.generate_new_key()
+
+    token = ResetToken(
+        token_hash=key_hash,
+        username=user.username,
+        expires_at=datetime.fromtimestamp(
+            datetime.now().timestamp() + ResetToken.TTL, timezone.utc
+        ),
+    )
+
+    tokendb.update_one(
+        {"username": user.username},
+        {"$set": token.model_dump(exclude_none=True)},
+        upsert=True,
+    )
+
+    return key, user
+
+
+def get_reset_token(username: str):
+    """
+    Get forgot password tokens for the user.
+    """
+    tokendb = get_db().tokens
+    doc = tokendb.find_one({"username": username})
+    if not doc:
+        return None
+    token = ResetToken.model_validate(doc)
+    return token if token.is_valid() else None
