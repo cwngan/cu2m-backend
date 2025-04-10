@@ -8,30 +8,33 @@ from flaskr.db.database import get_mongo_client
 TEST_DB_NAME = "TESTDB"
 
 
-@pytest.fixture(autouse=True)
-def setup(monkeypatch: pytest.MonkeyPatch):
+@pytest.fixture(autouse=True, scope="module")
+def setup():
     """
     Setup testing environment.
     Monkeypatches the `get_db` function to return a test database.
 
-    This fixture is automatically applied to all tests.
+    This fixture is automatically applied to all modules.
     """
 
-    mock_used = False
-    def mock_get_db():
-        nonlocal mock_used
-        mock_used = True
-        return get_mongo_client()[TEST_DB_NAME]
+    with pytest.MonkeyPatch.context() as mp:
+        mock_used = False
 
-    # Note: setattr must be done to all files that imports get_db directly
-    # https://stackoverflow.com/a/45466846
-    monkeypatch.setattr("flaskr.db.database.get_db", mock_get_db)
-    monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
+        def mock_get_db():
+            nonlocal mock_used
+            mock_used = True
+            return get_mongo_client()[TEST_DB_NAME]
 
-    yield
-    # Clean up the test database after tests
-    if mock_used:
-        get_mongo_client().drop_database(TEST_DB_NAME)
+        # Note: setattr must be done to all files that imports get_db directly
+        # https://stackoverflow.com/a/45466846
+        mp.setattr("flaskr.db.database.get_db", mock_get_db)
+        mp.setattr("flaskr.db.user.get_db", mock_get_db)
+
+        yield
+
+        # Clean up the test database after tests
+        if mock_used:
+            get_mongo_client().drop_database(TEST_DB_NAME)
 
 
 @pytest.fixture
