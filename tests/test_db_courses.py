@@ -8,6 +8,9 @@ from flaskr.api.respmodels import CoursesResponseModel
 
 
 def test_courses_version_upgrade(client: FlaskClient):
+    # Ensure database is pre-initialized with something else
+    init_db()
+
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
     course_data = json.load(open(course_data_filename))
     version = course_data.get("version")
