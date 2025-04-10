@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pymongo.collection import ReturnDocument
 
@@ -42,7 +42,9 @@ def activate_user(pre_user: PreUser, user_create: UserCreate):
 def get_precreated_user(email: str):
     """Fetch a pre-created user by email (that is still inactive)."""
     userdb = get_db().users
-    doc = userdb.find_one({"email": email, "activated_at": datetime.fromtimestamp(0)})
+    doc = userdb.find_one(
+        {"email": email, "activated_at": datetime.fromtimestamp(0, timezone.utc)}
+    )
     return PreUser.model_validate(doc) if doc else None
 
 

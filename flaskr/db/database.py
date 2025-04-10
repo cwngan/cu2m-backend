@@ -23,7 +23,7 @@ def get_mongo_client():
 
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@{os.getenv('MONGO_DB_HOST')}:{os.getenv('MONGO_DB_PORT')}/"
         print(mongo_uri, flush=True)
-        _mongo = MongoClient(mongo_uri)
+        _mongo = MongoClient(mongo_uri, tz_aware=True)
         init_db()
         print("MongoDB connected", flush=True)
         print(_mongo)

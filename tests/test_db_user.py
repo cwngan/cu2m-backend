@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flaskr.db import user as pkg
 from flaskr.db.models import PreUser, UserCreate, UserUpdate
@@ -16,7 +16,7 @@ def test_precreated_user():
     license_key, preuser = pkg.create_precreated_user(TEST_EMAIL)
     assert preuser is not None
     assert preuser.email == TEST_EMAIL
-    assert preuser.activated_at == datetime.fromtimestamp(0)
+    assert preuser.activated_at.timestamp() == 0
     assert preuser.license_key_hash is not None
     assert preuser.id is not None
 
@@ -72,14 +72,20 @@ def test_activate_get_user():
 
     res_user = pkg.activate_user(preuser, TEST_USER)
     assert res_user is not None
-    assert res_user.username == TEST_USER.username
-    assert res_user.first_name == TEST_USER.first_name
-    assert res_user.last_name == TEST_USER.last_name
-    assert res_user.major == TEST_USER.major
-    assert res_user.email == TEST_USER.email
+    assert (
+        UserCreate.model_validate(
+            {
+                **res_user.model_dump(),
+                "password": TEST_USER.password,
+                "license_key": TEST_USER.license_key,
+            }
+        )
+        == TEST_USER
+    )
     assert res_user.password_hash is not None
     assert res_user.license_key_hash == preuser.license_key_hash
-    assert res_user.activated_at != datetime.fromtimestamp(0)
+    # assuming test wont take more than 3 seconds
+    assert datetime.now().timestamp() - res_user.activated_at.timestamp() < 3
     assert res_user.last_login is not None
     assert res_user.id == preuser.id
 
@@ -131,15 +137,15 @@ def test_update_delete_user():
 
     original_user = pkg.get_user(users[1])
     assert original_user is not None
-    tm = datetime.now()
+    tm = datetime.now(timezone.utc)
     tm = tm.replace(
         microsecond=(tm.microsecond // 1000) * 1000
     )  # trunk to milliseconds because of MongoDB precision
     res = pkg.update_user(original_user.username, UserUpdate(last_login=tm))
     assert res is not None
     assert pkg.get_user(original_user.username) == res
-    assert res.last_login == tm
-    assert res.last_login != original_user.last_login
+    assert res.last_login.timestamp() == tm.timestamp()
+    assert res.last_login.timestamp() >= original_user.last_login.timestamp()
     original_user.last_login = res.last_login
     assert res == original_user
 

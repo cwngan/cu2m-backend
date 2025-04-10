@@ -1,0 +1,29 @@
+[project]
+name = "cu2m-backend"
+version = "0.1.0"
+description = "CU^2M Backend"
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask (>=3.1.0,<4.0.0)",
+    "flask-pydantic (>=0.13.0,<0.14.0)",
+    "pydantic (>=2.11.3,<3.0.0)",
+    "pymongo (>=4.12.0,<5.0.0)",
+    "pydantic-mongo (>=2.4.0,<3.0.0)",
+    "pytest (>=8.3.5,<9.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+    
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry]
+package-mode = false

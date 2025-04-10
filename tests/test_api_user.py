@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 
 from flask.testing import FlaskClient
 from werkzeug.test import TestResponse
@@ -90,9 +89,9 @@ def test_signup(client: FlaskClient):
     assert res.data is not None
     TEST_USER.id = res.data.id
     user_read = UserRead.model_validate(TEST_USER.model_dump())
+    assert user_read.last_login.timestamp() <= res.data.last_login.timestamp()
     user_read.last_login = res.data.last_login
     assert res.data == user_read
-    assert res.data.last_login != datetime.fromtimestamp(0)
 
     TEST_USER.email = "test@test.test"
     key, preuser = create_precreated_user(TEST_USER.email)
@@ -130,9 +129,9 @@ def test_login(client: FlaskClient):
     assert res.data is not None
     TEST_USER.id = res.data.id
     user_read = UserRead.model_validate(TEST_USER.model_dump())
+    assert user_read.last_login.timestamp() <= res.data.last_login.timestamp()
     user_read.last_login = res.data.last_login
     assert res.data == user_read
-    assert res.data.last_login != datetime.fromtimestamp(0)
 
     response = client.post(
         "/api/user/login",
@@ -183,7 +182,7 @@ def test_sessions(client: FlaskClient):
             assert res.data is not None
             user_read = UserRead.model_validate(user.model_dump())
             assert res.data == user_read
-            assert res.data.last_login != datetime.fromtimestamp(0)
+            assert res.data.last_login.timestamp() != 0
 
     _test_session(None)
 
@@ -226,6 +225,7 @@ def test_sessions(client: FlaskClient):
             ).json
         )
         if res.data:
+            assert user.last_login.timestamp() <= res.data.last_login.timestamp()
             user.last_login = res.data.last_login
         return user
 
