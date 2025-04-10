@@ -74,9 +74,8 @@ def init_db():
         for json_course in json_courses.values():
             json_string = json.dumps(json_course.get("data"))
             course = json.loads(json_string, object_hook=lambda d: SimpleNamespace(**d))
-            course.original, course.parsed = json_course.get(
-                "original"
-            ), json_course.get("parsed")
+            course.original = json_course.get("original")
+            course.parsed = json_course.get("parsed")
             insert_data.append(course.__dict__)
         db.courses.insert_many(insert_data)
 
