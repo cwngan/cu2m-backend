@@ -18,6 +18,7 @@ def setup(monkeypatch: pytest.MonkeyPatch):
     """
 
     mock_used = False
+
     def mock_get_db():
         nonlocal mock_used
         mock_used = True

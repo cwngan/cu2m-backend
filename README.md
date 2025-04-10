@@ -1,7 +1,7 @@
 # CU2M Backend
 
 # Prerequisites
-- Python with pip install
+- Python 3.12
 
 # Environment Setup (Flask Server Only)
 1. Setup a virtual environment.
@@ -14,14 +14,24 @@ python3 -m venv .venv
 . .venv/bin/activate
 ```
 
-3. Install required python packages.
+3. Install poetry.
 ```bash
-python3 -m pip install -r requirements.txt
+pip install poetry
 ```
 
-4. Start developing. Start the Flask server in debug mode with the following command.
+4. Install required python packages.
+```bash
+poetry install
+```
+
+5. Start developing. Start the Flask server in debug mode with the following command.
 ```bash
 flask --app flaskr run --debug
+```
+
+6. To install more packages do the following.
+```bash
+poetry add <package-name>
 ```
 
 # Environment Setup (With Database)
