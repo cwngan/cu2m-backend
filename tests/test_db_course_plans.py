@@ -24,7 +24,7 @@ def test_user():
 
 
 @pytest.fixture
-def course_plans(test_user):
+def course_plans(test_user) -> list[CoursePlan]:
     res = []
     for _ in range(20):
         name = random_string()
