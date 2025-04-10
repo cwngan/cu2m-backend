@@ -70,16 +70,16 @@ def init_db():
         db.courses.drop()
         db.courses.create_index("code", unique=True)
         json_courses = course_data.get("data")
+        insert_data = []
         for json_course in json_courses.values():
             json_string = json.dumps(json_course.get("data"))
             course = json.loads(json_string, object_hook=lambda d: SimpleNamespace(**d))
             course.original, course.parsed = json_course.get(
                 "original"
             ), json_course.get("parsed")
-            db.courses.update_one(
-                {"code": course.code}, {"$set": course.__dict__}, upsert=True
-            )
-    # print(">> DB ", db.courses.find({}).to_list(), flush=True)
+            insert_data.append(course.__dict__)
+        db.courses.insert_many(insert_data)
+
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
 
