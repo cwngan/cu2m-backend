@@ -1,3 +1,5 @@
+import json
+import os
 import pytest
 
 from flask.testing import FlaskClient
@@ -8,9 +10,9 @@ from flaskr.api.respmodels import CoursesResponseModel
 @pytest.mark.parametrize(
     "input, expected",
     [
-        ("ENGG1110", "Problem Solving By Programming"),
-        ("CSCI2100", "Data Structures"),
-        ("ESTR2102", "Data Structures"),
+        ("MATH2028", "Honours Advanced Calculus II"),
+        ("PHED1073", "Badminton"),
+        ("PHED1042", "Badminton"),
         ("CSCI3100", "Software Engineering"),
     ],
 )
@@ -33,7 +35,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     [
         (["ENGG1110", "CSCI3100"]),
         (["ENGG", "CSCI", "CENG", "MATH"]),
-        (["E", "LING"]),
+        (["E", "C"]),
     ],
 )
 def test_multiple_prefix_course_code(client: FlaskClient, input):
@@ -92,4 +94,7 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    assert len(res.data) >= 1
+
+    course_data_filename = os.getenv("COURSE_DATA_FILENAME")
+    course_data = json.load(open(course_data_filename))
+    assert len(course_data.get("data").items()) == len(res.data)
