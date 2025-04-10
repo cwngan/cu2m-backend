@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import random
 import pytest
 
@@ -93,7 +94,14 @@ def test_update_course_plan(course_plans, test_user):
             test_user.id,
         )
         course_plan.description = new_desc
-        assert get_course_plan(course_plan.id, test_user.id) == course_plan
+        course_plan.updated_at = datetime.now(timezone.utc)
+        db_course_plan = get_course_plan(course_plan.id, test_user.id)
+        assert db_course_plan.model_dump(
+            exclude={"updated_at"}
+        ) == course_plan.model_dump(exclude={"updated_at"})
+        assert abs(db_course_plan.updated_at - course_plan.updated_at) < timedelta(
+            seconds=1
+        )
         update_course_plan(
             course_plan.id,
             CoursePlanUpdate(
@@ -105,7 +113,12 @@ def test_update_course_plan(course_plans, test_user):
         )
         course_plan.name = new_name
         course_plan.favourite = favourite
-        assert get_course_plan(course_plan.id, test_user.id) == course_plan
+        assert get_course_plan(course_plan.id, test_user.id).model_dump(
+            exclude={"updated_at"}
+        ) == course_plan.model_dump(exclude={"updated_at"})
+        assert abs(db_course_plan.updated_at - course_plan.updated_at) < timedelta(
+            seconds=1
+        )
         update_course_plan(
             course_plan.id,
             CoursePlanUpdate(
@@ -116,7 +129,12 @@ def test_update_course_plan(course_plans, test_user):
             test_user.id,
         )
         course_plan.favourite = not favourite
-        assert get_course_plan(course_plan.id, test_user.id) == course_plan
+        assert get_course_plan(course_plan.id, test_user.id).model_dump(
+            exclude={"updated_at"}
+        ) == course_plan.model_dump(exclude={"updated_at"})
+        assert abs(db_course_plan.updated_at - course_plan.updated_at) < timedelta(
+            seconds=1
+        )
 
 
 def test_delete_course_plan(course_plans, test_user):
