@@ -72,6 +72,7 @@ def update_course_plan(
     :return: the updated CoursePlan object or None if not found.
     """
     course_plans_collection = get_db().course_plans
+    course_plan_update.updated_at = datetime.now(timezone.utc)
     data = course_plan_update.model_dump(exclude_none=True)
     doc = course_plans_collection.find_one_and_update(
         {"_id": course_plan_id, "user_id": user_id},
