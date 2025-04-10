@@ -82,7 +82,21 @@ class CoursePlan(CoreModel):
     user_id: Optional[PydanticObjectId]
 
 
+class CoursePlanRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    description: str
+    favourite: bool
+    name: str
+    updated_at: datetime
+
+
+class CoursePlanCreate(CoreModel):
+    description: str
+    name: str
+
+
 class CoursePlanUpdate(CoreModel):
-    description: Optional[str] = None
-    favourite: Optional[bool] = None
-    name: Optional[str] = None
+    description: str
+    favourite: bool
+    name: str
+    updated_at: Optional[datetime] = None
