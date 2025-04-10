@@ -86,7 +86,9 @@ def test_update_course_plan(course_plans, test_user):
         update_course_plan(
             course_plan.id,
             CoursePlanUpdate(
+                name=course_plan.name,
                 description=new_desc,
+                favourite=course_plan.favourite,
             ),
             test_user.id,
         )
@@ -96,6 +98,7 @@ def test_update_course_plan(course_plans, test_user):
             course_plan.id,
             CoursePlanUpdate(
                 name=new_name,
+                description=course_plan.description,
                 favourite=favourite,
             ),
             test_user.id,
@@ -106,6 +109,8 @@ def test_update_course_plan(course_plans, test_user):
         update_course_plan(
             course_plan.id,
             CoursePlanUpdate(
+                name=course_plan.name,
+                description=course_plan.description,
                 favourite=(not favourite),
             ),
             test_user.id,
