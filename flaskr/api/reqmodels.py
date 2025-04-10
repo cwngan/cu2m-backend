@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 # from flask_pydantic import ValidationError
 from pydantic import BaseModel, ValidationError, field_validator
