@@ -55,4 +55,10 @@ def test_courses_version_upgrade(client: FlaskClient):
     assert res.status == "OK"
     assert len(res.data) == 1
 
+    response = client.get("/api/courses/?code=CSCI3100")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    assert len(res.data) == 1
+
     os.environ["COURSE_DATA_FILENAME"] = course_data_filename
