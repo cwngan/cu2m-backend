@@ -5,6 +5,18 @@ from flaskr.db.database import get_db
 from flaskr.db.models import CoursePlan, CoursePlanUpdate
 
 
+def get_all_course_plans(user_id: ObjectId) -> list[CoursePlan]:
+    """
+    Return all CoursePlans of specified user.
+
+    :param user_id: the ID of the user whose CoursePlans are to be fetched.
+    :return: a list of CoursePlan objects.
+    """
+    course_plans_collection = get_db().course_plans
+    docs = course_plans_collection.find({"user_id": user_id}).to_list()
+    return [CoursePlan.model_validate(doc) for doc in docs]
+
+
 def get_course_plan(course_plan_id: ObjectId, user_id: ObjectId) -> CoursePlan | None:
     """
     Return CoursePlan of specified ID.
