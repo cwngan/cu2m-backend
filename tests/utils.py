@@ -1,12 +1,13 @@
 import random
 import string
-from datetime import datetime
+from datetime import datetime, timezone
 from os import urandom
 
 from flaskr.db.models import User
 
 
 def random_user():
+    now = int(datetime.now().timestamp())
     return User(
         email=urandom(16).hex(),
         username="".join(
@@ -23,6 +24,6 @@ def random_user():
         major=urandom(16).hex(),
         password_hash=urandom(16).hex(),
         license_key_hash=urandom(16).hex(),
-        last_login=datetime.fromtimestamp(int.from_bytes(urandom(4), "big")),
-        activated_at=datetime.fromtimestamp(int.from_bytes(urandom(4), "big")),
+        last_login=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
+        activated_at=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
     )
