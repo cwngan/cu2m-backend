@@ -11,20 +11,15 @@ from flaskr.db.models import CoursePlan, CoursePlanUpdate
 from tests.utils import random_string, random_user
 
 
-@pytest.fixture(autouse=True, scope="module")
-def test_db():
-    from flaskr.db.database import get_db
-
-    return get_db()
-
-
 @pytest.fixture(scope="module")
-def course_plan_test_user(test_db):
+def course_plan_test_user():
     """
     Create a test user for course plan tests.
     """
+    from flaskr.db.database import get_db
+
     user = random_user()
-    user.id = test_db.users.insert_one(user.model_dump(exclude_none=True)).inserted_id
+    user.id = get_db().users.insert_one(user.model_dump(exclude_none=True)).inserted_id
     return user
 
 
@@ -37,11 +32,13 @@ def course_plans() -> list[CoursePlan]:
     return res
 
 
-def test_create_course_plan(course_plan_test_user, course_plans, test_db):
+def test_create_course_plan(course_plan_test_user, course_plans):
     """
     Test creating a course plan.
     """
-    db_course_plans = test_db.course_plans
+    from flaskr.db.database import get_db
+
+    db_course_plans = get_db().course_plans
     for i in range(20):
         name = random_string()
         description = random_string(20)
@@ -111,11 +108,13 @@ def test_update_course_plan(course_plans):
         assert get_course_plan(course_plan.id) == course_plan
 
 
-def test_delete_course_plan(course_plans, test_db):
+def test_delete_course_plan(course_plans):
     """
     Test deleting course plans.
     """
-    db_course_plans = test_db.course_plans
+    from flaskr.db.database import get_db
+
+    db_course_plans = get_db().course_plans
     for idx, course_plan in enumerate(course_plans):
         delete_course_plan(course_plan.id)
         assert get_course_plan(course_plan.id) is None
