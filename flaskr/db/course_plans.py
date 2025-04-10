@@ -5,7 +5,7 @@ from flaskr.db.database import get_db
 from flaskr.db.models import CoursePlan, CoursePlanUpdate
 
 
-def get_course_plan(course_plan_id: ObjectId) -> CoursePlan | None:
+def get_course_plan(course_plan_id: ObjectId, user_id: ObjectId) -> CoursePlan | None:
     """
     Return CoursePlan of specified ID.
 
@@ -13,7 +13,7 @@ def get_course_plan(course_plan_id: ObjectId) -> CoursePlan | None:
     :return: the CoursePlan object or None if not found.
     """
     course_plans_collection = get_db().course_plans
-    doc = course_plans_collection.find_one({"_id": course_plan_id})
+    doc = course_plans_collection.find_one({"_id": course_plan_id, "user_id": user_id})
     return CoursePlan.model_validate(doc) if doc else None
 
 
@@ -50,7 +50,7 @@ def create_course_plan(
 
 
 def update_course_plan(
-    course_plan_id: ObjectId, course_plan_update: CoursePlanUpdate
+    course_plan_id: ObjectId, course_plan_update: CoursePlanUpdate, user_id: ObjectId
 ) -> CoursePlan | None:
     """
     Update CoursePlan of specified ID with given update parameters.
@@ -62,12 +62,14 @@ def update_course_plan(
     course_plans_collection = get_db().course_plans
     data = course_plan_update.model_dump(exclude_none=True)
     doc = course_plans_collection.find_one_and_update(
-        {"_id": course_plan_id}, {"$set": data}, return_document=ReturnDocument.AFTER
+        {"_id": course_plan_id, "user_id": user_id},
+        {"$set": data},
+        return_document=ReturnDocument.AFTER,
     )
     return CoursePlan.model_validate(doc) if doc else None
 
 
-def delete_course_plan(course_plan_id: ObjectId) -> CoursePlan:
+def delete_course_plan(course_plan_id: ObjectId, user_id: ObjectId) -> CoursePlan:
     """
     Delete CoursePlan of specified ID.
 
@@ -75,7 +77,9 @@ def delete_course_plan(course_plan_id: ObjectId) -> CoursePlan:
     :return: the deleted CoursePlan object or None if not found.
     """
     course_plans_collection = get_db().course_plans
-    course_plan = course_plans_collection.find_one({"_id": course_plan_id})
+    course_plan = course_plans_collection.find_one(
+        {"_id": course_plan_id, "user_id": user_id}
+    )
     if course_plan:
         doc = course_plans_collection.find_one_and_delete({"_id": course_plan_id})
         return CoursePlan.model_validate(doc) if doc else None
