@@ -1,5 +1,4 @@
 import random
-from bson import ObjectId
 import pytest
 
 from flaskr.db.course_plans import (
