@@ -12,6 +12,9 @@ def init_db():
     db = get_db()
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
+    db.semester_plans.create_index("course_plan_id")
+    db.semester_plans.create_index("semester")
+    db.semester_plans.create_index("year")
 
 
 def get_mongo_client():
