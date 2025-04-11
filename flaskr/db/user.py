@@ -62,7 +62,7 @@ def create_precreated_user(email: str):
     return license_key, preuser
 
 
-def get_by_username(username: str):
+def get_user_by_username(username: str):
     """
     Fetch a user by username.
 
@@ -73,7 +73,7 @@ def get_by_username(username: str):
     return User.model_validate(doc) if doc else None
 
 
-def get_by_email(email: str):
+def get_user_by_email(email: str):
     """
     Fetch a user by email.
 
@@ -123,7 +123,7 @@ def create_reset_token(email: str):
     """
     Create a forgot password token for the user.
     """
-    user = get_by_email(email)
+    user = get_user_by_email(email)
     if not user:
         return None, None
 

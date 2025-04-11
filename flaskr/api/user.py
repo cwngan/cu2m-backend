@@ -16,9 +16,9 @@ from flaskr.db.models import UserRead, UserUpdate
 from flaskr.db.user import (
     activate_user,
     create_reset_token,
-    get_by_username,
     get_precreated_user,
     get_reset_token,
+    get_user_by_username,
     update_user,
 )
 from flaskr.utils import KeyGenerator, PasswordHasher
@@ -55,7 +55,7 @@ def signup(body: UserCreateRequestModel):
         )
 
     # Username regex and availability can be handled in reqmodels validation
-    if get_by_username(user_create.username):
+    if get_user_by_username(user_create.username):
         return (
             UserResponseModel(status="ERROR", error="Username already taken."),
             400,
@@ -93,7 +93,7 @@ def signup(body: UserCreateRequestModel):
 @validate(response_by_alias=True)
 def login(body: UserLoginRequestModel):
     username, password = body.username, body.password
-    user = get_by_username(username)
+    user = get_user_by_username(username)
     if not user or not PasswordHasher.verify_password(user.password_hash, password):
         return (
             UserResponseModel(status="ERROR", error="Invalid username or password."),
@@ -116,7 +116,7 @@ def logout():
 @validate(response_by_alias=True)
 def me():
     username = session.get("username")
-    user = get_by_username(username) if username else None
+    user = get_user_by_username(username) if username else None
     if not user:
         return (
             UserResponseModel(status="ERROR", error="Unauthorized"),
