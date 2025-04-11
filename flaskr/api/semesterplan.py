@@ -10,7 +10,12 @@ from flaskr.api.reqmodels import (
 )
 from flaskr.api.respmodels import SemesterPlanResponseModel
 from flaskr.db.models import SemesterPlanRead, SemesterPlanUpdate
-from flaskr.db.semesterplan import create_semester_plan, get_semester_plan
+from flaskr.db.semesterplan import (
+    create_semester_plan,
+    get_semester_plan,
+    update_semester_plan,
+    delete_semester_plan,
+)
 from flaskr.db.user import get_user
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester_plans")
@@ -64,3 +69,46 @@ def post(body: SemesterPlanCreateRequestModel):
         course_plan_id=body.course_plan_id, semester=body.semester, year=body.year
     )
     return SemesterPlanResponseModel(data=semester_plan)
+
+@route.route("/", methods=["PUT"]) #Update the SemesterPlan
+@validate(response_by_alias=True)
+def put(body: SemesterPlanUpdate):
+    username = session.get("username")
+    user = get_user(username) if username else None
+    if not user:
+        return (
+            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
+            401,
+        )
+    semester_plan_id = request.args.get("id")
+    if not ObjectId.is_valid(semester_plan_id):
+        return (SemesterPlanResponseModel(status="ERROR", error="Malformed ID"), 400)
+    updated_plan = update_semester_plan(semester_plan_id, body.model_dump(exclude_none=True))
+    if not updated_plan:
+        return (
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
+            404,
+        )
+    return SemesterPlanResponseModel(data=updated_plan)
+
+
+@route.route("/", methods=["DELETE"])
+#Delete the SemesterPlan
+def delete():
+    username = session.get("username")
+    user = get_user(username) if username else None
+    if not user:
+        return (
+            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
+            401,
+        )
+    semester_plan_id = request.args.get("id")
+    if not ObjectId.is_valid(semester_plan_id):
+        return (SemesterPlanResponseModel(status="ERROR", error="Malformed ID"), 400)
+    deleted_plan = delete_semester_plan(semester_plan_id)
+    if not deleted_plan:
+        return (
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
+            404,
+        )
+    return SemesterPlanResponseModel(data=deleted_plan)
