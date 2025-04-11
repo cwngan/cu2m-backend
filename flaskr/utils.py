@@ -31,7 +31,7 @@ class KeyGenerator:
             expected_hash, value = key_hash.split(".")
             user_hash = sha256(key.encode() + value.encode())
             return user_hash.hexdigest() == expected_hash
-        except:
+        except Exception:
             return False
 
 
@@ -58,7 +58,7 @@ class PasswordHasher:
             return cls.__hash_password(
                 password, b64decode(salt.encode("ascii")), n, r, p
             ) == b64decode(password_hash.encode("ascii"))
-        except:
+        except Exception:
             return False
 
 
