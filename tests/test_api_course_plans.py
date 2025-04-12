@@ -164,3 +164,25 @@ def test_update_course_plan(logged_in_client, course_plans):
             updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
+
+
+def test_delete_course_plan(logged_in_client, course_plans):
+    for plan in course_plans:
+        response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
+        assert response.status_code == 200
+        course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+        assert course_plan_response.status == "OK"
+        assert course_plan_response.data is None
+
+        # Test deleting non-existing documents
+        response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
+        assert response.status_code == 404
+        course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+        assert course_plan_response.status == "ERROR"
+
+    # Test getting all course plans after deletion
+    response = logged_in_client.get("/api/course-plans/")
+    assert response.status_code == 200
+    course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+    assert course_plan_response.status == "OK"
+    assert len(course_plan_response.data) == 0
