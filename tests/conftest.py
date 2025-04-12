@@ -9,10 +9,10 @@ TEST_DB_NAME = "TESTDB"
 
 
 @pytest.fixture(autouse=True)
-def setup(monkeypatch: pytest.MonkeyPatch):
+def get_db(monkeypatch: pytest.MonkeyPatch):
     """
-    Setup testing environment.
-    Monkeypatches the `get_db` function to return a test database.
+    Monkeypatches the `get_db` function to return a test database and
+    yield a test database.
 
     This fixture is automatically applied to all tests.
     """
@@ -30,7 +30,7 @@ def setup(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.course_plans.get_db", mock_get_db)
 
-    yield
+    yield mock_get_db
     # Clean up the test database after tests
     if mock_used:
         get_mongo_client().drop_database(TEST_DB_NAME)

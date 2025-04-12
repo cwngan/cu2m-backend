@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic_mongo import PydanticObjectId
@@ -101,3 +101,16 @@ class CoursePlanUpdate(CoreModel):
     favourite: bool
     name: str
     updated_at: Optional[datetime] = None
+
+
+class ResetToken(CoreModel):
+    TTL: ClassVar[int] = 10 * 60  # 10 minutes
+
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    username: str
+    token_hash: str
+    ttl: int = TTL
+    expires_at: datetime
+
+    def is_valid(self):
+        return datetime.now(timezone.utc) < self.expires_at

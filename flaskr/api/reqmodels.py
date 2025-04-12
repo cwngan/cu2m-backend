@@ -61,6 +61,19 @@ class UserLoginRequestModel(UserNameValidator):
     password: str
 
 
+class UserForgotPasswordModel(BaseModel):
+    email: str
+
+
+class UserVerifyTokenModel(BaseModel):
+    username: str
+    token: str
+
+
+class UserResetPasswordModel(UserVerifyTokenModel):
+    password: str
+
+
 class CoursePlanCreateRequestModel(CoursePlanCreate, BaseModel):
     """
     Model for CoursePlanCreate request body.
