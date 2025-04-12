@@ -10,12 +10,27 @@ from tests.utils import random_string, random_user
 
 
 @pytest.fixture
-def test_user():
+def get_db():
+    from flaskr.db.database import get_db
+
+    return get_db
+
+
+@pytest.fixture
+def test_user(get_db):
     """
     Insert a test user into the database before running tests.
     """
-    from flaskr.db.database import get_db
+    user = random_user()
+    user.id = get_db().users.insert_one(user.model_dump(exclude_none=True)).inserted_id
+    return user
 
+
+@pytest.fixture
+def test_user2(get_db):
+    """
+    Insert a test user into the database before running tests.
+    """
     user = random_user()
     user.id = get_db().users.insert_one(user.model_dump(exclude_none=True)).inserted_id
     return user
@@ -66,6 +81,15 @@ def test_create_course_plan(logged_in_client, test_user):
         ) == CoursePlan.model_validate(
             course_plan_response.data.model_dump(exclude={"_id"})
         )
+
+
+def test_get_zero_course_plans(logged_in_client):
+    response = logged_in_client.get("/api/course-plans/")
+    assert response.status_code == 200
+    course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+    assert course_plan_response.status == "OK"
+    assert isinstance(course_plan_response.data, list)
+    assert len(course_plan_response.data) == 0
 
 
 def test_get_all_course_plans(logged_in_client, course_plans):
@@ -166,7 +190,7 @@ def test_update_course_plan(logged_in_client, course_plans):
         _test_for_update(update_obj)
 
 
-def test_delete_course_plan(logged_in_client, course_plans):
+def test_delete_course_plan(logged_in_client, course_plans, test_user2):
     for plan in course_plans:
         response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
         assert response.status_code == 200
@@ -186,3 +210,12 @@ def test_delete_course_plan(logged_in_client, course_plans):
     course_plan_response = CoursePlanResponseModel.model_validate(response.json)
     assert course_plan_response.status == "OK"
     assert len(course_plan_response.data) == 0
+
+    # Test deleting other user's course plan
+    unauthorized_plan = create_course_plan(
+        description=random_string(), name=random_string(), user_id=test_user2.id
+    )
+    response = logged_in_client.delete(f"/api/course-plans/{unauthorized_plan.id}")
+    assert response.status_code == 404
+    course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+    assert course_plan_response.status == "ERROR"
