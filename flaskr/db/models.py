@@ -88,6 +88,7 @@ class CoursePlanRead(CoreModel):
     favourite: bool
     name: str
     updated_at: datetime
+    user_id: PydanticObjectId
 
 
 class CoursePlanCreate(CoreModel):
