@@ -12,6 +12,8 @@ def init_db():
     db = get_db()
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
+    db.tokens.create_index("token", unique=True)
+    db.tokens.create_index("expires_at", expireAfterSeconds=0)
 
 
 def get_mongo_client():
