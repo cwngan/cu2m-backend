@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from flaskr.db import user as pkg
 from flaskr.db.models import PreUser, ResetToken, UserCreate, UserUpdate
 from flaskr.utils import KeyGenerator
-from tests.utils import GetDB, random_user
+from tests.utils import GetDatabase, random_user
 
 
-def test_precreated_user(get_db: GetDB):
+def test_precreated_user(get_db: GetDatabase):
     userdb = get_db().users
     TEST_EMAIL = "test@test.test"
 
@@ -49,7 +49,7 @@ def test_precreated_user(get_db: GetDB):
     assert pkg.get_precreated_user(TEST_EMAIL) is None
 
 
-def test_activate_get_user(get_db: GetDB):
+def test_activate_get_user(get_db: GetDatabase):
     userdb = get_db().users
     TEST_USER = UserCreate(
         email="test@test.test",
@@ -106,7 +106,7 @@ def test_activate_get_user(get_db: GetDB):
     assert pkg.get_user_by_username(TEST_USER.username) is None
 
 
-def test_update_delete_user(get_db: GetDB):
+def test_update_delete_user(get_db: GetDatabase):
     userdb = get_db().users
     N = 10
     users: list[str] = []
@@ -168,7 +168,7 @@ def test_update_delete_user(get_db: GetDB):
     assert userdb.count_documents({}) == 2
 
 
-def test_reset_token(get_db: GetDB):
+def test_reset_token(get_db: GetDatabase):
     userdb = get_db().users
     tokendb = get_db().tokens
     TEST_USER = random_user()

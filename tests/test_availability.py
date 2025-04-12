@@ -5,7 +5,7 @@ from conftest import TEST_DB_NAME
 from flask.testing import FlaskClient
 
 from flaskr.db.user import create_precreated_user, get_precreated_user
-from tests.utils import GetDB
+from tests.utils import GetDatabase
 
 
 def test_api_root(client: FlaskClient):
@@ -41,7 +41,7 @@ def test_api_ping(client: FlaskClient):
     )
 
 
-def test_db_rw(get_db: GetDB):
+def test_db_rw(get_db: GetDatabase):
     """
     Tests if the app is reading and writing to the correct database.
     """
