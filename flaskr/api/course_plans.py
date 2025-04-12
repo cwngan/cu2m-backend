@@ -15,7 +15,7 @@ from flaskr.db.course_plans import (
     update_course_plan,
 )
 from flaskr.db.models import CoursePlanRead, CoursePlanUpdate
-from flaskr.db.user import get_user  # type: ignore
+from flaskr.db.user import get_user_by_username  # type: ignore
 
 route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 
@@ -24,7 +24,7 @@ route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 @validate(response_by_alias=True)
 def read_all():
     username = session["username"]
-    user = get_user(username=username) if username else None
+    user = get_user_by_username(username=username) if username else None
     if not user:
         return (
             CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
@@ -41,7 +41,7 @@ def read_all():
 @validate(response_by_alias=True)
 def read_one(course_plan_id: str):
     username = session["username"]
-    user = get_user(username=username) if username else None
+    user = get_user_by_username(username=username) if username else None
     if not user:
         return (
             CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
@@ -69,7 +69,7 @@ def read_one(course_plan_id: str):
 @validate(response_by_alias=True)
 def create(body: CoursePlanCreateRequestModel):
     username = session["username"]
-    user = get_user(username=username) if username else None
+    user = get_user_by_username(username=username) if username else None
     if not user:
         return (
             CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
@@ -91,7 +91,7 @@ def create(body: CoursePlanCreateRequestModel):
 @validate(response_by_alias=True)
 def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
     username = session["username"]
-    user = get_user(username=username) if username else None
+    user = get_user_by_username(username=username) if username else None
     if not user:
         return (
             CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
@@ -117,7 +117,7 @@ def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
 @validate(response_by_alias=True)
 def delete(course_plan_id: str):
     username = session["username"]
-    user = get_user(username=username) if username else None
+    user = get_user_by_username(username=username) if username else None
     if not user:
         return (
             CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
