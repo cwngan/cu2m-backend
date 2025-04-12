@@ -13,7 +13,7 @@ from flaskr.api.reqmodels import (
 from flaskr.api.respmodels import ResponseModel, UserResponseModel
 from flaskr.db.models import User, UserCreate, UserRead
 from flaskr.db.user import create_precreated_user
-from tests.utils import random_user
+from tests.utils import GetDB, random_user
 
 
 def test_signup(client: FlaskClient):
@@ -252,7 +252,7 @@ def test_sessions(client: FlaskClient):
 
 
 def test_forgot_verify_reset_password(
-    monkeypatch: MonkeyPatch, client: FlaskClient, get_db
+    monkeypatch: MonkeyPatch, client: FlaskClient, get_db: GetDB
 ):
     curr_user: User | None = None
     curr_token: str | None = None
