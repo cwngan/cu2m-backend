@@ -17,7 +17,7 @@ from flaskr.db.course_plans import (
 from flaskr.db.models import CoursePlanRead, CoursePlanUpdate
 from flaskr.db.user import get_user  # type: ignore
 
-route = Blueprint("course_plans", __name__, url_prefix="/course_plans")
+route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 
 
 @route.route("/", methods=["GET"])
