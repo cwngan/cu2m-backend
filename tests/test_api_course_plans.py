@@ -6,18 +6,11 @@ import pytest
 from flaskr.api.respmodels import CoursePlanResponseModel
 from flaskr.db.course_plans import create_course_plan
 from flaskr.db.models import CoursePlan, CoursePlanRead, CoursePlanUpdate
-from tests.utils import random_string, random_user
+from tests.utils import GetDatabase, random_string, random_user
 
 
 @pytest.fixture
-def get_db():
-    from flaskr.db.database import get_db
-
-    return get_db
-
-
-@pytest.fixture
-def test_user(get_db):
+def test_user(get_db: GetDatabase):
     """
     Insert a test user into the database before running tests.
     """
@@ -27,7 +20,7 @@ def test_user(get_db):
 
 
 @pytest.fixture
-def test_user2(get_db):
+def test_user2(get_db: GetDatabase):
     """
     Insert a test user into the database before running tests.
     """

@@ -9,16 +9,14 @@ from flaskr.db.course_plans import (
     update_course_plan,
 )
 from flaskr.db.models import CoursePlan, CoursePlanUpdate
-from tests.utils import random_string, random_user
+from tests.utils import GetDatabase, random_string, random_user
 
 
 @pytest.fixture
-def test_user():
+def test_user(get_db: GetDatabase):
     """
     Insert a test user into the database before running tests.
     """
-    from flaskr.db.database import get_db
-
     user = random_user()
     user.id = get_db().users.insert_one(user.model_dump(exclude_none=True)).inserted_id
     return user
@@ -39,12 +37,10 @@ def course_plans(test_user) -> list[CoursePlan]:
     return res
 
 
-def test_create_course_plan(test_user):
+def test_create_course_plan(test_user, get_db: GetDatabase):
     """
     Test creating a course plan.
     """
-    from flaskr.db.database import get_db
-
     db_course_plans = get_db().course_plans
     course_plans = []
     for i in range(20):
@@ -137,12 +133,10 @@ def test_update_course_plan(course_plans, test_user):
         )
 
 
-def test_delete_course_plan(course_plans, test_user):
+def test_delete_course_plan(course_plans, test_user, get_db: GetDatabase):
     """
     Test deleting course plans.
     """
-    from flaskr.db.database import get_db
-
     db_course_plans = get_db().course_plans
     for idx, course_plan in enumerate(course_plans):
         delete_course_plan(course_plan.id, test_user.id)
@@ -150,9 +144,7 @@ def test_delete_course_plan(course_plans, test_user):
         assert db_course_plans.count_documents({}) == len(course_plans) - idx - 1
 
 
-def test_unauthorized_access(course_plans, test_user):
-    from flaskr.db.database import get_db
-
+def test_unauthorized_access(course_plans, test_user, get_db: GetDatabase):
     user2 = random_user()
     user2.id = (
         get_db().users.insert_one(user2.model_dump(exclude_none=True)).inserted_id
