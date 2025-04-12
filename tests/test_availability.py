@@ -40,12 +40,10 @@ def test_api_ping(client: FlaskClient):
     )
 
 
-def test_db_rw():
+def test_db_rw(get_db):
     """
     Tests if the app is reading and writing to the correct database.
     """
-    from flaskr.db.database import get_db
-
     TEST_EMAIL = "test@test.test"
     db = get_db()
     assert db is not None
