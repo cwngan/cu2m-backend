@@ -2,6 +2,8 @@ import random
 import string
 from datetime import datetime, timezone
 from os import urandom
+from typing import Any, Callable, TypeAlias
+from pymongo.database import Database
 
 from flaskr.db.models import User
 
@@ -27,3 +29,6 @@ def random_user():
         last_login=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
         activated_at=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
     )
+
+
+GetDatabase: TypeAlias = Callable[[], Database[dict[str, Any]]]

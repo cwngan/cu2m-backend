@@ -59,3 +59,16 @@ class UserDeleteRequestModel(UserNameValidator):
 class UserLoginRequestModel(UserNameValidator):
     username: str
     password: str
+
+
+class UserForgotPasswordModel(BaseModel):
+    email: str
+
+
+class UserVerifyTokenModel(BaseModel):
+    username: str
+    token: str
+
+
+class UserResetPasswordModel(UserVerifyTokenModel):
+    password: str

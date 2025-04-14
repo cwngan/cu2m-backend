@@ -6,7 +6,7 @@ from flaskr.db.models import UserCreate
 
 def test_license_key_generator():
     TEST_EMAIL = "test@test.test"
-    key_hash, key = utils.LicenseKeyGenerator.generate_new_key()
+    key_hash, key = utils.KeyGenerator.generate_new_key()
     assert key_hash is not None
     assert key is not None
     assert key_hash != key
@@ -21,27 +21,27 @@ def test_license_key_generator():
         license_key=key,
     )
 
-    assert utils.LicenseKeyGenerator.verify_key(user, key_hash) is True
+    assert utils.KeyGenerator.verify_key(user.license_key, key_hash) is True
     assert (
-        utils.LicenseKeyGenerator.verify_key(
-            user, "wrong_hash." + key_hash.split(".")[1]
+        utils.KeyGenerator.verify_key(
+            user.license_key, "wrong_hash." + key_hash.split(".")[1]
         )
         is False
     )
     assert (
-        utils.LicenseKeyGenerator.verify_key(
-            user, key_hash.split(".")[0] + "." + b"wrong_salt".hex()
+        utils.KeyGenerator.verify_key(
+            user.license_key, key_hash.split(".")[0] + "." + b"wrong_salt".hex()
         )
         is False
     )
     user.license_key = "wrong_key"
     assert (
-        utils.LicenseKeyGenerator.verify_key(user, key_hash) is False
+        utils.KeyGenerator.verify_key(user.license_key, key_hash) is False
     )  # wrong license key
 
     user.license_key = "!@#$%^&*()ADKMW31';]"
     assert (
-        utils.LicenseKeyGenerator.verify_key(user, "asdaksdwqeqwe") is False
+        utils.KeyGenerator.verify_key(user.license_key, "asdaksdwqeqwe") is False
     )  # garbage
 
 
