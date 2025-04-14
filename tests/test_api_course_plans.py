@@ -188,7 +188,7 @@ def test_update_course_plan(logged_in_client, course_plans):
         _test_for_update(update_obj)
 
 
-def test_delete_course_plan(logged_in_client, course_plans, test_user2):
+def test_delete_course_plan(logged_in_client, course_plans):
     for plan in course_plans:
         response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
         assert response.status_code == 200
@@ -209,11 +209,29 @@ def test_delete_course_plan(logged_in_client, course_plans, test_user2):
     assert course_plan_response.status == "OK"
     assert len(course_plan_response.data) == 0
 
-    # Test deleting other user's course plan
-    unauthorized_plan = create_course_plan(
+
+def test_unauthorised_access(logged_in_client, test_user2):
+    unauthorised_plan = create_course_plan(
         description=random_string(), name=random_string(), user_id=test_user2.id
     )
-    response = logged_in_client.delete(f"/api/course-plans/{unauthorized_plan.id}")
-    assert response.status_code == 404
-    course_plan_response = CoursePlanResponseModel.model_validate(response.json)
-    assert course_plan_response.status == "ERROR"
+    get_all_res = logged_in_client.get("/api/course-plans/")
+    assert unauthorised_plan.id not in [
+        plan.id
+        for plan in CoursePlanResponseModel.model_validate(get_all_res.json).data
+    ]
+    get_res = logged_in_client.get(f"/api/course-plans/{unauthorised_plan.id}")
+    patch_res = logged_in_client.patch(
+        f"/api/course-plans/{unauthorised_plan.id}",
+        json=CoursePlanUpdate(
+            description=random_string(),
+            name=random_string(),
+            favourite=random.choice([False, True]),
+        ).model_dump(),
+    )
+    delete_res = logged_in_client.delete(f"/api/course-plans/{unauthorised_plan.id}")
+    assert get_res.status_code != 200
+    assert CoursePlanResponseModel.model_validate(get_res.json).status == "ERROR"
+    assert patch_res.status_code != 200
+    assert CoursePlanResponseModel.model_validate(patch_res.json).status == "ERROR"
+    assert delete_res.status_code != 200
+    assert CoursePlanResponseModel.model_validate(delete_res.json).status == "ERROR"
