@@ -87,7 +87,7 @@ def create(body: CoursePlanCreateRequestModel):
     )
 
 
-@route.route("/<course_plan_id>", methods=["PUT"])
+@route.route("/<course_plan_id>", methods=["PATCH"])
 @validate(response_by_alias=True)
 def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
     username = session["username"]
@@ -104,7 +104,9 @@ def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
         )
     res = update_course_plan(
         course_plan_id=ObjectId(course_plan_id),
-        course_plan_update=CoursePlanUpdate.model_validate(body.model_dump()),
+        course_plan_update=CoursePlanUpdate.model_validate(
+            body.model_dump(exclude_none=True)
+        ),
         user_id=user.id,
     )
     if not res:

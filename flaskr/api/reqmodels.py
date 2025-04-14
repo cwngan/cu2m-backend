@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 # from flask_pydantic import ValidationError
 from pydantic import BaseModel, ValidationError, field_validator
@@ -85,6 +86,6 @@ class CoursePlanUpdateRequestModel(BaseModel):
     Model for CoursePlanUpdate request body.
     """
 
-    description: str
-    favourite: bool
-    name: str
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None

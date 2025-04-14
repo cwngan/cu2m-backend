@@ -97,9 +97,9 @@ class CoursePlanCreate(CoreModel):
 
 
 class CoursePlanUpdate(CoreModel):
-    description: str
-    favourite: bool
-    name: str
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None
     updated_at: Optional[datetime] = None
 
 
