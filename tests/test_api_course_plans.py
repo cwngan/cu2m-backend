@@ -115,7 +115,7 @@ def test_update_course_plan(logged_in_client, course_plans):
     for plan in course_plans:
 
         def _test_for_update(update_obj: CoursePlanUpdate):
-            response = logged_in_client.put(
+            response = logged_in_client.patch(
                 f"/api/course-plans/{plan.id}", json=update_obj.model_dump()
             )
             assert response.status_code == 200
@@ -125,12 +125,22 @@ def test_update_course_plan(logged_in_client, course_plans):
             assert course_plans_response.status == "OK"
             assert isinstance(course_plans_response.data, CoursePlanRead)
             assert abs(
-                course_plans_response.data.updated_at - update_obj.updated_at
+                course_plans_response.data.updated_at - datetime.now(timezone.utc)
             ) < timedelta(seconds=1)
             update_obj.updated_at = course_plans_response.data.updated_at
+            # Exclude fields that are not updated for comparison
             assert (
-                CoursePlanUpdate.model_validate(course_plans_response.data.model_dump())
+                CoursePlanUpdate.model_validate(
+                    course_plans_response.data.model_dump(
+                        include=update_obj.model_dump(exclude_none=True).keys()
+                    )
+                )
                 == update_obj
+            )
+            assert CoursePlanUpdate.model_validate(
+                course_plans_response.data.model_dump(
+                    exclude=update_obj.model_dump(exclude_none=True).key()
+                )
             )
 
         # Test update with no change to content
@@ -138,31 +148,22 @@ def test_update_course_plan(logged_in_client, course_plans):
             description=plan.description,
             favourite=plan.favourite,
             name=plan.name,
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
-        # Test update with changes to description and name
+        # Test partial update with changes to description and name
         update_obj = CoursePlanUpdate(
             description=random_string(),
-            favourite=plan.favourite,
             name=random_string(),
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
-        # Test update with changes to favourite
+        # Test partial update with changes to favourite
         update_obj = CoursePlanUpdate(
-            description=plan.description,
             favourite=False,
-            name=plan.name,
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
-        # Test update with changes to favourite
+        # Test partial update with changes to favourite
         update_obj = CoursePlanUpdate(
-            description=plan.description,
             favourite=True,
-            name=plan.name,
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
         # Test update with changes to everything
@@ -170,7 +171,6 @@ def test_update_course_plan(logged_in_client, course_plans):
             description=random_string(),
             favourite=random.choice([True, False]),
             name=random_string(),
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
         # Test update with original properties
@@ -178,7 +178,6 @@ def test_update_course_plan(logged_in_client, course_plans):
             description=plan.description,
             favourite=plan.favourite,
             name=plan.name,
-            updated_at=datetime.now(timezone.utc),
         )
         _test_for_update(update_obj)
 
