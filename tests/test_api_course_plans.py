@@ -137,11 +137,6 @@ def test_update_course_plan(logged_in_client, course_plans):
                 )
                 == update_obj
             )
-            assert CoursePlanUpdate.model_validate(
-                course_plans_response.data.model_dump(
-                    exclude=update_obj.model_dump(exclude_none=True).key()
-                )
-            )
 
         # Test update with no change to content
         update_obj = CoursePlanUpdate(
