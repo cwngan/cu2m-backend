@@ -4,6 +4,7 @@ from typing import Any
 
 from flask import Flask
 from flask_pydantic import ValidationError, validate  # type: ignore
+from flask_swagger_ui import get_swaggerui_blueprint
 
 from flaskr import api
 from flaskr.api.respmodels import ResponseModel
@@ -36,6 +37,13 @@ def create_app(test_config: dict[str, Any] | None = None):
     app.config.from_mapping(
         SECRET_KEY="dev", FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True
     )
+    swaggerui_blueprint = get_swaggerui_blueprint(
+        "/api/docs",
+        "/api/spec",
+        config={"app_name": "Test application"},  # Swagger UI config overrides
+    )
+    app.register_blueprint(swaggerui_blueprint)
+
     init_db()
 
     if test_config is None:
