@@ -185,7 +185,7 @@ def test_update_course_plan_with_all_change(logged_in_client, course_plans):
         # Test update with changes to everything
         update_obj = CoursePlanUpdate(
             description=random_string(),
-            favourite=random.choice([True, False]),
+            favourite=not plan.favourite,
             name=random_string(),
         )
         update_subtest(plan, logged_in_client, update_obj)
