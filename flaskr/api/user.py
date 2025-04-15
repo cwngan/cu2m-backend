@@ -34,6 +34,11 @@ class InvalidCredential(Exception):
 @route.route("/signup", methods=["POST"])
 @validate(response_by_alias=True)
 def signup(body: UserCreateRequestModel):
+    """
+    Signup an in-activated user in the database
+
+    swagger_from_file: ./docs/user/signup.yml
+    """
     user_create = body
 
     # Verify the provided license key against the pre-created record.
@@ -92,6 +97,11 @@ def signup(body: UserCreateRequestModel):
 @route.route("/login", methods=["POST"])
 @validate(response_by_alias=True)
 def login(body: UserLoginRequestModel):
+    """
+    Login an activated user to the system
+
+    swagger_from_file: ./docs/user/login.yml
+    """
     username, password = body.username, body.password
     user = get_user_by_username(username)
     if not user or not PasswordHasher.verify_password(user.password_hash, password):

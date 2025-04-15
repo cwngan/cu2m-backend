@@ -17,7 +17,7 @@ def root():
 
 @route.route("/spec")
 def spec():
-    return jsonify(swagger(current_app))
+    return jsonify(swagger(current_app, from_file_keyword="swagger_from_file"))
 
 
 route.register_blueprint(ping.route)

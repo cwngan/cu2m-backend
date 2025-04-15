@@ -1,0 +1,35 @@
+Check health of the database
+---
+tags:
+  - Health
+responses:
+  200:
+    description: The system is healthy.
+    schema:
+      id: HealthResponseModel
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: OK or ERROR.
+          example: "OK"
+        error:
+          type: string
+          description: Error message.
+          example: "A example error message"
+        data:
+          type: object
+          description: Data provided.
+          required:
+            - server
+            - db
+          properties:
+            server:
+              type: boolean
+              description: Should be true.
+              example: true
+            db:
+              type: boolean
+              description: Should be true.
+              example: true

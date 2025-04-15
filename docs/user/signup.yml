@@ -1,0 +1,105 @@
+Signup an in-activated user in the database
+---
+tags:
+  - User
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      id: UserCreateRequestModel
+      required:
+        - email
+        - first_name
+        - last_name
+        - major
+        - password
+        - username
+        - license_key
+      properties:
+        email:
+          type: string
+          description: Signup email.
+          example: "email@example.com"
+        first_name:
+          type: string
+          description: First name / given name / forename of the user.
+          example: "John"
+        last_name:
+          type: string
+          description: Last name / family name / surname of the user.
+          example: "Doe"
+        major:
+          type: string
+          description: The program the user is studying.
+          example: "Computer Science"
+        password:
+          type: string
+          description: The password of the account.
+          example: "Wow-Really-A-Strong-Password-UwU-0w0"
+        username:
+          type: string
+          description: The username of the account.
+          example: "DefinitelyABadDragon"
+        license_key:
+          type: string
+          description: The license key given for the user.
+          example: "AAAA-BBBB-CCCC-DDDD"
+responses:
+  201:
+    description: The account activated in the database.
+    schema:
+      id: UserResponseModel
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: OK or ERROR.
+          example: "OK"
+        error:
+          type: string
+          description: Error message.
+          example: "A example error message"
+        data:
+          type: object
+          description: Data provided.
+          schema:
+            id: UserRead
+            required:
+              - id
+              - email
+              - first_name
+              - last_login
+              - last_name
+              - major
+              - username
+            properties:
+              id:
+                type: string
+                description: MongoDB ObjectId.
+                example: "67fe86498e20e84f93a56035"
+              email:
+                type: string
+                description: Signup email.
+                example: "email@example.com"
+              first_name:
+                type: string
+                description: First name / given name / forename of the user.
+                example: "John"
+              last_name:
+                type: string
+                description: Last name / family name / surname of the user.
+                default: "Doe"
+              major:
+                type: string
+                description: The program the user is studying.
+                default: "Computer Science"
+              username:
+                type: string
+                description: The username of the account.
+                example: "DefinitelyABadDragon"
+  400:
+    description: Error occurred during account activation.
+    schema:
+      $ref: "#/definitions/UserResponseModel"

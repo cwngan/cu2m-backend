@@ -1,0 +1,27 @@
+Login an activated user to the system
+---
+tags:
+  - User
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      id: UserLoginRequestModel
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: The username of the account.
+          example: "DefinitelyABadDragon"
+        password:
+          type: string
+          description: The password of the account.
+          example: "Wow-Really-A-Strong-Password-UwU-0w0"
+responses:
+  200:
+    description: The account logged in
+    schema:
+      $ref: "#/definitions/UserResponseModel"
