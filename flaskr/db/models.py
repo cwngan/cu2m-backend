@@ -60,9 +60,11 @@ class Course(CoreModel):
     is_graded: bool
     not_for_major: str
     not_for_taken: str
+    original: str
+    parsed: bool
     prerequisites: str
     title: str
-    units: str
+    units: float
 
 
 class SemesterPlan(CoreModel):

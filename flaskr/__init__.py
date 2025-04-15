@@ -36,6 +36,7 @@ def create_app(test_config: dict[str, Any] | None = None):
     app.config.from_mapping(
         SECRET_KEY="dev", FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True
     )
+
     init_db()
 
     if test_config is None:
