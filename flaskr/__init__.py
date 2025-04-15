@@ -40,7 +40,7 @@ def create_app(test_config: dict[str, Any] | None = None):
     swaggerui_blueprint = get_swaggerui_blueprint(
         "/api/docs",
         "/api/spec",
-        config={"app_name": "Test application"},  # Swagger UI config overrides
+        config={"app_name": "CU^2M"},
     )
     app.register_blueprint(swaggerui_blueprint)
 
