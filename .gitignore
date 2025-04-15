@@ -176,6 +176,7 @@ cython_debug/
 # Mongo volumes
 database
 
+# User registration
 new_users*.txt
 temp*
 

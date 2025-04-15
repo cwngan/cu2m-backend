@@ -13,7 +13,10 @@ jobs:
       MONGO_DB_PORT: 27017
       COURSE_DATA_FILENAME: ${{ vars.COURSE_DATA_FILENAME }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: docker compose up
         run: docker compose up -d mongodb
       - name: Check running containers
@@ -24,5 +27,6 @@ jobs:
         run: |
           python -m venv ./venv
           source ./venv/bin/activate
-          pip install -r requirements.txt
-          pytest
+          pip install poetry
+          poetry install
+          pytest --log-cli-level=INFO

@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, timezone
+from typing import ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic_mongo import PydanticObjectId
@@ -13,7 +13,7 @@ class PreUser(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     email: str
     license_key_hash: str
-    activated_at: datetime = datetime.fromtimestamp(0)
+    activated_at: datetime = datetime.fromtimestamp(0, timezone.utc)
 
 
 class User(PreUser):
@@ -60,9 +60,11 @@ class Course(CoreModel):
     is_graded: bool
     not_for_major: str
     not_for_taken: str
+    original: str
+    parsed: bool
     prerequisites: str
     title: str
-    units: str
+    units: float
 
 
 class SemesterPlan(CoreModel):
@@ -97,4 +99,38 @@ class CoursePlan(CoreModel):
     favourite: bool
     name: str
     updated_at: datetime
+    user_id: Optional[PydanticObjectId]
+
+
+class CoursePlanRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    description: str
+    favourite: bool
+    name: str
+    updated_at: datetime
     user_id: PydanticObjectId
+
+
+class CoursePlanCreate(CoreModel):
+    description: str
+    name: str
+
+
+class CoursePlanUpdate(CoreModel):
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None
+    updated_at: Optional[datetime] = None
+
+
+class ResetToken(CoreModel):
+    TTL: ClassVar[int] = 10 * 60  # 10 minutes
+
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    username: str
+    token_hash: str
+    ttl: int = TTL
+    expires_at: datetime
+
+    def is_valid(self):
+        return datetime.now(timezone.utc) < self.expires_at

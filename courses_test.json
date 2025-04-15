@@ -1,0 +1,140 @@
+{
+    "version": 3,
+    "data": {
+       "MATH2028": {
+            "parsed": false,
+            "data": {
+                "code": "MATH2028",
+                "corequisites": "",
+                "description": "This is a continuation of MATH2018. The following topics will be discussed: multiple integrals in n-dimensions: areas and n-volumes, surface areas, volumes of submanifolds and hypersurfaces in n-space, change of variables; vector analysis: line integrals, surface integrals, integration on submanifolds, Green theorem, divergence theorem and Stokes theorem in n-dimensions.\nAdvisory: MATH Majors should select not more than 5 MATH courses in a term.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "",
+                "prerequisites": "",
+                "title": "Honours Advanced Calculus II",
+                "units": 3.0
+            },
+            "original": "Not for students who have taken MATH2020 or who are taking MATH2550 in the same term.\nPre-requisite: [Alternative 1] Grade B- or above in each of MATH1058, MATH2018. [Alternative 2] Grade A- or above in each of MATH1050, 2010."
+        },
+        "PHED1073": {
+            "parsed": true,
+            "data": {
+                "code": "PHED1073",
+                "corequisites": "",
+                "description": "This course is offered as one of the courses under the Elective Physical Education Programme. This course aims at developing students\u2019 fundamental skills of badminton needed for life long participation in the sport. Contents include: services, overhand shots, underhand shots, forehand shots, backhand shots, footwork, rules and tactics of the sport, nurturing positive attitudes and values toward sports participation, etc.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "PHED1280",
+                "prerequisites": "",
+                "title": "Badminton",
+                "units": 1.0
+            },
+            "original": "For male only.\nEach students can only take one elective course in a term.\nNot for students who have taken PHED1280."
+        },
+        "MATH2070": {
+            "parsed": true,
+            "data": {
+                "code": "MATH2070",
+                "corequisites": "",
+                "description": "This course is intended as an introduction to modern abstract algebra and the way of algebraic thinking in advanced mathematics. The course focuses on basic algebraic concepts which arise in various areas of advanced mathematics, and emphasizes on the underlying algebraic structures which are common to various concrete mathematical examples. \nAdvisory: MATH Majors should select not more than 5 MATH courses in a term.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "MATH2078",
+                "prerequisites": "(MATH1030 or 1038 or ENGG1120 or ESTR1005) and MATH1050 or MATH1058",
+                "title": "Algebraic Structures",
+                "units": 3.0
+            },
+            "original": "Not for students who have taken MATH2078. Pre-requisite: (MATH1030/1038 or ENGG1120 or ESTR1005) and MATH1050/1058."
+        },
+        "CURE3377": {
+            "parsed": true,
+            "data": {
+                "code": "CURE3377",
+                "corequisites": "",
+                "description": "This course aims to introduce students to the major religions, traditions and cultures of India, with the exception of Islam. It offers students a lively and effective learning experience through fieldwork. There are two options for fieldwork which students can choose from. \n1: Visiting various Hindu, Sikh and Jain temples in Hong Kong\n2: A 10 day visit to India that will include visiting both religious and historical sites.\nIn both cases students will learn through first-hand exposure to religious relics, sites, material culture and personal interactions with Indian practitioners of different faiths. The sites of visit will be organized and led by experienced member(s) of the teaching staff. Sites to be visited in Hong Kong and India will include mainstream traditions within the broad framework of Hinduism, such as the Vaishnava Bhakti movement and the Shaiva tradition. Field work will also include visits to traditions that originally arose as challenges to mainstream Hinduism such as the Jains, Buddhists and Sikhs. \nThere will be six lectures conducted on campus prior to the fieldwork that will offer students an overview of the geographical, philosophical and historical background of the sites that will be visited and the traditions we will interact with. \nStudents who select option 1 will spend the rest of the term on fieldwork in Hong Kong. This will be planned together with the instructor. For students who select option 2 a ten day trip to India during the Christmas holidays will be arranged. \nFieldwork should add up to approximately 21 hours of off campus learning which will include on-site lectures, on-the-spot investigations and tutorial discussions during the trip. Both a pre-trip and a post-trip assignment in the form of a reading report, essay and/or presentation are required. . \nIt should be noted that enrolment for option 2 is limited to 25 persons with the course being conducted in English and Chinese. For more details regarding option 2 please contact the department. \nCourse content:\nI. Lectures\n(1) History and geography of India\n(2) Jainism and Zoroastrainism\n(3) Sikhism\n(4) Bahai\u2019i\n(5) The Vaishnava Bhakti movement\n(6) Planning for Fieldwork\nII. Fieldwork",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "",
+                "prerequisites": "CURE1123 or CURE2225",
+                "title": "Fieldwork in Indian Religions and Culture",
+                "units": 3.0
+            },
+            "original": "Pre-requisite(s): CURE1123 or CURE2225"
+        },
+        "CLCP2843": {
+            "parsed": false,
+            "data": {
+                "code": "CLCP2843",
+                "corequisites": "",
+                "description": "An intermediate Putonghua course designed for students who plan on taking the HSK (level IV). This course prepares students for the exam by teaching vocabulary and grammar from the HSK level IV test syllabus and equipping students with test-taking strategies. In addition to examination preparation, this course also enhances students\u2019 listening, reading, and writing abilities in Putonghua through various learning activities.",
+                "is_graded": false,
+                "not_for_major": "",
+                "not_for_taken": "",
+                "prerequisites": "",
+                "title": "Comprehensive Putonghua I",
+                "units": 3.0
+            },
+            "original": "Pre-requisites: CLCP/CPTH2213 \nNot for students who have taken CLCP/CPTH3313 or above"
+        },
+        "ENGG1110": {
+            "parsed": true,
+            "data": {
+                "code": "ENGG1110",
+                "corequisites": "",
+                "description": "This is a computer-programming course to equip students with software knowledge and skills to solve engineering problems. Students will learn fundamental programming concepts in C, such as data representation and variables, operators and expressions, flow-control statements, functions, arrays, structures, pointer basics, input/ output handling, etc. In addition to lectures and e-learning, students will work in labs to practise solving problems and complete an engineering software project. The course will cover various problem solving methods such as incremental development, divide-and-conquer, debugging technique, finite-state machine, etc. Through practices, students will acquire skills to define problems and specifications, to perform modelling and simulation, to develop software system prototypes, to carry out verification, validation, and performance analysis.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "CSCI1020 or CSCI1030 or CSCI1110 or CSCI1120 or CSCI1130 or CSCI1510 or CSCI1520 or CSCI1530 or CSCI1540 or ESTR1002 or ESTR1100 or ESTR1102",
+                "prerequisites": "",
+                "title": "Problem Solving By Programming",
+                "units": 3.0
+            },
+            "original": "Not for students who have taken CSCI1020 or 1030 or 1110 or 1120 or 1130 or 1510 or 1520 or 1530 or 1540 or ESTR1002 or 1100 or 1102."
+        },
+        "PHED1100": {
+            "parsed": false,
+            "data": {
+                "code": "PHED1100",
+                "corequisites": "",
+                "description": "This course is offered as one of the courses under the Elective Physical Education Programme. This course aims at developing students\u2019 fundamental skills of woodball needed for life long participation in the sport. Contents include: shooting, half swing, full swing, tactics and rules of the game, etc.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "",
+                "prerequisites": "",
+                "title": "Woodball",
+                "units": 1.0
+            },
+            "original": "Each student can only take one elective course in a term."
+        },
+        "CSCI3100": {
+            "parsed": true,
+            "data": {
+                "code": "CSCI3100",
+                "corequisites": "",
+                "description": "This course introduces software life-cycles: system modelling, requirements analysis and specifications, design techniques, implementation methodology, testings, maintenance and engineering laboratory. Analytical tools: software metrics, system performance measurement and evaluation. Management techniques: estimations, planning, project management, communication skills and documentations. Introductions to CASE tools and security.",
+                "is_graded": true,
+                "not_for_major": "",
+                "not_for_taken": "ENGG3820 or ESTR3308 or IERG3080",
+                "prerequisites": "CSCI1120 or CSCI1130 or CSCI1510 or CSCI1520 or CSCI1530 or CSCI1540 or CSCI1550 or ESTR1100 or ESTR1102",
+                "title": "Software Engineering",
+                "units": 3.0
+            },
+            "original": "Not for students who have taken ENGG3820 or ESTR3308 or IERG3080;Pre-requisite: CSCI1120 or 1130 or 1510 or 1520 or 1530 or 1540 or 1550 or ESTR1100 or 1102.\nFor 2nd-year entrants, the prerequisite will be waived."
+        },
+        "PHED1042": {
+            "parsed": true,
+            "data": {
+                "code": "PHED1042",
+                "corequisites": "",
+                "description": "This course is offered as one of the courses under the Required Physical Education Programme. This course aims at developing students\u2019 fundamental skills of badminton needed for life long participation in the sport. Contents include: services, overhand shots, underhand shots, forehand shots, backhand shots, footwork, rules and tactics of the sport, nurturing positive attitudes and values toward sports participation, etc.",
+                "is_graded": true,
+                "not_for_major": "PESH and ESHE",
+                "not_for_taken": "PHED1180",
+                "prerequisites": "",
+                "title": "Badminton",
+                "units": 1.0
+            },
+            "original": "For female only.\nNot for PESH and ESHE Majors.\nNot for IASP students.\nNot for students who have taken PHED1180."
+        }
+    }
+}

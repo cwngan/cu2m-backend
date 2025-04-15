@@ -3,11 +3,25 @@ from datetime import datetime
 from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.reqmodels import UserCreateRequestModel, UserLoginRequestModel
-from flaskr.api.respmodels import UserResponseModel
+from flaskr.api import email_service
+from flaskr.api.reqmodels import (
+    UserCreateRequestModel,
+    UserForgotPasswordModel,
+    UserLoginRequestModel,
+    UserResetPasswordModel,
+    UserVerifyTokenModel,
+)
+from flaskr.api.respmodels import ResponseModel, UserResponseModel
 from flaskr.db.models import UserRead, UserUpdate
-from flaskr.db.user import activate_user, get_precreated_user, get_user, update_user
-from flaskr.utils import LicenseKeyGenerator, PasswordHasher
+from flaskr.db.user import (
+    activate_user,
+    create_reset_token,
+    get_precreated_user,
+    get_reset_token,
+    get_user_by_username,
+    update_user,
+)
+from flaskr.utils import KeyGenerator, PasswordHasher
 
 route = Blueprint("user", __name__, url_prefix="/user")
 
@@ -32,14 +46,16 @@ def signup(body: UserCreateRequestModel):
         )
 
     # Use PasswordHasher to verify provided license key against license_hash
-    if not LicenseKeyGenerator.verify_key(user_create, pre_created.license_key_hash):
+    if not KeyGenerator.verify_key(
+        user_create.license_key, pre_created.license_key_hash
+    ):
         return (
             UserResponseModel(status="ERROR", error="Invalid license key."),
             400,
         )
 
     # Username regex and availability can be handled in reqmodels validation
-    if get_user(user_create.username):
+    if get_user_by_username(user_create.username):
         return (
             UserResponseModel(status="ERROR", error="Username already taken."),
             400,
@@ -77,7 +93,7 @@ def signup(body: UserCreateRequestModel):
 @validate(response_by_alias=True)
 def login(body: UserLoginRequestModel):
     username, password = body.username, body.password
-    user = get_user(username)
+    user = get_user_by_username(username)
     if not user or not PasswordHasher.verify_password(user.password_hash, password):
         return (
             UserResponseModel(status="ERROR", error="Invalid username or password."),
@@ -100,7 +116,7 @@ def logout():
 @validate(response_by_alias=True)
 def me():
     username = session.get("username")
-    user = get_user(username) if username else None
+    user = get_user_by_username(username) if username else None
     if not user:
         return (
             UserResponseModel(status="ERROR", error="Unauthorized"),
@@ -108,3 +124,49 @@ def me():
         )
     user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 200
+
+
+@route.route("/forgot-password", methods=["POST"])
+@validate()
+def forgot_password(body: UserForgotPasswordModel):
+    token, user = create_reset_token(body.email)
+    if token and user:
+        # Send the reset password token to the user's email.
+        email_service.send_reset_password_token(user, token)
+    return "", 204
+
+
+def _verify_token(body: UserVerifyTokenModel):
+    token = get_reset_token(body.username)
+    if not token or not KeyGenerator.verify_key(body.token, token.token_hash):
+        return False
+
+    return True
+
+
+@route.route("/verify-token", methods=["POST"])
+@validate()
+def verify_token(body: UserVerifyTokenModel):
+    if not _verify_token(body):
+        return (
+            ResponseModel(status="ERROR", error="Invalid token"),
+            400,
+        )
+    return ResponseModel(), 200
+
+
+@route.route("/reset-password", methods=["PUT"])
+@validate()
+def reset_password(body: UserResetPasswordModel):
+    if not _verify_token(body):
+        return (
+            ResponseModel(status="ERROR", error="Invalid token"),
+            400,
+        )
+
+    update_user(
+        body.username,
+        UserUpdate(password=body.password),
+    )
+
+    return ResponseModel(), 200

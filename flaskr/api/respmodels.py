@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel
 
-from flaskr.db.models import UserRead, SemesterPlan
+from flaskr.db.models import Course, CoursePlanRead, UserRead, SemesterPlan
 
 
 class ResponseModel(BaseModel):
@@ -22,8 +22,17 @@ class HealthResponseModel(ResponseModel):
     data: dict[str, bool]
 
 
+class CoursesResponseModel(ResponseModel):
+    data: Optional[list[Course]] = None
+
+
 class UserResponseModel(ResponseModel):
     data: UserRead | None = None
 
+
 class SemesterPlanResponseModel(ResponseModel):
     data: SemesterPlan | None = None
+
+
+class CoursePlanResponseModel(ResponseModel):
+    data: CoursePlanRead | list[CoursePlanRead] | None = None
