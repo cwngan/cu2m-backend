@@ -69,9 +69,7 @@ def test_create_course_plan(logged_in_client, test_user):
         )
         plan.id = course_plan_response.data.id
         course_plan_response.data.updated_at = plan.updated_at
-        assert CoursePlan.model_validate(
-            plan.model_dump()
-        ) == CoursePlan.model_validate(
+        assert plan == CoursePlan.model_validate(
             course_plan_response.data.model_dump(exclude={"_id"})
         )
 
