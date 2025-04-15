@@ -30,9 +30,9 @@ class InvalidCredential(Exception):
     pass
 
 
-@route.route("/", methods=["GET"])
+@route.route("/<semester_plan_id>", methods=["GET"])
 @validate(response_by_alias=True)
-def get():
+def get(semester_plan_id):
     """
     Return the SemesterPlan with the specified id.
     """
@@ -45,7 +45,6 @@ def get():
             ).model_dump(),
             401,
         )
-    semester_plan_id = request.args.get("id")
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(
@@ -62,9 +61,7 @@ def get():
             404,
         )
     semester_plan_read = SemesterPlanRead.model_validate(semester_plan.model_dump())
-    semester_plan_read.created_at = (
-        semester_plan.created_at
-    )  # Ensure created_at is included
+    semester_plan_read.created_at = semester_plan.created_at
     return (
         SemesterPlanResponseModel(
             status="OK", data=semester_plan_read.model_dump()
@@ -112,9 +109,9 @@ def post(body: SemesterPlanCreateRequestModel):
     return SemesterPlanResponseModel(data=semester_plan), 200
 
 
-@route.route("/", methods=["PUT"])
+@route.route("/<semester_plan_id>", methods=["PUT"])
 @validate(response_by_alias=True)
-def put(body: SemesterPlanUpdate):
+def put(semester_plan_id, body: SemesterPlanUpdate):
     username = session.get("username")
     user = get_user_by_username(username) if username else None
     if not user:
@@ -124,7 +121,6 @@ def put(body: SemesterPlanUpdate):
             ).model_dump(),
             401,
         )
-    semester_plan_id = request.args.get("id")
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(
@@ -133,7 +129,6 @@ def put(body: SemesterPlanUpdate):
             400,
         )
     updates = body.model_dump(exclude_none=True)
-    # logger.debug(f"Updating semester plan {semester_plan_id} with data: {updates}")
     updated_plan = update_semester_plan(semester_plan_id, updates)
     if not updated_plan:
         return (
@@ -142,7 +137,6 @@ def put(body: SemesterPlanUpdate):
             ).model_dump(),
             404,
         )
-    # logger.debug(f"Updated semester plan: {updated_plan.model_dump()}")
     return (
         SemesterPlanResponseModel(
             status="OK", data=updated_plan.model_dump()
@@ -151,8 +145,8 @@ def put(body: SemesterPlanUpdate):
     )
 
 
-@route.route("/", methods=["DELETE"])
-def delete():
+@route.route("/<semester_plan_id>", methods=["DELETE"])
+def delete(semester_plan_id):
     username = session.get("username")
     user = get_user_by_username(username) if username else None
     if not user:
@@ -162,7 +156,6 @@ def delete():
             ).model_dump(),
             401,
         )
-    semester_plan_id = request.args.get("id")
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(

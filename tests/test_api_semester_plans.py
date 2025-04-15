@@ -60,7 +60,7 @@ def test_get_semester_plan(logged_in_client, test_courseplan):
     assert create_response.status_code == 200
     created_data = create_response.get_json()["data"]
 
-    response = logged_in_client.get(f"/api/semester_plans/?id={created_data['_id']}")
+    response = logged_in_client.get(f"/api/semester_plans/{created_data['_id']}")
     assert response.status_code == 200
     data = response.get_json()
     assert data["status"] == "OK"
@@ -86,7 +86,7 @@ def test_update_semester_plan(logged_in_client, test_courseplan):
         "year": 2026,
     }
     response = logged_in_client.put(
-        f"/api/semester_plans/?id={created_data['_id']}", json=updated_data
+        f"/api/semester_plans/{created_data['_id']}", json=updated_data
     )
     assert response.status_code == 200
     data = response.get_json()
@@ -107,7 +107,7 @@ def test_delete_semester_plan(logged_in_client, test_courseplan):
     assert create_response.status_code == 200
     created_data = create_response.get_json()["data"]
 
-    response = logged_in_client.delete(f"/api/semester_plans/?id={created_data['_id']}")
+    response = logged_in_client.delete(f"/api/semester_plans/{created_data['_id']}")
     assert response.status_code == 200
     data = response.get_json()
     assert data["status"] == "OK"
