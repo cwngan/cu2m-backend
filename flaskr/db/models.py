@@ -60,9 +60,11 @@ class Course(CoreModel):
     is_graded: bool
     not_for_major: str
     not_for_taken: str
+    original: str
+    parsed: bool
     prerequisites: str
     title: str
-    units: str
+    units: float
 
 
 class SemesterPlan(CoreModel):
@@ -79,7 +81,28 @@ class CoursePlan(CoreModel):
     favourite: bool
     name: str
     updated_at: datetime
+    user_id: Optional[PydanticObjectId]
+
+
+class CoursePlanRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    description: str
+    favourite: bool
+    name: str
+    updated_at: datetime
     user_id: PydanticObjectId
+
+
+class CoursePlanCreate(CoreModel):
+    description: str
+    name: str
+
+
+class CoursePlanUpdate(CoreModel):
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None
+    updated_at: Optional[datetime] = None
 
 
 class ResetToken(CoreModel):
