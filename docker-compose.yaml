@@ -25,5 +25,5 @@ services:
           ignore:
             - __pycache__/
         - action: rebuild
-          path: requirements.txt
+          path: pyproject.toml
 
