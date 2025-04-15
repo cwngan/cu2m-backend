@@ -28,6 +28,7 @@ def get_db(monkeypatch: pytest.MonkeyPatch):
     # https://stackoverflow.com/a/45466846
     monkeypatch.setattr("flaskr.db.database.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
+    monkeypatch.setattr("flaskr.db.course_plans.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.courses.get_db", mock_get_db)
 
     yield mock_get_db

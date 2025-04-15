@@ -31,4 +31,14 @@ def random_user():
     )
 
 
+def random_string(length: int = 10):
+    """
+    Generate a random string of fixed length.
+
+    :param length: Length of the string to be generated.
+    :return: Random string.
+    """
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
 GetDatabase: TypeAlias = Callable[[], Database[dict[str, Any]]]

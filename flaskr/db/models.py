@@ -81,7 +81,28 @@ class CoursePlan(CoreModel):
     favourite: bool
     name: str
     updated_at: datetime
+    user_id: Optional[PydanticObjectId]
+
+
+class CoursePlanRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    description: str
+    favourite: bool
+    name: str
+    updated_at: datetime
     user_id: PydanticObjectId
+
+
+class CoursePlanCreate(CoreModel):
+    description: str
+    name: str
+
+
+class CoursePlanUpdate(CoreModel):
+    description: Optional[str] = None
+    favourite: Optional[bool] = None
+    name: Optional[str] = None
+    updated_at: Optional[datetime] = None
 
 
 class ResetToken(CoreModel):
