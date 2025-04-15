@@ -11,7 +11,7 @@ route = Blueprint("health", __name__, url_prefix="/health")
 @validate()
 def health():
     """
-    Check health of the database
+    Check health of the server
     ---
 
     swagger_from_file: ./docs/health/root.yml
