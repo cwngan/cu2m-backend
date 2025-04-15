@@ -11,6 +11,9 @@ RUN poetry install
 WORKDIR /app/flaskr
 COPY flaskr .
 
+WORKDIR /app/docs
+COPY docs .
+
 WORKDIR /app
 COPY courses*.json .
 ENV PORT=8080
