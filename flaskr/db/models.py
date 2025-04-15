@@ -73,6 +73,7 @@ class SemesterPlan(CoreModel):
     courses: list[str]
     semester: int
     year: int
+    created_at: datetime
 
 
 class SemesterPlanRead(CoreModel):
@@ -81,6 +82,7 @@ class SemesterPlanRead(CoreModel):
     courses: list[str]
     semester: int
     year: int
+    created_at: datetime
 
 
 class SemesterPlanCreate(CoreModel):
@@ -91,6 +93,8 @@ class SemesterPlanCreate(CoreModel):
 
 class SemesterPlanUpdate(CoreModel):
     courses: Optional[list[str]] = None
+    semester: Optional[int] = None
+    year: Optional[int] = None
 
 
 class CoursePlan(CoreModel):

@@ -72,7 +72,9 @@ class SemesterPlanReadRequestModel(SemesterPlanRead, BaseModel):
 
 
 class SemesterPlanCreateRequestModel(SemesterPlanCreate, BaseModel):
-    id: str
+    """
+    Model for SemesterPlanCreate request body.
+    """
 
 
 class UserForgotPasswordModel(BaseModel):
