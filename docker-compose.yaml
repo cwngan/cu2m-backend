@@ -24,6 +24,9 @@ services:
           target: /app/flaskr
           ignore:
             - __pycache__/
+        - action: sync+restart
+          path: ./docs
+          target: /app/docs
         - action: rebuild
           path: requirements.txt
 
