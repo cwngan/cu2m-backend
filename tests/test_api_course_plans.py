@@ -109,81 +109,97 @@ def test_get_course_plan(logged_in_client, course_plans):
         )
 
 
-def test_update_course_plan(logged_in_client, course_plans):
+def update_subtest(
+    plan, logged_in_client, update_obj: CoursePlanUpdate, check_fields: list[str] = []
+):
+    original_doc = CoursePlanResponseModel.model_validate(
+        logged_in_client.get(f"/api/course-plans/{plan.id}").json
+    )
+    response = logged_in_client.patch(
+        f"/api/course-plans/{plan.id}", json=update_obj.model_dump()
+    )
+    assert response.status_code == 200
+    course_plans_response = CoursePlanResponseModel.model_validate(response.json)
+    assert course_plans_response.status == "OK"
+    assert isinstance(course_plans_response.data, CoursePlanRead)
+    assert abs(
+        course_plans_response.data.updated_at - datetime.now(timezone.utc)
+    ) < timedelta(seconds=1)
+    update_obj.updated_at = course_plans_response.data.updated_at
+    # Exclude fields that are not updated for comparison
+    assert (
+        CoursePlanUpdate.model_validate(
+            course_plans_response.data.model_dump(
+                include=update_obj.model_dump(exclude_none=True).keys()
+            )
+        )
+        == update_obj
+    )
+    # Check un-updated fields
+    for field in check_fields:
+        assert (
+            course_plans_response.data.model_dump()[field]
+            == original_doc.data.model_dump()[field]
+        )
+
+
+def test_update_course_plan_with_no_change(logged_in_client, course_plans):
     for plan in course_plans:
-
-        def _test_for_update(
-            update_obj: CoursePlanUpdate, check_fields: list[str] = []
-        ):
-            original_doc = CoursePlanResponseModel.model_validate(
-                logged_in_client.get(f"/api/course-plans/{plan.id}").json
-            )
-            response = logged_in_client.patch(
-                f"/api/course-plans/{plan.id}", json=update_obj.model_dump()
-            )
-            assert response.status_code == 200
-            course_plans_response = CoursePlanResponseModel.model_validate(
-                response.json
-            )
-            assert course_plans_response.status == "OK"
-            assert isinstance(course_plans_response.data, CoursePlanRead)
-            assert abs(
-                course_plans_response.data.updated_at - datetime.now(timezone.utc)
-            ) < timedelta(seconds=1)
-            update_obj.updated_at = course_plans_response.data.updated_at
-            # Exclude fields that are not updated for comparison
-            assert (
-                CoursePlanUpdate.model_validate(
-                    course_plans_response.data.model_dump(
-                        include=update_obj.model_dump(exclude_none=True).keys()
-                    )
-                )
-                == update_obj
-            )
-            # Check un-updated fields
-            for field in check_fields:
-                assert (
-                    course_plans_response.data.model_dump()[field]
-                    == original_doc.data.model_dump()[field]
-                )
-
         # Test update with no change to content
         update_obj = CoursePlanUpdate(
             description=plan.description,
             favourite=plan.favourite,
             name=plan.name,
         )
-        _test_for_update(update_obj)
+        update_subtest(plan, logged_in_client, update_obj)
+
+
+def test_update_course_plan_with_description_name_change(
+    logged_in_client, course_plans
+):
+    for plan in course_plans:
         # Test partial update with changes to description and name
         update_obj = CoursePlanUpdate(
             description=random_string(),
             name=random_string(),
         )
-        _test_for_update(update_obj, ["favourite"])
+        update_subtest(plan, logged_in_client, update_obj, ["favourite"])
+
+
+def test_update_course_plan_with_favourite_change(logged_in_client, course_plans):
+    for plan in course_plans:
         # Test partial update with changes to favourite
         update_obj = CoursePlanUpdate(
             favourite=False,
         )
-        _test_for_update(update_obj, ["description", "name"])
+        update_subtest(plan, logged_in_client, update_obj, ["description", "name"])
         # Test partial update with changes to favourite
         update_obj = CoursePlanUpdate(
             favourite=True,
         )
-        _test_for_update(update_obj, ["description", "name"])
+        update_subtest(plan, logged_in_client, update_obj, ["description", "name"])
+
+
+def test_update_course_plan_with_all_change(logged_in_client, course_plans):
+    for plan in course_plans:
         # Test update with changes to everything
         update_obj = CoursePlanUpdate(
             description=random_string(),
             favourite=random.choice([True, False]),
             name=random_string(),
         )
-        _test_for_update(update_obj)
+        update_subtest(plan, logged_in_client, update_obj)
+
+
+def test_update_course_plan_with_original_data(logged_in_client, course_plans):
+    for plan in course_plans:
         # Test update with original properties
         update_obj = CoursePlanUpdate(
             description=plan.description,
             favourite=plan.favourite,
             name=plan.name,
         )
-        _test_for_update(update_obj)
+        update_subtest(plan, logged_in_client, update_obj)
 
 
 def test_delete_course_plan(logged_in_client, course_plans):
