@@ -1,5 +1,4 @@
-
-import logging
+# import logging
 
 from bson import ObjectId
 from flask import Blueprint, request, session
@@ -20,8 +19,8 @@ from flaskr.db.user import get_user_by_username
 from flaskr.db.course_plans import get_course_plan  # Corrected the import
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger(__name__)
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester_plans")
 
@@ -134,7 +133,7 @@ def put(body: SemesterPlanUpdate):
             400,
         )
     updates = body.model_dump(exclude_none=True)
-    logger.debug(f"Updating semester plan {semester_plan_id} with data: {updates}")
+    # logger.debug(f"Updating semester plan {semester_plan_id} with data: {updates}")
     updated_plan = update_semester_plan(semester_plan_id, updates)
     if not updated_plan:
         return (
@@ -143,7 +142,7 @@ def put(body: SemesterPlanUpdate):
             ).model_dump(),
             404,
         )
-    logger.debug(f"Updated semester plan: {updated_plan.model_dump()}")
+    # logger.debug(f"Updated semester plan: {updated_plan.model_dump()}")
     return (
         SemesterPlanResponseModel(
             status="OK", data=updated_plan.model_dump()

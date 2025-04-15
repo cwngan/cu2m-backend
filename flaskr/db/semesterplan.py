@@ -1,13 +1,10 @@
 from datetime import datetime
 from pymongo.collection import ReturnDocument
 from bson import ObjectId
-import logging
+# import logging
 from flaskr.db.database import get_db
 from flaskr.db.models import SemesterPlan
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
 
 
 
@@ -39,13 +36,13 @@ def get_semester_plan(plan_id: str):
 
 def update_semester_plan(plan_id: str, updates: dict):
     db = get_db().semester_plans
-    logger.debug(f"Updating semester plan {plan_id} with updates: {updates}")
+    # logger.debug(f"Updating semester plan {plan_id} with updates: {updates}")
     doc = db.find_one_and_update(
         {"_id": ObjectId(plan_id)},
         {"$set": updates},
         return_document=ReturnDocument.AFTER,
     )
-    logger.debug(f"Updated document: {doc}")
+    # logger.debug(f"Updated document: {doc}")
     return SemesterPlan.model_validate(doc) if doc else None
 
 
