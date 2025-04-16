@@ -1,12 +1,10 @@
 from datetime import datetime
 from pymongo.collection import ReturnDocument
 from bson import ObjectId
+
 # import logging
 from flaskr.db.database import get_db
 from flaskr.db.models import SemesterPlan
-
-
-
 
 
 def create_semester_plan(
