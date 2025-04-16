@@ -1,7 +1,7 @@
 # import logging
 
 from bson import ObjectId
-from flask import Blueprint, request, session
+from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
 from flaskr.api.reqmodels import (
