@@ -9,7 +9,7 @@ from flaskr.api.reqmodels import (
 )
 from flaskr.api.respmodels import SemesterPlanResponseModel
 from flaskr.db.models import SemesterPlanRead, SemesterPlanUpdate
-from flaskr.db.semesterplan import (
+from flaskr.db.semester_plans import (
     create_semester_plan,
     get_semester_plan,
     update_semester_plan,

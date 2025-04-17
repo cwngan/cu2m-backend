@@ -1,5 +1,5 @@
 import pytest
-from flaskr.db.semesterplan import (
+from flaskr.db.semester_plans import (
     create_semester_plan,
     get_semester_plan,
     update_semester_plan,
