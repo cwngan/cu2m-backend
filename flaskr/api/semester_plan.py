@@ -22,7 +22,7 @@ from flaskr.db.course_plans import get_course_plan  # Corrected the import
 # logging.basicConfig(level=logging.DEBUG)
 # logger = logging.getLogger(__name__)
 
-route = Blueprint("semester_plans", __name__, url_prefix="/semester_plans")
+route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 
 
 # Custom Exception
