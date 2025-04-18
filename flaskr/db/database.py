@@ -81,6 +81,9 @@ def init_db():
 
     db.users.create_index("email", unique=True)
     db.users.create_index("username", unique=True, sparse=True)
+    db.semester_plans.create_index("course_plan_id")
+    # db.semester_plans.create_index("semester")
+    # db.semester_plans.create_index("year")
     db.tokens.create_index("token", unique=True)
     db.tokens.create_index("expires_at", expireAfterSeconds=0)
     db.course_plans.create_index("user_id")

@@ -73,6 +73,28 @@ class SemesterPlan(CoreModel):
     courses: list[str]
     semester: int
     year: int
+    created_at: datetime
+
+
+class SemesterPlanRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    course_plan_id: PydanticObjectId
+    courses: list[str]
+    semester: int
+    year: int
+    created_at: datetime
+
+
+class SemesterPlanCreate(CoreModel):
+    course_plan_id: PydanticObjectId
+    semester: int
+    year: int
+
+
+class SemesterPlanUpdate(CoreModel):
+    courses: Optional[list[str]] = None
+    semester: Optional[int] = None
+    year: Optional[int] = None
 
 
 class CoursePlan(CoreModel):

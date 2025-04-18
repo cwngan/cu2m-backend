@@ -5,7 +5,12 @@ from typing import Optional
 from pydantic import BaseModel, ValidationError, field_validator
 from pydantic_core import PydanticCustomError
 
-from flaskr.db.models import CoursePlanCreate, UserCreate
+from flaskr.db.models import (
+    SemesterPlanCreate,
+    SemesterPlanRead,
+    UserCreate,
+    CoursePlanCreate,
+)
 
 USERNAME_REGEX = re.compile(r"^[a-zA-Z0-9_]{5,20}$")
 NAME_REGEX = re.compile(r"^[a-zA-Z]{2,20}$")
@@ -60,6 +65,16 @@ class UserDeleteRequestModel(UserNameValidator):
 class UserLoginRequestModel(UserNameValidator):
     username: str
     password: str
+
+
+class SemesterPlanReadRequestModel(SemesterPlanRead, BaseModel):
+    id: str
+
+
+class SemesterPlanCreateRequestModel(SemesterPlanCreate, BaseModel):
+    """
+    Model for SemesterPlanCreate request body.
+    """
 
 
 class UserForgotPasswordModel(BaseModel):
