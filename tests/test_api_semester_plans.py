@@ -13,7 +13,7 @@ def test_user(get_db: GetDatabase):
 
 
 @pytest.fixture
-def test_courseplan(test_user, get_db: GetDatabase):
+def test_course_plan(test_user, get_db: GetDatabase):
     course_plan = {
         "description": random_string(20),
         "name": random_string(),
@@ -33,9 +33,9 @@ def logged_in_client(test_user, client: FlaskClient):
     yield client
 
 
-def test_create_semester_plan(logged_in_client, test_courseplan):
+def test_create_semester_plan(logged_in_client, test_course_plan):
     semester_plan_data = {
-        "course_plan_id": str(test_courseplan["_id"]),
+        "course_plan_id": str(test_course_plan["_id"]),
         "semester": 1,
         "year": 2025,
     }
@@ -48,9 +48,9 @@ def test_create_semester_plan(logged_in_client, test_courseplan):
     assert data["data"]["year"] == semester_plan_data["year"]
 
 
-def test_get_semester_plan(logged_in_client, test_courseplan):
+def test_get_semester_plan(logged_in_client, test_course_plan):
     semester_plan_data = {
-        "course_plan_id": str(test_courseplan["_id"]),
+        "course_plan_id": str(test_course_plan["_id"]),
         "semester": 1,
         "year": 2025,
     }
@@ -69,9 +69,9 @@ def test_get_semester_plan(logged_in_client, test_courseplan):
     assert data["data"]["year"] == semester_plan_data["year"]
 
 
-def test_update_semester_plan(logged_in_client, test_courseplan):
+def test_update_semester_plan(logged_in_client, test_course_plan):
     semester_plan_data = {
-        "course_plan_id": str(test_courseplan["_id"]),
+        "course_plan_id": str(test_course_plan["_id"]),
         "semester": 1,
         "year": 2025,
     }
@@ -95,9 +95,9 @@ def test_update_semester_plan(logged_in_client, test_courseplan):
     assert data["data"]["year"] == updated_data["year"]
 
 
-def test_delete_semester_plan(logged_in_client, test_courseplan):
+def test_delete_semester_plan(logged_in_client, test_course_plan):
     semester_plan_data = {
-        "course_plan_id": str(test_courseplan["_id"]),
+        "course_plan_id": str(test_course_plan["_id"]),
         "semester": 1,
         "year": 2025,
     }
