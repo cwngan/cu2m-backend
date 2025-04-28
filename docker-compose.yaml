@@ -28,5 +28,5 @@ services:
           path: ./docs
           target: /app/docs
         - action: rebuild
-          path: requirements.txt
+          path: pyproject.toml
 
