@@ -245,7 +245,7 @@ def test_sessions(client: FlaskClient):
     _login(user1.username, user2.password_hash, user1)
     _test_session(user2)
     response = client.post("/api/user/logout")
-    assert response.status_code == 204
+    assert response.status_code == 200
     _test_session(None)
     _login(user2.username, user1.password_hash, user1)
     _test_session(None)
@@ -280,7 +280,7 @@ def test_forgot_verify_reset_password(
             "/api/user/forgot-password",
             json=UserForgotPasswordModel(email="fakeemail").model_dump(),
         ).status_code
-        == 204
+        == 200
     )
     assert curr_user is None
     assert (
@@ -288,7 +288,7 @@ def test_forgot_verify_reset_password(
             "/api/user/forgot-password",
             json=UserForgotPasswordModel(email=TEST_USER.email).model_dump(),
         ).status_code
-        == 204
+        == 200
     )
     assert tokendb.count_documents({}) == 1
     assert curr_user is not None
@@ -322,7 +322,7 @@ def test_forgot_verify_reset_password(
             "/api/user/forgot-password",
             json=UserForgotPasswordModel(email=TEST_USER.email).model_dump(),
         ).status_code
-        == 204
+        == 200
     )
     assert tokendb.count_documents({}) == 1
     assert curr_user is not None
