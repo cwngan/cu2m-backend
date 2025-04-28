@@ -118,6 +118,11 @@ def login(body: UserLoginRequestModel):
 
 @route.route("/logout", methods=["POST"])
 def logout():
+    """
+    Logout a logged in user from the system
+
+    swagger_from_file: ./docs/user/logout.yml
+    """
     session.pop("username", None)
     return "", 204
 
@@ -125,6 +130,11 @@ def logout():
 @route.route("/me", methods=["GET"])
 @validate(response_by_alias=True)
 def me():
+    """
+    Obtain user data
+
+    swagger_from_file: ./docs/user/me.yml
+    """
     username = session.get("username")
     user = get_user_by_username(username) if username else None
     if not user:
@@ -139,6 +149,11 @@ def me():
 @route.route("/forgot-password", methods=["POST"])
 @validate()
 def forgot_password(body: UserForgotPasswordModel):
+    """
+    Create a forgot password token
+
+    swagger_from_file: ./docs/user/forgot_password.yml
+    """
     token, user = create_reset_token(body.email)
     if token and user:
         # Send the reset password token to the user's email.
@@ -157,6 +172,11 @@ def _verify_token(body: UserVerifyTokenModel):
 @route.route("/verify-token", methods=["POST"])
 @validate()
 def verify_token(body: UserVerifyTokenModel):
+    """
+    Reset a specific account password
+
+    swagger_from_file: ./docs/user/reset_password.yml
+    """
     if not _verify_token(body):
         return (
             ResponseModel(status="ERROR", error="Invalid token"),
@@ -168,6 +188,11 @@ def verify_token(body: UserVerifyTokenModel):
 @route.route("/reset-password", methods=["PUT"])
 @validate()
 def reset_password(body: UserResetPasswordModel):
+    """
+    Reset a specific account password
+
+    swagger_from_file: ./docs/user/reset_password.yml
+    """
     if not _verify_token(body):
         return (
             ResponseModel(status="ERROR", error="Invalid token"),

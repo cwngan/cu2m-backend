@@ -1,0 +1,13 @@
+Obtain user data
+---
+tags:
+  - User
+responses:
+  200:
+    description: The account activated in the database.
+    schema:
+      $ref: "#/definitions/UserResponseModel"
+  401:
+    description: No information due to not logged in.
+    schema:
+      $ref: "#/definitions/UserResponseModel"

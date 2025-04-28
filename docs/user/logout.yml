@@ -1,0 +1,20 @@
+Logout a logged in user from the system
+---
+tags:
+  - User
+responses:
+  200:
+    description: Logged out a user.
+    schema:
+      id: ResponseModel
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: OK or ERROR.
+          example: "OK"
+        error:
+          type: string
+          description: Error message.
+          example: "A example error message"

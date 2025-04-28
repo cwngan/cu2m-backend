@@ -1,0 +1,31 @@
+Verify the forgot password token
+---
+tags:
+  - User
+parameters:
+  - name: body
+    in: body
+    required: true
+    schema:
+      id: UserVerifyTokenModel
+      required:
+        - username
+        - token
+      properties:
+        username:
+          type: string
+          description: The username of the account.
+          example: "DefinitelyABadDragon"
+        token:
+          type: string
+          description: Recovery token for resting password.
+          example: "AAAA-BBBB-CCCC-DDDD"
+responses:
+  200:
+    description: The token is valid.
+    schema:
+      $ref: "#/definitions/ResponseModel"
+  400:
+    description: The token is invalid.
+    schema:
+      $ref: "#/definitions/ResponseModel"
