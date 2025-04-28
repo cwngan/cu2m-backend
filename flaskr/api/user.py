@@ -107,6 +107,7 @@ def login(body: UserLoginRequestModel):
 
 
 @route.route("/logout", methods=["POST"])
+@validate()
 def logout():
     session.pop("username", None)
     return ResponseModel(), 200
