@@ -218,7 +218,7 @@ def test_sessions(client: FlaskClient):
     user2 = _test_user_creation(random_user())
 
     response = client.post("/api/user/logout")
-    assert response.status_code == 204
+    assert response.status_code == 200
     _test_session(None)
 
     def _login(uname: str, pwd: str, user: User):
