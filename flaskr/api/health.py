@@ -14,7 +14,7 @@ def health():
     Check health of the server
     ---
 
-    swagger_from_file: ./docs/health/root.yml
+    swagger_from_file: ./docs/health/health.yml
     """
     db = get_db()
     return HealthResponseModel(data={"server": True, "db": db is not None})
