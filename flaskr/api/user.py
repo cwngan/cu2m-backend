@@ -109,7 +109,7 @@ def login(body: UserLoginRequestModel):
 @route.route("/logout", methods=["POST"])
 def logout():
     session.pop("username", None)
-    return "", 204
+    return ResponseModel(), 200
 
 
 @route.route("/me", methods=["GET"])
@@ -133,7 +133,7 @@ def forgot_password(body: UserForgotPasswordModel):
     if token and user:
         # Send the reset password token to the user's email.
         email_service.send_reset_password_token(user, token)
-    return "", 204
+    return ResponseModel(), 200
 
 
 def _verify_token(body: UserVerifyTokenModel):
