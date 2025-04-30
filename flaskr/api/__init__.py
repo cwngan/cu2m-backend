@@ -19,7 +19,3 @@ route.register_blueprint(courses.route)
 route.register_blueprint(user.route)
 route.register_blueprint(course_plans.route)
 route.register_blueprint(semester_plans.route)
-
-
-# def register_blueprints(app):
-#     app.register_blueprint(semester_plans_route)
