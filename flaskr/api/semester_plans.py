@@ -40,32 +40,24 @@ def get(semester_plan_id):
     user = get_user_by_username(username) if username else None
     if not user:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Unauthorized"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
             401,
         )
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Malformed ID"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
             400,
         )
     semester_plan = get_semester_plan(semester_plan_id)
     if not semester_plan:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Semester plan not found"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
             404,
         )
     semester_plan_read = SemesterPlanRead.model_validate(semester_plan.model_dump())
     semester_plan_read.created_at = semester_plan.created_at
     return (
-        SemesterPlanResponseModel(
-            status="OK", data=semester_plan_read.model_dump()
-        ).model_dump(),
+        SemesterPlanResponseModel(data=semester_plan_read.model_dump()),
         200,
     )
 
@@ -116,16 +108,12 @@ def put(semester_plan_id, body: SemesterPlanUpdate):
     user = get_user_by_username(username) if username else None
     if not user:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Unauthorized"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
             401,
         )
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Malformed ID"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
             400,
         )
     updates = body.model_dump(exclude_none=True)
@@ -138,9 +126,7 @@ def put(semester_plan_id, body: SemesterPlanUpdate):
             404,
         )
     return (
-        SemesterPlanResponseModel(
-            status="OK", data=updated_plan.model_dump()
-        ).model_dump(),
+        SemesterPlanResponseModel(data=updated_plan.model_dump()),
         200,
     )
 
@@ -151,29 +137,21 @@ def delete(semester_plan_id):
     user = get_user_by_username(username) if username else None
     if not user:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Unauthorized"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
             401,
         )
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Malformed ID"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
             400,
         )
     deleted_plan = delete_semester_plan(semester_plan_id)
     if not deleted_plan:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Semester plan not found"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
             404,
         )
     return (
-        SemesterPlanResponseModel(
-            status="OK", data=deleted_plan.model_dump()
-        ).model_dump(),
+        SemesterPlanResponseModel(data=deleted_plan.model_dump()),
         200,
     )
