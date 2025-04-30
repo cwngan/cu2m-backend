@@ -22,11 +22,6 @@ from flaskr.db.course_plans import get_course_plan  # Corrected the import
 route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 
 
-# Custom Exception
-class InvalidCredential(Exception):
-    pass
-
-
 @route.route("/<semester_plan_id>", methods=["GET"])
 @validate(response_by_alias=True)
 def get(semester_plan_id):
@@ -129,6 +124,7 @@ def put(semester_plan_id, body: SemesterPlanUpdate):
 
 
 @route.route("/<semester_plan_id>", methods=["DELETE"])
+@validate(response_by_alias=True)
 def delete(semester_plan_id):
     username = session.get("username")
     user = get_user_by_username(username) if username else None
