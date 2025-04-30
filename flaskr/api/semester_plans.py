@@ -18,9 +18,6 @@ from flaskr.db.semester_plans import (
 from flaskr.db.user import get_user_by_username
 from flaskr.db.course_plans import get_course_plan  # Corrected the import
 
-# Configure logging
-# logging.basicConfig(level=logging.DEBUG)
-# logger = logging.getLogger(__name__)
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 
