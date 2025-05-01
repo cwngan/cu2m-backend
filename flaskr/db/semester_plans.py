@@ -25,17 +25,17 @@ def create_semester_plan(
     return semester_plan
 
 
-def get_semester_plan(plan_id: str):
+def get_semester_plan(semester_plan_id: str):
     db = get_db().semester_plans
-    doc = db.find_one({"_id": ObjectId(plan_id)})
+    doc = db.find_one({"_id": ObjectId(semester_plan_id)})
     return SemesterPlan.model_validate(doc) if doc else None
 
 
-def update_semester_plan(plan_id: str, updates: dict):
+def update_semester_plan(semester_plan_id: str, updates: dict):
     db = get_db().semester_plans
     # logger.debug(f"Updating semester plan {plan_id} with updates: {updates}")
     doc = db.find_one_and_update(
-        {"_id": ObjectId(plan_id)},
+        {"_id": ObjectId(semester_plan_id)},
         {"$set": updates},
         return_document=ReturnDocument.AFTER,
     )
@@ -43,9 +43,9 @@ def update_semester_plan(plan_id: str, updates: dict):
     return SemesterPlan.model_validate(doc) if doc else None
 
 
-def delete_semester_plan(plan_id: str):
+def delete_semester_plan(semester_plan_id: str):
     db = get_db().semester_plans
-    doc = db.find_one_and_delete({"_id": ObjectId(plan_id)})
+    doc = db.find_one_and_delete({"_id": ObjectId(semester_plan_id)})
     return SemesterPlan.model_validate(doc) if doc else None
 
 
