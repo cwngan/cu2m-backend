@@ -6,9 +6,9 @@ from flask_pydantic import validate  # type: ignore
 
 from flaskr.api.reqmodels import (
     SemesterPlanCreateRequestModel,
+    SemesterPlanUpdateRequestModel,
 )
 from flaskr.api.respmodels import SemesterPlanResponseModel
-from flaskr.db.models import SemesterPlanRead, SemesterPlanUpdate
 from flaskr.db.semester_plans import (
     create_semester_plan,
     get_semester_plan,
@@ -46,10 +46,8 @@ def get(semester_plan_id):
             SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
             404,
         )
-    semester_plan_read = SemesterPlanRead.model_validate(semester_plan.model_dump())
-    semester_plan_read.created_at = semester_plan.created_at
     return (
-        SemesterPlanResponseModel(data=semester_plan_read.model_dump()),
+        SemesterPlanResponseModel(data=semester_plan.model_dump()),
         200,
     )
 
@@ -90,12 +88,12 @@ def post(body: SemesterPlanCreateRequestModel):
     semester_plan = create_semester_plan(
         course_plan_id=course_plan_id, semester=body.semester, year=body.year
     )
-    return SemesterPlanResponseModel(data=semester_plan), 200
+    return SemesterPlanResponseModel(data=semester_plan.model_dump()), 200
 
 
 @route.route("/<semester_plan_id>", methods=["PUT"])
 @validate(response_by_alias=True)
-def put(semester_plan_id, body: SemesterPlanUpdate):
+def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
     username = session.get("username")
     user = get_user_by_username(username) if username else None
     if not user:
@@ -112,9 +110,7 @@ def put(semester_plan_id, body: SemesterPlanUpdate):
     updated_plan = update_semester_plan(semester_plan_id, updates)
     if not updated_plan:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Semester plan not found"
-            ).model_dump(),
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
             404,
         )
     return (
