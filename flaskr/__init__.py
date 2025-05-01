@@ -1,13 +1,16 @@
 import json
+import logging
 import os
 from typing import Any
 
 from flask import Flask
+from flask.logging import default_handler
 from flask_pydantic import ValidationError, validate  # type: ignore
 
 from flaskr import api
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
+from flaskr.utils import RequestFormatter
 
 
 def validation_error_handler(e: ValidationError):
@@ -32,13 +35,31 @@ def validation_error_handler(e: ValidationError):
 
 
 def create_app(test_config: dict[str, Any] | None = None):
+    # Configure Flask app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY="dev", FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True
+        SECRET_KEY="dev" if app.debug else os.urandom(32),
+        FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True,
     )
 
+    # Initalize logging
+    default_handler.setFormatter(RequestFormatter())
+
+    app.logger.setLevel(
+        logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+    )
+
+    app.logger.info("Logging level: %s", logging.getLevelName(app.logger.level))
+
+    # Test logging color formats during debug mode
+    if app.debug:
+        for levelname, levelno in logging.getLevelNamesMapping().items():
+            app.logger.log(levelno, f"Testing {levelname}...")
+
+    # Initialize database
     init_db()
 
+    # Load test config
     if test_config is None:
         app.config.from_pyfile("config.py", silent=True)
     else:
