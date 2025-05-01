@@ -4,6 +4,7 @@ from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
+from flaskr.api.auth_guard import auth_guard
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,
     UserForgotPasswordModel,
@@ -12,7 +13,7 @@ from flaskr.api.reqmodels import (
     UserVerifyTokenModel,
 )
 from flaskr.api.respmodels import ResponseModel, UserResponseModel
-from flaskr.db.models import UserRead, UserUpdate
+from flaskr.db.models import User, UserRead, UserUpdate
 from flaskr.db.user import (
     activate_user,
     create_reset_token,
@@ -114,14 +115,8 @@ def logout():
 
 @route.route("/me", methods=["GET"])
 @validate(response_by_alias=True)
-def me():
-    username = session.get("username")
-    user = get_user_by_username(username) if username else None
-    if not user:
-        return (
-            UserResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+@auth_guard
+def me(user: User):
     user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 200
 
