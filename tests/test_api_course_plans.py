@@ -53,7 +53,7 @@ def logged_in_client(test_user, client: FlaskClient):
 
 
 @pytest.mark.parametrize(
-    "method, endpoint, body",
+    "method, endpoint",
     [
         ("GET", ""),
         ("GET", "asd"),
