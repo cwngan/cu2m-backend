@@ -22,7 +22,7 @@ jobs:
       - name: Check running containers
         run: docker ps -a
       - name: Check logs
-        run: docker compose logs
+        run: docker compose -f docker-compose.workflow.yaml logs
       - name: Create virtual env and run test
         run: |
           python -m venv ./venv
