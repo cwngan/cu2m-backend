@@ -71,7 +71,7 @@ class SemesterPlan(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
     courses: list[str]
-    semester: int
+    semester: int = Field(ge=1, le=3)
     year: int
     created_at: datetime
 
@@ -80,20 +80,20 @@ class SemesterPlanRead(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
     courses: list[str]
-    semester: int
+    semester: int = Field(ge=1, le=3)
     year: int
     created_at: datetime
 
 
 class SemesterPlanCreate(CoreModel):
     course_plan_id: PydanticObjectId
-    semester: int
+    semester: int = Field(ge=1, le=3)
     year: int
 
 
 class SemesterPlanUpdate(CoreModel):
     courses: Optional[list[str]] = None
-    semester: Optional[int] = None
+    semester: Optional[int] = Field(ge=1, le=3, default=None)
     year: Optional[int] = None
 
 
