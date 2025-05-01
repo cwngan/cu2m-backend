@@ -16,7 +16,7 @@ def test_user(get_db: GetDatabase):
 
 
 @pytest.fixture
-def test_courseplan(test_user, get_db: GetDatabase):
+def test_course_plan(test_user, get_db: GetDatabase):
     course_plan = {
         "description": random_string(20),
         "name": random_string(),
@@ -27,21 +27,21 @@ def test_courseplan(test_user, get_db: GetDatabase):
     return course_plan
 
 
-def test_create_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
+def test_create_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     semester_plan = create_semester_plan(
-        course_plan_id=str(test_courseplan["_id"]),
+        course_plan_id=str(test_course_plan["_id"]),
         semester=1,
         year=2025,
     )
     assert semester_plan is not None
-    assert semester_plan.course_plan_id == test_courseplan["_id"]
+    assert semester_plan.course_plan_id == test_course_plan["_id"]
     assert semester_plan.semester == 1
     assert semester_plan.year == 2025
 
 
-def test_get_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
+def test_get_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     semester_plan = create_semester_plan(
-        course_plan_id=str(test_courseplan["_id"]),
+        course_plan_id=str(test_course_plan["_id"]),
         semester=1,
         year=2025,
     )
@@ -51,9 +51,9 @@ def test_get_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
     assert fetched_plan.course_plan_id == semester_plan.course_plan_id
 
 
-def test_update_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
+def test_update_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     semester_plan = create_semester_plan(
-        course_plan_id=str(test_courseplan["_id"]),
+        course_plan_id=str(test_course_plan["_id"]),
         semester=1,
         year=2025,
     )
@@ -64,9 +64,9 @@ def test_update_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
     assert updated_plan.year == 2026
 
 
-def test_delete_semester_plan(test_user, test_courseplan, get_db: GetDatabase):
+def test_delete_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     semester_plan = create_semester_plan(
-        course_plan_id=str(test_courseplan["_id"]),
+        course_plan_id=str(test_course_plan["_id"]),
         semester=1,
         year=2025,
     )
