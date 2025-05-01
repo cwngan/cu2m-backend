@@ -3,7 +3,7 @@ from typing import Callable, ParamSpec, TypeVar
 
 from flask import session
 
-from flaskr.api.respmodels import CoursePlanResponseModel
+from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import get_user_by_username
 
 P = ParamSpec("P")
@@ -18,11 +18,7 @@ def auth_guard(func: Callable[P, R]):
     """
     # Check if the function has a parameter named "user"
     # If it does, we will pass the user object to that parameter
-    # delete it from the annotations to avoid confusing flask_pydantic
-
-    has_user = func.__annotations__.get("user") is not None
-    if has_user:
-        del func.__annotations__["user"]
+    has_user = "user" in func.__annotations__
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs):
@@ -30,7 +26,7 @@ def auth_guard(func: Callable[P, R]):
         user = get_user_by_username(username=username) if username else None
         if not user:
             return (
-                CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
+                ResponseModel(status="ERROR", error="Unauthorized").model_dump(),
                 401,
             )
         if has_user:

@@ -114,8 +114,8 @@ def logout():
 
 
 @route.route("/me", methods=["GET"])
-@validate(response_by_alias=True)
 @auth_guard
+@validate(response_by_alias=True)
 def me(user: User):
     user_read = UserRead.model_validate(user.model_dump())
     return UserResponseModel(data=user_read), 200
