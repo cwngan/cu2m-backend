@@ -1,3 +1,4 @@
+
 FROM python:3.12-alpine
 
 ENV POETRY_VIRTUALENVS_CREATE=false
@@ -9,9 +10,5 @@ COPY courses*.json .
 COPY pyproject.toml poetry.lock ./
 RUN poetry install
 
-WORKDIR /app/flaskr
-COPY flaskr .
-
-WORKDIR /app
 ENV PORT=8080
-CMD ["gunicorn", "-w", "4", "flaskr:create_app()"]
+CMD ["flask", "--app", "flaskr:create_app()", "run", "--debug", "--host=0.0.0.0"]

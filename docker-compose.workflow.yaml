@@ -14,7 +14,7 @@ services:
     profiles: [dev]
     build:
       context: .
-      dockerfile: Debug.Dockerfile
+      dockerfile: Dockerfile
     environment:
       - COURSE_DATA_FILENAME=courses.json
       - MONGO_DB_HOST=mongodb
@@ -34,7 +34,9 @@ services:
           path: pyproject.toml
   cu2m-backend:
     profiles: [prod]
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     environment:
       - COURSE_DATA_FILENAME=courses.json
       - MONGO_DB_HOST=mongodb
@@ -42,4 +44,5 @@ services:
       - LOGGING_LEVEL=INFO
     ports:
       - 8080:8080
+
 
