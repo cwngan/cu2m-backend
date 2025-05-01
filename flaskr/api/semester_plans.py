@@ -88,6 +88,14 @@ def post(body: SemesterPlanCreateRequestModel):
     semester_plan = create_semester_plan(
         course_plan_id=course_plan_id, semester=body.semester, year=body.year
     )
+    if not semester_plan:
+        return (
+            SemesterPlanResponseModel(
+                status="ERROR",
+                error="Semester plan with same semester and year already exists",
+            ),
+            400,
+        )
     return SemesterPlanResponseModel(data=semester_plan.model_dump()), 200
 
 
