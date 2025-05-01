@@ -1,4 +1,5 @@
 import os
+import logging
 import json
 from typing import Any
 
@@ -6,8 +7,11 @@ from pymongo import MongoClient
 from types import SimpleNamespace
 from jsonschema import validate
 
+from flaskr.utils import RequestFormatter
+
 
 _mongo: MongoClient[dict[str, Any]] | None = None
+_db_logger: logging.Logger | None = None
 
 schema = {
     "type": "object",
@@ -94,13 +98,27 @@ def get_mongo_client():
         load_dotenv()
 
         mongo_uri = f"mongodb://{os.getenv('MONGO_DB_USERNAME')}:{os.getenv('MONGO_DB_PASSWORD')}@{os.getenv('MONGO_DB_HOST')}:{os.getenv('MONGO_DB_PORT')}/"
-        print(mongo_uri, flush=True)
         _mongo = MongoClient(mongo_uri, tz_aware=True)
         init_db()
-        print("MongoDB connected", flush=True)
-        print(_mongo, flush=True)
+        get_db_logger().info("MongoDB successfully connected")
+        get_db_logger().info(f"MongoClient current state: {_mongo}")
     return _mongo
 
 
 def get_db():
     return get_mongo_client().database
+
+
+def get_db_logger():
+    global _db_logger
+    if not _db_logger:
+        _db_logger = logging.getLogger("database")
+        _db_logger.setLevel(
+            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+        )
+
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(RequestFormatter())
+        _db_logger.addHandler(console_handler)
+        _db_logger.info("Logging level: %s", logging.getLevelName(_db_logger.level))
+    return _db_logger
