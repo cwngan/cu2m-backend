@@ -7,8 +7,6 @@ from hashlib import scrypt, sha256
 
 from colorama import Style, Fore, Back
 
-from flask import has_request_context, request
-
 
 class RequestFormatter(logging.Formatter):
     default_custom_fmt = (
@@ -33,13 +31,6 @@ class RequestFormatter(logging.Formatter):
         )
 
     def format(self, record):
-        if has_request_context():
-            record.url = request.url
-            record.remote_addr = request.remote_addr
-        else:
-            record.url = None
-            record.remote_addr = None
-
         record.levelname = "{color}{levelname}{reset}".format(
             color=self.FORMATS.get(record.levelno),
             levelname=record.levelname,
