@@ -76,17 +76,33 @@ def test_delete_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     assert get_semester_plan(str(semester_plan.id)) is None
 
 
-def test_semester_plan_uniqueness(test_user, test_course_plan, get_db: GetDatabase):
+@pytest.mark.parametrize(
+    "first, second, valid",
+    [
+        ((1, 2026), (2, 2027), True),
+        ((1, 2025), (2, 2025), True),
+        ((2, 2024), (3, 2024), True),
+        ((1, 2025), (1, 2025), False),
+    ],
+)
+def test_semester_plan_compound_key(
+    first, second, valid, test_user, test_course_plan, get_db: GetDatabase
+):
+    semester, year = first
     assert create_semester_plan(
         course_plan_id=str(test_course_plan["_id"]),
-        semester=1,
-        year=2025,
+        semester=semester,
+        year=year,
     )
-    assert (
-        create_semester_plan(
-            course_plan_id=str(test_course_plan["_id"]),
-            semester=1,
-            year=2025,
-        )
-        is None
+
+    # Try to insert the second object and check the result
+    semester, year = second
+    semester_plan = create_semester_plan(
+        course_plan_id=str(test_course_plan["_id"]),
+        semester=semester,
+        year=year,
     )
+    if valid:
+        assert semester_plan is not None
+    else:
+        assert semester_plan is None
