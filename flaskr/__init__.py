@@ -3,7 +3,7 @@ import logging
 import os
 from typing import Any
 
-from flask import Flask
+from flask import Flask, request, Response
 from flask.logging import default_handler
 from flask_pydantic import ValidationError, validate  # type: ignore
 
@@ -44,11 +44,9 @@ def create_app(test_config: dict[str, Any] | None = None):
 
     # Initalize logging
     default_handler.setFormatter(RequestFormatter())
-
     app.logger.setLevel(
         logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
     )
-
     app.logger.info("Logging level: %s", logging.getLevelName(app.logger.level))
 
     # Test logging color formats during debug mode
@@ -75,6 +73,19 @@ def create_app(test_config: dict[str, Any] | None = None):
     @validate()
     def root():  # type: ignore
         return ResponseModel()
+
+    @app.after_request
+    def logging_request(response: Response):
+        app.logger.info(
+            '{remote_addr} -> "{method} {endpoint} {protocol}" {status_code}'.format(
+                remote_addr=request.remote_addr,
+                method=request.method,
+                endpoint=request.full_path,
+                protocol=request.environ.get("SERVER_PROTOCOL"),
+                status_code=response.default_status,
+            )
+        )
+        return response
 
     app.register_error_handler(ValidationError, validation_error_handler)
     app.register_blueprint(api.route)
