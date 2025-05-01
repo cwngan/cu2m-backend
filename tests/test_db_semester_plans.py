@@ -27,6 +27,21 @@ def test_course_plan(test_user, get_db: GetDatabase):
     return course_plan
 
 
+@pytest.fixture
+def test_two_course_plans(test_user, get_db: GetDatabase):
+    course_plans = []
+    for i in range(2):
+        course_plan = {
+            "description": random_string(20),
+            "name": random_string(),
+            "user_id": test_user.id,
+        }
+        course_plan_id = get_db().course_plans.insert_one(course_plan).inserted_id
+        course_plan["_id"] = course_plan_id
+        course_plans.append(course_plan)
+    return course_plans
+
+
 def test_create_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     semester_plan = create_semester_plan(
         course_plan_id=str(test_course_plan["_id"]),
@@ -106,3 +121,18 @@ def test_semester_plan_compound_key(
         assert semester_plan is not None
     else:
         assert semester_plan is None
+
+
+def test_different_course_plans_create_same_compound_key_semester_plan(
+    test_two_course_plans, get_db: GetDatabase
+):
+    for test_course_plan in test_two_course_plans:
+        semester_plan = create_semester_plan(
+            course_plan_id=str(test_course_plan["_id"]),
+            semester=1,
+            year=2025,
+        )
+        assert semester_plan is not None
+        assert semester_plan.course_plan_id == test_course_plan["_id"]
+        assert semester_plan.semester == 1
+        assert semester_plan.year == 2025
