@@ -1,7 +1,8 @@
 from bson import ObjectId
-from flask import Blueprint, session
-from flask_pydantic import validate
+from flask import Blueprint
+from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.auth_guard import auth_guard
 from flaskr.api.reqmodels import (
     CoursePlanCreateRequestModel,
     CoursePlanUpdateRequestModel,
@@ -14,22 +15,15 @@ from flaskr.db.course_plans import (
     get_course_plan,
     update_course_plan,
 )
-from flaskr.db.models import CoursePlanRead, CoursePlanUpdate
-from flaskr.db.user import get_user_by_username
+from flaskr.db.models import CoursePlanRead, CoursePlanUpdate, User
 
 route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 
 
 @route.route("/", methods=["GET"])
+@auth_guard
 @validate(response_by_alias=True)
-def read_all():
-    username = session["username"]
-    user = get_user_by_username(username=username) if username else None
-    if not user:
-        return (
-            CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+def read_all(user: User):
     res = [
         CoursePlanRead.model_validate(plan.model_dump())
         for plan in get_all_course_plans(user.id)
@@ -38,15 +32,9 @@ def read_all():
 
 
 @route.route("/<course_plan_id>", methods=["GET"])
+@auth_guard
 @validate(response_by_alias=True)
-def read_one(course_plan_id: str):
-    username = session["username"]
-    user = get_user_by_username(username=username) if username else None
-    if not user:
-        return (
-            CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+def read_one(course_plan_id: str, user: User):
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed ID"),
@@ -66,15 +54,9 @@ def read_one(course_plan_id: str):
 
 
 @route.route("/", methods=["POST"])
+@auth_guard
 @validate(response_by_alias=True)
-def create(body: CoursePlanCreateRequestModel):
-    username = session["username"]
-    user = get_user_by_username(username=username) if username else None
-    if not user:
-        return (
-            CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+def create(body: CoursePlanCreateRequestModel, user: User):
     res = create_course_plan(
         description=body.description, name=body.name, user_id=user.id
     )
@@ -88,15 +70,9 @@ def create(body: CoursePlanCreateRequestModel):
 
 
 @route.route("/<course_plan_id>", methods=["PATCH"])
+@auth_guard
 @validate(response_by_alias=True)
-def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
-    username = session["username"]
-    user = get_user_by_username(username=username) if username else None
-    if not user:
-        return (
-            CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+def update(course_plan_id: str, body: CoursePlanUpdateRequestModel, user: User):
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed course plan ID"),
@@ -116,15 +92,9 @@ def update(course_plan_id: str, body: CoursePlanUpdateRequestModel):
 
 
 @route.route("/<course_plan_id>", methods=["DELETE"])
+@auth_guard
 @validate(response_by_alias=True)
-def delete(course_plan_id: str):
-    username = session["username"]
-    user = get_user_by_username(username=username) if username else None
-    if not user:
-        return (
-            CoursePlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
+def delete(course_plan_id: str, user: User):
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed course plan ID"),
