@@ -38,15 +38,19 @@ poetry add <package-name>
 1. Download Docker and Docker Compose.
 2. Use the following command for (re)building and running the docker container with watching. With watching, you can edit the source code and docker will try to reflect those changes as soon as possible.
 ```bash
-docker compose up --build --watch
+docker compose --profile dev up --build --watch
 ```
 3. Use the following command to start the server with watching.
 ```bash
-docker compose up --watch
+docker compose --profile dev up --watch
 ```
 4. You may want to run it in detach mode. Type the following command to do so (doesn't support watch).
 ```bash
-docker compose up -d
+docker compose --profile dev up -d
+```
+5. Use the following command for deploying in production environment.
+```bash
+docker compose --profile prod up
 ```
 
 # Development Conventions
