@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: docker compose up
-        run: docker compose up -d mongodb
+        run: docker compose --profile prod up -d mongodb
       - name: Check running containers
         run: docker ps -a
       - name: Check logs
