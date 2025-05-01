@@ -74,3 +74,19 @@ def test_delete_semester_plan(test_user, test_course_plan, get_db: GetDatabase):
     assert deleted_plan is not None
     assert deleted_plan.id == semester_plan.id
     assert get_semester_plan(str(semester_plan.id)) is None
+
+
+def test_semester_plan_uniqueness(test_user, test_course_plan, get_db: GetDatabase):
+    assert create_semester_plan(
+        course_plan_id=str(test_course_plan["_id"]),
+        semester=1,
+        year=2025,
+    )
+    assert (
+        create_semester_plan(
+            course_plan_id=str(test_course_plan["_id"]),
+            semester=1,
+            year=2025,
+        )
+        is None
+    )

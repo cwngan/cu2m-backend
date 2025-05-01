@@ -109,5 +109,79 @@ def test_delete_semester_plan(logged_in_client, test_course_plan):
 
     response = logged_in_client.delete(f"/api/semester-plans/{created_data['_id']}")
     assert response.status_code == 200
-    data = response.get_json()
-    assert data["status"] == "OK"
+    assert response.get_json()["status"] == "OK"
+
+    # Try to delete the same thing to ensure the system is working properly
+    response = logged_in_client.delete(f"/api/semester-plans/{created_data['_id']}")
+    assert response.status_code == 404
+    assert response.get_json()["status"] == "ERROR"
+
+
+def test_semester_plan_uniqueness(logged_in_client, test_course_plan):
+    semester_plan_data = {
+        "course_plan_id": str(test_course_plan["_id"]),
+        "semester": 1,
+        "year": 2025,
+    }
+    create_response = logged_in_client.post(
+        "/api/semester-plans/", json=semester_plan_data
+    )
+    assert create_response.status_code == 200
+
+    # Create a semester plan with same semester and year, should return with error
+    create_response = logged_in_client.post(
+        "/api/semester-plans/", json=semester_plan_data
+    )
+    assert create_response.status_code == 400
+    assert create_response.get_json()["status"] == "ERROR"
+
+
+def test_creating_all_valid_semesters(logged_in_client, test_course_plan):
+    for num in range(1, 4):
+        semester_plan_data = {
+            "course_plan_id": str(test_course_plan["_id"]),
+            "semester": num,
+            "year": 2025,
+        }
+        create_response = logged_in_client.post(
+            "/api/semester-plans/", json=semester_plan_data
+        )
+        assert create_response.status_code == 200
+
+
+def test_creating_invalid_semesters(logged_in_client, test_course_plan):
+    for num in [0, 4, -100, 69420]:
+        semester_plan_data = {
+            "course_plan_id": str(test_course_plan["_id"]),
+            "semester": num,
+            "year": 2025,
+        }
+        create_response = logged_in_client.post(
+            "/api/semester-plans/", json=semester_plan_data
+        )
+        assert create_response.status_code == 400
+        assert create_response.get_json()["status"] == "ERROR"
+
+
+def test_update_invalid_semester_number(logged_in_client, test_course_plan):
+    semester_plan_data = {
+        "course_plan_id": str(test_course_plan["_id"]),
+        "semester": 1,
+        "year": 2025,
+    }
+    create_response = logged_in_client.post(
+        "/api/semester-plans/", json=semester_plan_data
+    )
+    assert create_response.status_code == 200
+    created_data = create_response.get_json()["data"]
+
+    for num in [0, 4, -100, 69420]:
+        updated_data = {
+            "semester": num,
+            "year": 2026,
+        }
+        response = logged_in_client.put(
+            f"/api/semester-plans/{created_data['_id']}", json=updated_data
+        )
+        assert response.status_code == 400
+        assert response.get_json()["status"] == "ERROR"
