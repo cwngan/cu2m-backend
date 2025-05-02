@@ -47,13 +47,11 @@ def get_semester_plan_by_attributes(course_plan_id: str, semester: int, year: in
 
 def update_semester_plan(semester_plan_id: str, updates: dict):
     db = get_db().semester_plans
-    # logger.debug(f"Updating semester plan {plan_id} with updates: {updates}")
     doc = db.find_one_and_update(
         {"_id": ObjectId(semester_plan_id)},
         {"$set": updates},
         return_document=ReturnDocument.AFTER,
     )
-    # logger.debug(f"Updated document: {doc}")
     return SemesterPlan.model_validate(doc) if doc else None
 
 
