@@ -1,40 +1,34 @@
 # import logging
 
 from bson import ObjectId
-from flask import Blueprint, session
+from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.auth_guard import auth_guard
 from flaskr.api.reqmodels import (
     SemesterPlanCreateRequestModel,
     SemesterPlanUpdateRequestModel,
 )
 from flaskr.api.respmodels import SemesterPlanResponseModel
+from flaskr.db.course_plans import get_course_plan  # Corrected the import
 from flaskr.db.semester_plans import (
     create_semester_plan,
+    delete_semester_plan,
     get_semester_plan,
     update_semester_plan,
-    delete_semester_plan,
 )
-from flaskr.db.user import get_user_by_username
-from flaskr.db.course_plans import get_course_plan  # Corrected the import
-
+from flaskr.db.user import User
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 
 
 @route.route("/<semester_plan_id>", methods=["GET"])
+@auth_guard
 @validate(response_by_alias=True)
 def get(semester_plan_id):
     """
     Return the SemesterPlan with the specified id.
     """
-    username = session.get("username")
-    user = get_user_by_username(username) if username else None
-    if not user:
-        return (
-            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
@@ -53,19 +47,12 @@ def get(semester_plan_id):
 
 
 @route.route("/", methods=["POST"])
+@auth_guard
 @validate(response_by_alias=True)
-def post(body: SemesterPlanCreateRequestModel):
+def post(body: SemesterPlanCreateRequestModel, user: User):
     """
     Create a SemesterPlan with the given parameters.
     """
-    username = session.get("username")
-    user = get_user_by_username(username) if username else None
-    if not user:
-        return (
-            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
-
     # Validate and convert course_plan_id
     try:
         course_plan_id = ObjectId(body.course_plan_id)
@@ -100,15 +87,9 @@ def post(body: SemesterPlanCreateRequestModel):
 
 
 @route.route("/<semester_plan_id>", methods=["PUT"])
+@auth_guard
 @validate(response_by_alias=True)
 def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
-    username = session.get("username")
-    user = get_user_by_username(username) if username else None
-    if not user:
-        return (
-            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
@@ -128,15 +109,9 @@ def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
 
 
 @route.route("/<semester_plan_id>", methods=["DELETE"])
+@auth_guard
 @validate(response_by_alias=True)
 def delete(semester_plan_id):
-    username = session.get("username")
-    user = get_user_by_username(username) if username else None
-    if not user:
-        return (
-            SemesterPlanResponseModel(status="ERROR", error="Unauthorized"),
-            401,
-        )
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
