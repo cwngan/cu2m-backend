@@ -11,6 +11,7 @@ class ResponseError(StrEnum):
 
     NotFound = "The requested resource was not found"
     BadRequest = "The request was malformed or invalid"
+    DuplicateResource = "A resource with these properties already exists"
 
     InternalError = "An internal server error occurred."
 
@@ -25,9 +26,6 @@ class UserAuthErrors(StrEnum):
     InvalidLicenseKey = "Invalid license key"
     UsernameTaken = "Username already taken"
     RegistrationFailed = "Registration failed"
-    UserAlreadyExists = "User already exists"
-
-    UserNotFound = "User not found"
 
     InvalidResetToken = "Invalid reset token"
 
