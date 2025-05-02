@@ -92,7 +92,7 @@ def test_create_course_plan(logged_in_client: FlaskClient, test_user: User):
         assert response.status_code == 200
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
         assert course_plan_response.status == "OK"
-        assert type(course_plan_response.data) == CoursePlanRead
+        assert isinstance(course_plan_response.data, CoursePlanRead)
         assert abs(course_plan_response.data.updated_at - plan.updated_at) < timedelta(
             seconds=1
         )
@@ -278,7 +278,7 @@ def test_delete_course_plan(
     assert response.status_code == 200
     course_plan_response = CoursePlanResponseModel.model_validate(response.json)
     assert course_plan_response.status == "OK"
-    assert type(course_plan_response.data) == list
+    assert isinstance(course_plan_response.data, list)
     assert len(course_plan_response.data) == 0
 
 
@@ -291,7 +291,7 @@ def test_unauthorised_access(logged_in_client: FlaskClient, test_user2: User):
     get_all_res = CoursePlanResponseModel.model_validate(
         logged_in_client.get("/api/course-plans/").json
     )
-    assert type(get_all_res.data) == list
+    assert isinstance(get_all_res.data, list)
     assert unauthorised_plan.id not in [plan.id for plan in get_all_res.data]
     get_res = logged_in_client.get(f"/api/course-plans/{unauthorised_plan.id}")
     patch_res = logged_in_client.patch(
