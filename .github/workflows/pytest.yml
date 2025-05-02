@@ -18,11 +18,11 @@ jobs:
         with:
           python-version: "3.12"
       - name: docker compose up
-        run: docker compose -f docker-compose.workflow.yaml --profile prod up -d mongodb
+        run: docker compose up -d mongodb
       - name: Check running containers
         run: docker ps -a
       - name: Check logs
-        run: docker compose -f docker-compose.workflow.yaml logs
+        run: docker compose logs
       - name: Create virtual env and run test
         run: |
           python -m venv ./venv
