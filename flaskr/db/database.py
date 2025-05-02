@@ -1,15 +1,16 @@
-import os
 import json
+import os
+from types import SimpleNamespace
 from typing import Any
 
-from pymongo import MongoClient
-from types import SimpleNamespace
 from jsonschema import validate
+from pymongo import MongoClient
 
+JSON = dict[str, Any]
 
 _mongo: MongoClient[dict[str, Any]] | None = None
 
-schema = {
+schema: JSON = {
     "type": "object",
     "properties": {
         "version": {"type": "integer"},
@@ -53,6 +54,9 @@ def init_db():
     load_dotenv()
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
+
+    assert course_data_filename, "COURSE_DATA_FILENAME not set in the environment"
+
     course_data = json.load(open(course_data_filename))
 
     validate(instance=course_data, schema=schema)
@@ -70,7 +74,7 @@ def init_db():
         db.courses.drop()
         db.courses.create_index("code", unique=True)
         json_courses = course_data.get("data")
-        insert_data = []
+        insert_data: list[JSON] = []
         for json_course in json_courses.values():
             json_string = json.dumps(json_course.get("data"))
             course = json.loads(json_string, object_hook=lambda d: SimpleNamespace(**d))

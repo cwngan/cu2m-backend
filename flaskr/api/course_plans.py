@@ -9,6 +9,7 @@ from flaskr.api.reqmodels import (
 )
 from flaskr.api.respmodels import (
     CoursePlanResponseModel,
+    CoursePlanWithSemestersData,
     CoursePlanWithSemestersResponseModel,
 )
 from flaskr.db.course_plans import (
@@ -18,7 +19,7 @@ from flaskr.db.course_plans import (
     get_course_plan,
     update_course_plan,
 )
-from flaskr.db.models import CoursePlanRead, CoursePlanUpdate, User, SemesterPlanRead
+from flaskr.db.models import CoursePlanRead, CoursePlanUpdate, SemesterPlanRead, User
 from flaskr.db.semester_plans import get_semester_plans_by_course_plan
 
 route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
@@ -28,6 +29,7 @@ route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 @auth_guard
 @validate(response_by_alias=True)
 def read_all(user: User):
+    assert user.id is not None, "User ID will never be None here"
     res = [
         CoursePlanRead.model_validate(plan.model_dump())
         for plan in get_all_course_plans(user.id)
@@ -39,6 +41,7 @@ def read_all(user: User):
 @auth_guard
 @validate(response_by_alias=True)
 def read_one(course_plan_id: str, user: User):
+    assert user.id is not None, "User ID will never be None here"
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed ID"),
@@ -51,17 +54,19 @@ def read_one(course_plan_id: str, user: User):
             404,
         )
     course_plan_read = CoursePlanRead.model_validate(course_plan.model_dump())
-    semester_plans = get_semester_plans_by_course_plan(str(course_plan_read.id))
+
+    assert course_plan_read.id is not None, "Course plan ID will never be None here"
+    semester_plans = get_semester_plans_by_course_plan(course_plan_read.id)
     semester_plans_read = [
         SemesterPlanRead.model_validate(sp.model_dump()) for sp in semester_plans
     ]
     return (
         CoursePlanWithSemestersResponseModel(
             status="OK",
-            data={
-                "course_plan": course_plan_read,
-                "semester_plans": semester_plans_read,
-            },
+            data=CoursePlanWithSemestersData(
+                course_plan=course_plan_read,
+                semester_plans=semester_plans_read,
+            ),
         ),
         200,
     )
@@ -71,6 +76,7 @@ def read_one(course_plan_id: str, user: User):
 @auth_guard
 @validate(response_by_alias=True)
 def create(body: CoursePlanCreateRequestModel, user: User):
+    assert user.id is not None, "User ID will never be None here"
     res = create_course_plan(
         description=body.description, name=body.name, user_id=user.id
     )
@@ -78,7 +84,7 @@ def create(body: CoursePlanCreateRequestModel, user: User):
         return CoursePlanResponseModel(status="ERROR", error="Unknown error"), 500
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
     return (
-        CoursePlanResponseModel(status="OK", data=course_plan_read.model_dump()),
+        CoursePlanResponseModel(status="OK", data=course_plan_read),
         200,
     )
 
@@ -87,6 +93,7 @@ def create(body: CoursePlanCreateRequestModel, user: User):
 @auth_guard
 @validate(response_by_alias=True)
 def update(course_plan_id: str, body: CoursePlanUpdateRequestModel, user: User):
+    assert user.id is not None, "User ID will never be None here"
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed course plan ID"),
@@ -109,6 +116,7 @@ def update(course_plan_id: str, body: CoursePlanUpdateRequestModel, user: User):
 @auth_guard
 @validate(response_by_alias=True)
 def delete(course_plan_id: str, user: User):
+    assert user.id is not None, "User ID will never be None here"
     if not ObjectId.is_valid(course_plan_id):
         return (
             CoursePlanResponseModel(status="ERROR", error="Malformed course plan ID"),
