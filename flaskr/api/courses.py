@@ -3,6 +3,7 @@ import re
 from flask import Blueprint, request
 from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.errors import ResponseError
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.courses import get_all_courses, get_courses
 
@@ -23,7 +24,7 @@ def courses():
             ):
                 return (
                     CoursesResponseModel(
-                        status="ERROR", error="Invalid course code prefix."
+                        status="ERROR", error=ResponseError.BadRequest
                     ),
                     400,
                 )
