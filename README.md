@@ -53,6 +53,16 @@ docker compose --profile dev up -d
 docker compose --profile prod up
 ```
 
+# Testing Procedure
+1. Ensure you have `pytest`.
+2. Use the following command to start testing with `pytest`.
+```bash
+MONGO_DB_USERNAME=tmp MONGO_DB_PASSWORD=tmp MONGO_DB_HOST=localhost MONGO_DB_PORT=27017 COURSE_DATA_FILENAME=courses_test.json pytest --show-capture=log --log-cli-level=INFO 
+```
+3. To run a specific test file, just mention test file path.
+4. To run a specific test name, just add `-k` flag with the test function name
+5. To increase the logger verbosity, add the environment variable `LOGGING_LEVEL=DEBUG`.
+
 # Development Conventions
 1. Use `black` for code formatting. Use the following command to format your code. You can also setup auto formatting in Visual Studio Code (install "Black Formatter" from Microsoft).
 ```bash
