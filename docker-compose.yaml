@@ -26,10 +26,6 @@ services:
       - './flaskr:/app/flaskr'
     develop:
       watch:
-        - action: restart
-          path: ./flaskr
-          ignore:
-            - __pycache__/
         - action: rebuild
           path: pyproject.toml
   cu2m-backend:
