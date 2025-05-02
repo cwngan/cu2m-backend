@@ -129,12 +129,14 @@ def test_get_course_plan(logged_in_client, course_plans):
             response.json
         )
         assert course_plans_response.status == "OK"
-        assert "course_plan" in course_plans_response.data
-        assert "semester_plans" in course_plans_response.data
+        assert hasattr(course_plans_response.data, "course_plan")
+        assert hasattr(course_plans_response.data, "semester_plans")
         assert CoursePlanRead.model_validate(
             plan.model_dump()
-        ) == CoursePlanRead.model_validate(course_plans_response.data["course_plan"])
-        assert isinstance(course_plans_response.data["semester_plans"], list)
+        ) == CoursePlanRead.model_validate(
+            course_plans_response.data.course_plan.model_dump()
+        )
+        assert isinstance(course_plans_response.data.semester_plans, list)
 
 
 def update_subtest(
@@ -166,9 +168,9 @@ def update_subtest(
     )
     # Check un-updated fields
     for field in check_fields:
-        # Convert dict to CoursePlanRead for comparison
+        # Convert to CoursePlanRead for comparison
         original_course_plan = CoursePlanRead.model_validate(
-            original_doc.data["course_plan"]
+            original_doc.data.course_plan.model_dump()
         )
         assert (
             course_plans_response.data.model_dump()[field]

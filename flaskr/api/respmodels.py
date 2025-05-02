@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 
 from pydantic import BaseModel
 
@@ -38,7 +38,10 @@ class CoursePlanResponseModel(ResponseModel):
     data: CoursePlanRead | list[CoursePlanRead] | None = None
 
 
+class CoursePlanWithSemestersData(BaseModel):
+    course_plan: CoursePlanRead
+    semester_plans: List[SemesterPlanRead]
+
+
 class CoursePlanWithSemestersResponseModel(ResponseModel):
-    data: dict | None = (
-        None  # {'course_plan': CoursePlanRead, 'semester_plans': list[SemesterPlanRead]}
-    )
+    data: CoursePlanWithSemestersData | None = None
