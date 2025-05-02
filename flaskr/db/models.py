@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+from pydantic.functional_serializers import model_serializer
 from pydantic_mongo import PydanticObjectId
 
 
@@ -65,6 +66,25 @@ class Course(CoreModel):
     prerequisites: str
     title: str
     units: float
+
+
+class CourseRead(CoreModel):
+    @model_serializer
+    def _serialize(self):
+        return {k: v for k, v in self if v is not None}
+
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    code: Optional[str] = None
+    corequisites: Optional[str] = None
+    description: Optional[str] = None
+    is_graded: Optional[bool] = None
+    not_for_major: Optional[str] = None
+    not_for_taken: Optional[str] = None
+    original: Optional[str] = None
+    parsed: Optional[bool] = None
+    prerequisites: Optional[str] = None
+    title: Optional[str] = None
+    units: Optional[float] = None
 
 
 class SemesterPlan(CoreModel):
