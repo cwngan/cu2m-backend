@@ -76,7 +76,7 @@ def create_app(test_config: dict[str, Any] | None = None):
 
     @app.after_request
     def logging_request(response: Response):
-        app.logger.info(
+        app.logger.debug(
             '{remote_addr} -> "{method} {endpoint} {protocol}" {status_code}'.format(
                 remote_addr=request.remote_addr,
                 method=request.method,
