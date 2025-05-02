@@ -7,7 +7,6 @@ class ResponseError(StrEnum):
     """
 
     Unauthorized = "Please log in to access this resource"
-    Forbidden = "You don't have permission to access this resource"
 
     NotFound = "The requested resource was not found"
     BadRequest = "The request was malformed or invalid"

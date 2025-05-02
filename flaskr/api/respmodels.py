@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel
 
@@ -20,7 +20,7 @@ class PingResponseModel(ResponseModel):
 
 
 class HealthResponseModel(ResponseModel):
-    data: dict[str, bool]
+    data: dict[str, Any]
 
 
 class CoursesResponseModel(ResponseModel):

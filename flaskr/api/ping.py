@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint
-from flask_pydantic import validate
+from flask_pydantic import validate  # type: ignore
 
 from flaskr.api.respmodels import PingResponseModel
 
