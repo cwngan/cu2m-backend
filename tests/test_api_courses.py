@@ -101,8 +101,16 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert len(course_data.get("data").items()) == len(res.data)
 
 
-def test_course_fetch_basic_flag(client: FlaskClient):
-    response = client.get("/api/courses/?basic=true")
+@pytest.mark.parametrize(
+    "test_mode",
+    [(None), ("includes"), ("excludes")],
+)
+def test_course_fetch_basic_flag(test_mode, client: FlaskClient):
+    response = client.get(
+        f"/api/courses/?basic=true&{test_mode}=code"
+        if test_mode
+        else "/api/courses/?basic=true"
+    )
 
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
@@ -170,3 +178,26 @@ def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
         lambda course: set(course.model_dump().keys()) == actual_includes,
         res.data,
     )
+
+
+@pytest.mark.parametrize(
+    "basic, valid",
+    [("true", True), ("FaLsE", True), ("Flase", False), ("Bruh", False)],
+)
+def test_basic_flag_validation(basic, valid, client: FlaskClient):
+    response = client.get(f"/api/courses/?basic={basic}")
+
+    res = CoursesResponseModel.model_validate(response.json)
+    if valid:
+        assert response.status_code == 200
+        assert res.status == "OK"
+    else:
+        assert response.status_code == 400
+        assert res.status == "ERROR"
+
+
+def test_includes_excludes_conflict(client: FlaskClient):
+    response = client.get("/api/courses/?includes=hello&excludes=world")
+    assert response.status_code == 400
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
