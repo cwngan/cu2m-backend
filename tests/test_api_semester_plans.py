@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import pytest
 from flask.testing import FlaskClient
 
-from tests.utils import random_user, random_string, GetDatabase
-from datetime import datetime
+from flaskr.api.respmodels import ResponseModel
+from tests.utils import GetDatabase, random_string, random_user
 
 
 @pytest.fixture
@@ -31,6 +33,24 @@ def logged_in_client(test_user, client: FlaskClient):
     with client.session_transaction() as session:
         session["username"] = test_user.username
     yield client
+
+
+@pytest.mark.parametrize(
+    "method, endpoint",
+    [
+        ("GET", "id"),
+        ("POST", ""),
+        ("PUT", "id"),
+        ("DELETE", "id"),
+    ],
+)
+def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str):
+    base_url = "/api/semester-plans/"
+    response = client.open(f"{base_url}{endpoint}", method=method)
+    assert response.status_code == 401
+    course_plan_response = ResponseModel.model_validate(response.json)
+    assert course_plan_response.status == "ERROR"
+    assert course_plan_response.error == "Unauthorized"
 
 
 def test_create_semester_plan(logged_in_client, test_course_plan):

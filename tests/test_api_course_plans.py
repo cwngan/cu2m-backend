@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.respmodels import CoursePlanResponseModel
+from flaskr.api.respmodels import CoursePlanResponseModel, ResponseModel
 from flaskr.db.course_plans import create_course_plan
 from flaskr.db.models import CoursePlan, CoursePlanRead, CoursePlanUpdate
 from tests.utils import GetDatabase, random_string, random_user
@@ -56,17 +56,17 @@ def logged_in_client(test_user, client: FlaskClient):
     "method, endpoint",
     [
         ("GET", ""),
-        ("GET", "asd"),
+        ("GET", "id"),
         ("POST", ""),
-        ("PATCH", "asd"),
-        ("DELETE", "asd"),
+        ("PATCH", "id"),
+        ("DELETE", "id"),
     ],
 )
 def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str):
     base_url = "/api/course-plans/"
     response = client.open(f"{base_url}{endpoint}", method=method)
     assert response.status_code == 401
-    course_plan_response = CoursePlanResponseModel.model_validate(response.json)
+    course_plan_response = ResponseModel.model_validate(response.json)
     assert course_plan_response.status == "ERROR"
     assert course_plan_response.error == "Unauthorized"
 
