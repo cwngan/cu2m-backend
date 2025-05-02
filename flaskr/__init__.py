@@ -11,28 +11,16 @@ from flaskr.db.database import init_db
 
 
 def validation_error_handler(e: ValidationError):
-    # errs: list[list[dict[Any, Any]] | None] = [
-    #     e.body_params,  # type: ignore
-    #     e.form_params,  # type: ignore
-    #     e.query_params,  # type: ignore
-    #     e.path_params,  # type: ignore
-    # ]
-    # err = None
-    # for err_list in errs:
-    #     if err_list is not None:
-    #         err = err_list
-    #         break
-    # return (
-    #     ResponseModel(
-    #         status="ERROR",
-    #         error=json.dumps(err),
-    #     ).model_dump(),
-    #     400,
-    # )
-
     return (
         ResponseModel(status="ERROR", error=ResponseError.BadRequest).model_dump(),
         400,
+    )
+
+
+def global_error_handler(e: Exception):
+    return (
+        ResponseModel(status="ERROR", error=ResponseError.InternalError).model_dump(),
+        500,
     )
 
 
@@ -60,7 +48,14 @@ def create_app(test_config: dict[str, Any] | None = None):
     def root():  # type: ignore
         return ResponseModel()
 
+    if app.testing:
+
+        @app.route("/throw", methods=["GET"])
+        def throw_error():  # type: ignore
+            raise Exception("This is a test error")
+
     app.register_error_handler(ValidationError, validation_error_handler)
+    app.register_error_handler(Exception, global_error_handler)
     app.register_blueprint(api.route)
 
     return app

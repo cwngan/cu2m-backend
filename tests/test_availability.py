@@ -4,6 +4,8 @@ from datetime import datetime
 from conftest import TEST_DB_NAME
 from flask.testing import FlaskClient
 
+from flaskr.api.errors import ResponseError
+from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.utils import GetDatabase
 
@@ -61,3 +63,14 @@ def test_db_rw(get_db: GetDatabase):
 
     userdb.delete_many({})
     assert get_precreated_user(TEST_EMAIL) is None
+
+
+def test_global_error_handler(client: FlaskClient):
+    """
+    Tests if the global error handler is working correctly.
+    """
+    response = client.get("/api/throw/")
+    assert response.status_code == 500
+    data = ResponseModel.model_validate(response.json)
+    assert data.status == "ERROR"
+    assert data.error == ResponseError.InternalError
