@@ -56,3 +56,11 @@ def client(app: Flask):
     Provide a test client for the Flask app.
     """
     return app.test_client()
+
+
+@pytest.fixture
+def client_2(app: Flask):
+    """
+    Provide another test client for the Flask app.
+    """
+    return app.test_client()

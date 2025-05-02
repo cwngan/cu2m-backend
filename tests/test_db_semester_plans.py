@@ -15,6 +15,12 @@ def test_user(get_db: GetDatabase):
     return user
 
 
+def add_course_plan_for_user(course_plan, test_user, get_db: GetDatabase):
+    course_plan_id = get_db().course_plans.insert_one(course_plan).inserted_id
+    course_plan["_id"] = course_plan_id
+    return course_plan
+
+
 @pytest.fixture
 def test_course_plan(test_user, get_db: GetDatabase):
     course_plan = {
@@ -22,9 +28,7 @@ def test_course_plan(test_user, get_db: GetDatabase):
         "name": random_string(),
         "user_id": test_user.id,
     }
-    course_plan_id = get_db().course_plans.insert_one(course_plan).inserted_id
-    course_plan["_id"] = course_plan_id
-    return course_plan
+    return add_course_plan_for_user(course_plan, test_user, get_db)
 
 
 @pytest.fixture
@@ -36,9 +40,7 @@ def test_two_course_plans(test_user, get_db: GetDatabase):
             "name": random_string(),
             "user_id": test_user.id,
         }
-        course_plan_id = get_db().course_plans.insert_one(course_plan).inserted_id
-        course_plan["_id"] = course_plan_id
-        course_plans.append(course_plan)
+        course_plans.append(add_course_plan_for_user(course_plan, test_user, get_db))
     return course_plans
 
 
