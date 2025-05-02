@@ -25,7 +25,7 @@ route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 @route.route("/<semester_plan_id>", methods=["GET"])
 @auth_guard
 @validate(response_by_alias=True)
-def get(semester_plan_id):
+def get_one_semester_plan(semester_plan_id):
     """
     Return the SemesterPlan with the specified id.
     """
@@ -49,7 +49,7 @@ def get(semester_plan_id):
 @route.route("/", methods=["POST"])
 @auth_guard
 @validate(response_by_alias=True)
-def post(body: SemesterPlanCreateRequestModel, user: User):
+def post_one_semester_plan(body: SemesterPlanCreateRequestModel, user: User):
     """
     Create a SemesterPlan with the given parameters.
     """
@@ -87,7 +87,7 @@ def post(body: SemesterPlanCreateRequestModel, user: User):
 @route.route("/<semester_plan_id>", methods=["PUT"])
 @auth_guard
 @validate(response_by_alias=True)
-def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
+def put_one_semester_plan(semester_plan_id, body: SemesterPlanUpdateRequestModel):
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
@@ -109,7 +109,7 @@ def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
 @route.route("/<semester_plan_id>", methods=["DELETE"])
 @auth_guard
 @validate(response_by_alias=True)
-def delete(semester_plan_id):
+def delete_one_semester_plan(semester_plan_id):
     if not ObjectId.is_valid(semester_plan_id):
         return (
             SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
