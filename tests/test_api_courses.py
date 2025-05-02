@@ -5,6 +5,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from flaskr.api.respmodels import CoursesResponseModel
+from flaskr.db.models import Course
 
 
 @pytest.mark.parametrize(
@@ -98,3 +99,74 @@ def test_all_courses_match_schema(client: FlaskClient):
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
     course_data = json.load(open(course_data_filename))
     assert len(course_data.get("data").items()) == len(res.data)
+
+
+def test_course_fetch_basic_flag(client: FlaskClient):
+    response = client.get("/api/courses/?basic=true")
+
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+
+    assert False not in map(
+        lambda course: set(course.model_dump().keys())
+        == set(("code", "title", "units")),
+        res.data,
+    )
+
+
+@pytest.mark.parametrize(
+    "includes",
+    [
+        (["code", "id"]),
+        (["code", "units", "foo", "bar"]),
+    ],
+)
+def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
+    response = client.get(
+        "/api/courses/?{includes}".format(
+            includes="&".join(f"includes={include}" for include in includes)
+        )
+    )
+
+    # Obtain fields that are actually used
+    actual_includes = set(includes) & set(Course.model_fields.keys())
+    # ID will never be returned
+    if "id" in actual_includes:
+        actual_includes.remove("id")
+
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+
+    assert False not in map(
+        lambda course: set(course.model_dump().keys()) == actual_includes,
+        res.data,
+    )
+
+
+@pytest.mark.parametrize(
+    "excludes",
+    [
+        (["description", "original"]),
+        (["prerequisites", "corequisites", "foo", "bar"]),
+    ],
+)
+def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
+    response = client.get(
+        "/api/courses/?{excludes}".format(
+            excludes="&".join(f"excludes={exclude}" for exclude in excludes)
+        )
+    )
+
+    # Obtain fields that are actually used
+    actual_includes = set(Course.model_fields.keys()) - set(excludes + ["id"])
+
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+
+    assert False not in map(
+        lambda course: set(course.model_dump().keys()) == actual_includes,
+        res.data,
+    )
