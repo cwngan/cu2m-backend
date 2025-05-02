@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
+from flaskr.api.errors import ResponseError
 from flaskr.api.respmodels import (
     CoursePlanResponseModel,
     CoursePlanWithSemestersResponseModel,
@@ -73,7 +74,7 @@ def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str)
     assert response.status_code == 401
     course_plan_response = ResponseModel.model_validate(response.json)
     assert course_plan_response.status == "ERROR"
-    assert course_plan_response.error == "Unauthorized"
+    assert course_plan_response.error == ResponseError.Unauthorized
 
 
 def test_create_course_plan(logged_in_client: FlaskClient, test_user: User):
