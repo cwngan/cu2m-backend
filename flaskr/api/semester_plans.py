@@ -17,7 +17,7 @@ from flaskr.db.semester_plans import (
     get_semester_plan,
     update_semester_plan,
 )
-from flaskr.db.user import User
+from flaskr.db.models import User
 
 route = Blueprint("semester_plans", __name__, url_prefix="/semester-plans")
 
