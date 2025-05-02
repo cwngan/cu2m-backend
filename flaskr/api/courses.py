@@ -15,8 +15,21 @@ def courses():
     patterns = request.args.getlist("code")
     excludes = request.args.getlist("excludes")
     includes = request.args.getlist("includes")
-    basic = request.args.get("basic") == "true"  # A flag for convenience sake
 
+    # A flag for frontend developers' convenience sake
+    basic = request.args.get("basic")
+    if basic and basic.lower() not in ["true", "false"]:
+        return (
+            CoursesResponseModel(
+                status="ERROR",
+                error="Basic flag can only be a boolean value (true or false).",
+            ),
+            400,
+        )
+    else:
+        basic = bool(basic)
+
+    # Includes and excludes list cannot exist together due to potential conflict
     if includes and excludes:
         return (
             CoursesResponseModel(
