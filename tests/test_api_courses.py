@@ -1,7 +1,7 @@
 import json
 import os
-import pytest
 
+import pytest
 from flask.testing import FlaskClient
 
 from flaskr.api.respmodels import CoursesResponseModel
@@ -16,7 +16,7 @@ from flaskr.api.respmodels import CoursesResponseModel
         ("CSCI3100", "Software Engineering"),
     ],
 )
-def test_single_exact_course_code(client: FlaskClient, input, expected):
+def test_single_exact_course_code(client: FlaskClient, input: str, expected: str):
     """
     Test if the given exact course code returns the exact expected name
     """
@@ -25,6 +25,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     courses = res.data
+    assert courses is not None
     assert len(courses) == 1
     assert courses[0].code == input
     assert courses[0].title == expected
@@ -38,7 +39,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
         (["E", "C"]),
     ],
 )
-def test_multiple_prefix_course_code(client: FlaskClient, input):
+def test_multiple_prefix_course_code(client: FlaskClient, input: list[str]):
     """
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
@@ -46,6 +47,7 @@ def test_multiple_prefix_course_code(client: FlaskClient, input):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) >= 1
     for course in res.data:
         ok = False
@@ -64,6 +66,7 @@ def test_empty_course_code(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) == 0
 
 
@@ -77,7 +80,7 @@ def test_empty_course_code(client: FlaskClient):
         (["", "CSCI"]),
     ],
 )
-def test_invalid_prefix_course_code(client: FlaskClient, input):
+def test_invalid_prefix_course_code(client: FlaskClient, input: list[str]):
     """
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
@@ -96,5 +99,7 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert res.status == "OK"
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
+    assert course_data_filename is not None, "COURSE_DATA_FILENAME is not set"
     course_data = json.load(open(course_data_filename))
+    assert res.data is not None
     assert len(course_data.get("data").items()) == len(res.data)

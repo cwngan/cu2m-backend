@@ -84,7 +84,7 @@ def update_course_plan(
     return CoursePlan.model_validate(doc) if doc else None
 
 
-def delete_course_plan(course_plan_id: ObjectId, user_id: ObjectId) -> CoursePlan:
+def delete_course_plan(course_plan_id: ObjectId, user_id: ObjectId):
     """
     Delete CoursePlan of specified ID.
 

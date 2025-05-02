@@ -1,10 +1,13 @@
 import json
 import os
+from typing import Any
 
 from flask.testing import FlaskClient
 
-from flaskr.db.database import init_db
 from flaskr.api.respmodels import CoursesResponseModel
+from flaskr.db.database import init_db
+
+JSON = dict[str, Any]
 
 
 def test_courses_version_upgrade(client: FlaskClient):
@@ -12,11 +15,14 @@ def test_courses_version_upgrade(client: FlaskClient):
     init_db()
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
+
+    assert course_data_filename is not None, "COURSE_DATA_FILENAME is not set"
+
     course_data = json.load(open(course_data_filename))
     version = course_data.get("version")
 
     new_version = version + 1
-    new_data = {
+    new_data: JSON = {
         "ZZZZ9999": {
             "parsed": True,
             "data": {
@@ -47,18 +53,21 @@ def test_courses_version_upgrade(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) == 1
 
     response = client.get("/api/courses/?code=ZZZZ9999")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) == 1
 
     response = client.get("/api/courses/?code=CSCI3100")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) == 0
 
     os.environ["COURSE_DATA_FILENAME"] = course_data_filename
