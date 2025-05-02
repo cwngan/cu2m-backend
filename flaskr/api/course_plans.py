@@ -7,7 +7,10 @@ from flaskr.api.reqmodels import (
     CoursePlanCreateRequestModel,
     CoursePlanUpdateRequestModel,
 )
-from flaskr.api.respmodels import CoursePlanResponseModel
+from flaskr.api.respmodels import (
+    CoursePlanResponseModel,
+    CoursePlanWithSemestersResponseModel,
+)
 from flaskr.db.course_plans import (
     create_course_plan,
     delete_course_plan,
@@ -15,7 +18,8 @@ from flaskr.db.course_plans import (
     get_course_plan,
     update_course_plan,
 )
-from flaskr.db.models import CoursePlanRead, CoursePlanUpdate, User
+from flaskr.db.models import CoursePlanRead, CoursePlanUpdate, User, SemesterPlanRead
+from flaskr.db.semester_plans import get_semester_plans_by_course_plan
 
 route = Blueprint("course-plans", __name__, url_prefix="/course-plans")
 
@@ -47,8 +51,18 @@ def read_one(course_plan_id: str, user: User):
             404,
         )
     course_plan_read = CoursePlanRead.model_validate(course_plan.model_dump())
+    semester_plans = get_semester_plans_by_course_plan(str(course_plan_read.id))
+    semester_plans_read = [
+        SemesterPlanRead.model_validate(sp.model_dump()) for sp in semester_plans
+    ]
     return (
-        CoursePlanResponseModel(status="OK", data=course_plan_read),
+        CoursePlanWithSemestersResponseModel(
+            status="OK",
+            data={
+                "course_plan": course_plan_read,
+                "semester_plans": semester_plans_read,
+            },
+        ),
         200,
     )
 

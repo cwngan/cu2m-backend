@@ -36,3 +36,9 @@ class SemesterPlanResponseModel(ResponseModel):
 
 class CoursePlanResponseModel(ResponseModel):
     data: CoursePlanRead | list[CoursePlanRead] | None = None
+
+
+class CoursePlanWithSemestersResponseModel(ResponseModel):
+    data: dict | None = (
+        None  # {'course_plan': CoursePlanRead, 'semester_plans': list[SemesterPlanRead]}
+    )

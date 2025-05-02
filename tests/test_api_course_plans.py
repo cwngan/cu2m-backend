@@ -4,7 +4,11 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.respmodels import CoursePlanResponseModel, ResponseModel
+from flaskr.api.respmodels import (
+    CoursePlanResponseModel,
+    ResponseModel,
+    CoursePlanWithSemestersResponseModel,
+)
 from flaskr.db.course_plans import create_course_plan
 from flaskr.db.models import CoursePlan, CoursePlanRead, CoursePlanUpdate
 from tests.utils import GetDatabase, random_string, random_user
@@ -121,18 +125,23 @@ def test_get_course_plan(logged_in_client, course_plans):
     for plan in course_plans:
         response = logged_in_client.get(f"/api/course-plans/{plan.id}")
         assert response.status_code == 200
-        course_plans_response = CoursePlanResponseModel.model_validate(response.json)
-        assert course_plans_response.status == "OK"
-        assert (
-            CoursePlanRead.model_validate(plan.model_dump())
-            == course_plans_response.data
+        course_plans_response = CoursePlanWithSemestersResponseModel.model_validate(
+            response.json
         )
+        assert course_plans_response.status == "OK"
+        assert "course_plan" in course_plans_response.data
+        assert "semester_plans" in course_plans_response.data
+        assert CoursePlanRead.model_validate(
+            plan.model_dump()
+        ) == CoursePlanRead.model_validate(course_plans_response.data["course_plan"])
+        assert isinstance(course_plans_response.data["semester_plans"], list)
 
 
 def update_subtest(
     plan, logged_in_client, update_obj: CoursePlanUpdate, check_fields: list[str] = []
 ):
-    original_doc = CoursePlanResponseModel.model_validate(
+    # Use the new response model for GET
+    original_doc = CoursePlanWithSemestersResponseModel.model_validate(
         logged_in_client.get(f"/api/course-plans/{plan.id}").json
     )
     response = logged_in_client.patch(
@@ -157,9 +166,13 @@ def update_subtest(
     )
     # Check un-updated fields
     for field in check_fields:
+        # Convert dict to CoursePlanRead for comparison
+        original_course_plan = CoursePlanRead.model_validate(
+            original_doc.data["course_plan"]
+        )
         assert (
             course_plans_response.data.model_dump()[field]
-            == original_doc.data.model_dump()[field]
+            == original_course_plan.model_dump()[field]
         )
 
 
