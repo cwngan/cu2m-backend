@@ -85,6 +85,7 @@ def init_db():
     db.semester_plans.create_index(["course_plan_id", "year", "semester"], unique=True)
     db.tokens.create_index("token", unique=True)
     db.tokens.create_index("expires_at", expireAfterSeconds=0)
+    db.course_plans.create_index("user_id")
 
 
 def get_mongo_client():
