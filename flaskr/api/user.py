@@ -5,6 +5,7 @@ from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
 from flaskr.api.auth_guard import auth_guard
+from flaskr.api.errors import UserAuthErrors
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,
     UserForgotPasswordModel,
@@ -36,13 +37,15 @@ class InvalidCredential(Exception):
 @validate(response_by_alias=True)
 def signup(body: UserCreateRequestModel):
     user_create = body
-
+    
     # Verify the provided license key against the pre-created record.
     # For example, fetch the pre-created user by email with is_active=False.
     pre_created = get_precreated_user(user_create.email)
     if not pre_created:
         return (
-            UserResponseModel(status="ERROR", error="Pre-registration not found."),
+            UserResponseModel(
+                status="ERROR", error=UserAuthErrors.PreRegistrationNotFound
+            ),
             400,
         )
 
@@ -51,14 +54,14 @@ def signup(body: UserCreateRequestModel):
         user_create.license_key, pre_created.license_key_hash
     ):
         return (
-            UserResponseModel(status="ERROR", error="Invalid license key."),
+            UserResponseModel(status="ERROR", error=UserAuthErrors.InvalidLicenseKey),
             400,
         )
 
     # Username regex and availability can be handled in reqmodels validation
     if get_user_by_username(user_create.username):
         return (
-            UserResponseModel(status="ERROR", error="Username already taken."),
+            UserResponseModel(status="ERROR", error=UserAuthErrors.UsernameTaken),
             400,
         )
 
@@ -66,7 +69,7 @@ def signup(body: UserCreateRequestModel):
     user = activate_user(pre_created, user_create)
     if not user:
         return (
-            UserResponseModel(status="ERROR", error="Registration failed."),
+            UserResponseModel(status="ERROR", error=UserAuthErrors.RegistrationFailed),
             400,
         )
 
@@ -97,7 +100,7 @@ def login(body: UserLoginRequestModel):
     user = get_user_by_username(username)
     if not user or not PasswordHasher.verify_password(user.password_hash, password):
         return (
-            UserResponseModel(status="ERROR", error="Invalid username or password."),
+            UserResponseModel(status="ERROR", error=UserAuthErrors.InvalidCredentials),
             401,
         )
     session["username"] = username
@@ -144,7 +147,7 @@ def _verify_token(body: UserVerifyTokenModel):
 def verify_token(body: UserVerifyTokenModel):
     if not _verify_token(body):
         return (
-            ResponseModel(status="ERROR", error="Invalid token"),
+            ResponseModel(status="ERROR", error=UserAuthErrors.InvalidResetToken),
             400,
         )
     return ResponseModel(), 200
@@ -155,7 +158,7 @@ def verify_token(body: UserVerifyTokenModel):
 def reset_password(body: UserResetPasswordModel):
     if not _verify_token(body):
         return (
-            ResponseModel(status="ERROR", error="Invalid token"),
+            ResponseModel(status="ERROR", error=UserAuthErrors.InvalidResetToken),
             400,
         )
 

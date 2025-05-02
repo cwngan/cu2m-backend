@@ -1,13 +1,14 @@
-from typing import Literal, Optional, List
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel
 
-from flaskr.db.models import Course, CoursePlanRead, UserRead, SemesterPlanRead
+from flaskr.api.errors import APIErrors
+from flaskr.db.models import Course, CoursePlanRead, SemesterPlanRead, UserRead
 
 
 class ResponseModel(BaseModel):
     status: Literal["OK", "ERROR"] = "OK"
-    error: Optional[str] = None
+    error: Optional[APIErrors] = None
 
 
 class RootResponseModel(ResponseModel):

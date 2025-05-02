@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any
 
@@ -6,27 +5,33 @@ from flask import Flask
 from flask_pydantic import ValidationError, validate  # type: ignore
 
 from flaskr import api
+from flaskr.api.errors import ResponseError
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
 
 
 def validation_error_handler(e: ValidationError):
-    errs: list[list[dict[Any, Any]] | None] = [
-        e.body_params,  # type: ignore
-        e.form_params,  # type: ignore
-        e.query_params,  # type: ignore
-        e.path_params,  # type: ignore
-    ]
-    err = None
-    for err_list in errs:
-        if err_list is not None:
-            err = err_list
-            break
+    # errs: list[list[dict[Any, Any]] | None] = [
+    #     e.body_params,  # type: ignore
+    #     e.form_params,  # type: ignore
+    #     e.query_params,  # type: ignore
+    #     e.path_params,  # type: ignore
+    # ]
+    # err = None
+    # for err_list in errs:
+    #     if err_list is not None:
+    #         err = err_list
+    #         break
+    # return (
+    #     ResponseModel(
+    #         status="ERROR",
+    #         error=json.dumps(err),
+    #     ).model_dump(),
+    #     400,
+    # )
+
     return (
-        ResponseModel(
-            status="ERROR",
-            error=json.dumps(err),
-        ).model_dump(),
+        ResponseModel(status="ERROR", error=ResponseError.BadRequest).model_dump(),
         400,
     )
 

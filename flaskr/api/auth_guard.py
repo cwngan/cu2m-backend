@@ -3,6 +3,7 @@ from typing import Callable, ParamSpec, TypeVar
 
 from flask import session
 
+from flaskr.api.errors import ResponseError
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import get_user_by_username
 
@@ -28,7 +29,9 @@ def auth_guard(func: Callable[P, R]):
         user = get_user_by_username(username=username) if username else None
         if not user:
             return (
-                ResponseModel(status="ERROR", error="Unauthorized").model_dump(),
+                ResponseModel(
+                    status="ERROR", error=ResponseError.Unauthorized
+                ).model_dump(),
                 401,
             )
         if has_user:
