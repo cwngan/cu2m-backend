@@ -31,8 +31,8 @@ def get(semester_plan_id):
     """
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
-            400,
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
+            404,
         )
     semester_plan = get_semester_plan(semester_plan_id)
     if not semester_plan:
@@ -53,22 +53,20 @@ def post(body: SemesterPlanCreateRequestModel, user: User):
     """
     Create a SemesterPlan with the given parameters.
     """
-    # Validate and convert course_plan_id
-    try:
-        course_plan_id = ObjectId(body.course_plan_id)
-    except Exception:
+    # Validate course plan ID
+    if not ObjectId.is_valid(body.course_plan_id):
         return (
-            SemesterPlanResponseModel(status="ERROR", error="Invalid course_plan_id"),
-            400,
+            SemesterPlanResponseModel(status="ERROR", error="Course plan not found"),
+            404,
         )
 
+    course_plan_id = ObjectId(body.course_plan_id)
+
     # Ensure the course plan exists and belongs to the user
-    course_plan = get_course_plan(course_plan_id, user.id)
+    course_plan = get_course_plan(ObjectId(course_plan_id), user.id)
     if not course_plan:
         return (
-            SemesterPlanResponseModel(
-                status="ERROR", error="Course plan not found or unauthorized"
-            ),
+            SemesterPlanResponseModel(status="ERROR", error="Course plan not found"),
             404,
         )
 
@@ -92,8 +90,8 @@ def post(body: SemesterPlanCreateRequestModel, user: User):
 def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
-            400,
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
+            404,
         )
     updates = body.model_dump(exclude_none=True)
     updated_plan = update_semester_plan(semester_plan_id, updates)
@@ -114,8 +112,8 @@ def put(semester_plan_id, body: SemesterPlanUpdateRequestModel):
 def delete(semester_plan_id):
     if not ObjectId.is_valid(semester_plan_id):
         return (
-            SemesterPlanResponseModel(status="ERROR", error="Malformed ID"),
-            400,
+            SemesterPlanResponseModel(status="ERROR", error="Semester plan not found"),
+            404,
         )
     deleted_plan = delete_semester_plan(semester_plan_id)
     if not deleted_plan:
