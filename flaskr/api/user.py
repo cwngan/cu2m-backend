@@ -5,7 +5,7 @@ from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
 from flaskr.api.auth_guard import auth_guard
-from flaskr.api.errors import UserAuthErrors
+from flaskr.api.errors import ResponseError, UserAuthErrors
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,
     UserForgotPasswordModel,
@@ -37,7 +37,7 @@ class InvalidCredential(Exception):
 @validate(response_by_alias=True)
 def signup(body: UserCreateRequestModel):
     user_create = body
-    
+
     # Verify the provided license key against the pre-created record.
     # For example, fetch the pre-created user by email with is_active=False.
     pre_created = get_precreated_user(user_create.email)
@@ -68,9 +68,10 @@ def signup(body: UserCreateRequestModel):
     # Update pre-created record to activate account and update with credentials.
     user = activate_user(pre_created, user_create)
     if not user:
+        # this case cannot happen under normal circumstances
         return (
-            UserResponseModel(status="ERROR", error=UserAuthErrors.RegistrationFailed),
-            400,
+            UserResponseModel(status="ERROR", error=ResponseError.InternalError),
+            500,
         )
 
     session["username"] = user.username

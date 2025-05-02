@@ -24,7 +24,6 @@ class UserAuthErrors(StrEnum):
     PreRegistrationNotFound = "Pre-registration not found"
     InvalidLicenseKey = "Invalid license key"
     UsernameTaken = "Username already taken"
-    RegistrationFailed = "Registration failed"
 
     InvalidResetToken = "Invalid reset token"
 
