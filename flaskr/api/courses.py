@@ -11,7 +11,7 @@ route = Blueprint("courses", __name__, url_prefix="/courses")
 
 
 @route.route("/", methods=["GET"])
-@validate(response_by_alias=True)
+@validate(response_by_alias=True, exclude_none=True)
 def courses():
     patterns = request.args.getlist("code")
     excludes = request.args.getlist("excludes")

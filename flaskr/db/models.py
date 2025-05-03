@@ -69,10 +69,6 @@ class Course(CoreModel):
 
 
 class CourseRead(CoreModel):
-    @model_serializer
-    def _serialize(self):
-        return {k: v for k, v in self if v is not None}
-
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     code: Optional[str] = None
     corequisites: Optional[str] = None
