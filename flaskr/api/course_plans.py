@@ -63,6 +63,9 @@ def create(body: CoursePlanCreateRequestModel, user: User):
     if not res:
         return CoursePlanResponseModel(status="ERROR", error="Unknown error"), 500
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
+
+    # TODO: Initialize semester plans according to the given years
+
     return (
         CoursePlanResponseModel(status="OK", data=course_plan_read.model_dump()),
         200,
