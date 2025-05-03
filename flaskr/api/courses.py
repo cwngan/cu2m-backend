@@ -2,6 +2,7 @@ import re
 from flask import Blueprint, request
 from flask_pydantic import validate
 
+from bson import ObjectId
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.courses import get_all_courses, get_courses
 from flaskr.db.models import Course
@@ -15,6 +16,8 @@ def courses():
     patterns = request.args.getlist("code")
     excludes = request.args.getlist("excludes")
     includes = request.args.getlist("includes")
+    next = request.args.get("next", default="0" * 24)
+    limit = request.args.get("limit", default="100")
 
     # A flag for frontend developers' convenience sake
     basic = request.args.get("basic")
@@ -28,6 +31,27 @@ def courses():
         )
     else:
         basic = bool(basic)
+
+    # Verify next value
+    if not ObjectId.is_valid(next):
+        return (
+            CoursesResponseModel(status="ERROR", error="Invalid next value."),
+            400,
+        )
+    else:
+        next = ObjectId(next)
+
+    # Verify limit value
+    if not limit.isdigit() or not (0 < int(limit) < 2**63):
+        return (
+            CoursesResponseModel(
+                status="ERROR",
+                error="Invalid limit value (should be a positive 8-byte integer).",
+            ),
+            400,
+        )
+    else:
+        limit = int(limit)
 
     # Includes and excludes list cannot exist together due to potential conflict
     if includes and excludes:
@@ -45,12 +69,13 @@ def courses():
     if basic:
         excludes = list(
             filter(
-                lambda attr: attr not in ["code", "title", "units"], course_attributes
+                lambda attr: attr not in ["code", "title", "units"],
+                course_attributes,
             )
         )
     elif includes:
         excludes = list(filter(lambda attr: attr not in includes, course_attributes))
-    elif set(excludes + ["id"]) == set(course_attributes):
+    elif set(excludes) == set(course_attributes):
         return (
             CoursesResponseModel(
                 status="ERROR",
@@ -66,12 +91,13 @@ def courses():
             lambda exclude: exclude.lower() in course_attributes, excludes
         )
     }
-    # For exclude mode, auto escape ID because it's not quite useful for course fetching
-    projection["_id"] = False
+    # Must return ID for pagination
+    if projection:
+        projection["_id"] = True
 
     courses = None
     if not patterns:
-        courses = get_all_courses(projection)
+        courses = get_all_courses(projection, next, limit)
         return CoursesResponseModel(data=courses)
     else:
         for pattern in patterns:
@@ -84,6 +110,6 @@ def courses():
                     ),
                     400,
                 )
-        courses = get_courses(patterns, projection)
+        courses = get_courses(patterns, projection, next, limit)
 
     return CoursesResponseModel(data=courses)
