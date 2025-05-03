@@ -33,4 +33,4 @@ jobs:
           poetry env use 3.12
           poetry install
       - name: Run tests
-        run: pytest --log-cli-level=INFO
+        run: poetry run pytest --log-cli-level=INFO
