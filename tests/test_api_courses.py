@@ -90,7 +90,7 @@ def test_invalid_prefix_course_code(client: FlaskClient, input):
 
 
 def test_all_courses_match_schema(client: FlaskClient):
-    response = client.get("/api/courses/")
+    response = client.get("/api/courses/?limit=9223372036854775807")
 
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
@@ -118,7 +118,7 @@ def test_course_fetch_basic_flag(test_mode, client: FlaskClient):
 
     assert False not in map(
         lambda course: set(course.model_dump().keys())
-        == set(("code", "title", "units")),
+        == set(("id", "code", "title", "units")),
         res.data,
     )
 
@@ -139,9 +139,8 @@ def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
 
     # Obtain fields that are actually used
     actual_includes = set(includes) & set(Course.model_fields.keys())
-    # ID will never be returned
-    if "id" in actual_includes:
-        actual_includes.remove("id")
+    # ID will always be returned
+    actual_includes.add("id")
 
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
@@ -158,6 +157,7 @@ def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
     [
         (["description", "original"]),
         (["prerequisites", "corequisites", "foo", "bar"]),
+        (["_id", "id"]),  # Make sure id field is always here
     ],
 )
 def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
@@ -168,7 +168,9 @@ def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
     )
 
     # Obtain fields that are actually used
-    actual_includes = set(Course.model_fields.keys()) - set(excludes + ["id"])
+    actual_includes = set(Course.model_fields.keys()) - set(excludes)
+    # ID will always be returned
+    actual_includes.add("id")
 
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
@@ -201,3 +203,60 @@ def test_includes_excludes_conflict(client: FlaskClient):
     assert response.status_code == 400
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
+
+
+def test_courses_pagination(client: FlaskClient):
+    response = client.get("/api/courses/?limit=2")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    first = set(res.data)
+    middleman = res.data[1]
+
+    response = client.get(f"/api/courses/?limit=2&next={str(res.data[0].id)}")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    second = set(res.data)
+
+    # Confirm our order is right
+    assert first & second == set([middleman])
+
+
+def test_course_pagination_with_large_next(client: FlaskClient):
+    response = client.get("/api/courses/?next=ffffffffffffffffffff0000")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    assert res.data == []
+
+
+def test_course_pagination_with_invalid_next(client: FlaskClient):
+    response = client.get("/api/courses/?next=foobar")
+    assert response.status_code == 400
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+
+
+@pytest.mark.parametrize(
+    "limit, valid",
+    [
+        (1, True),
+        (4, True),
+        (9, True),
+        (9223372036854775807, True),
+        (9223372036854775808, False),
+        (0, False),
+        (-9223372036854775808, False),
+    ],
+)
+def test_course_fetch_limit_value(limit, valid, client: FlaskClient):
+    response = client.get(f"/api/courses/?limit={limit}")
+    res = CoursesResponseModel.model_validate(response.json)
+    if valid:
+        assert response.status_code == 200
+        assert res.status == "OK"
+        assert len(res.data) <= limit
+    else:
+        assert response.status_code == 400
+        assert res.status == "ERROR"
