@@ -96,6 +96,7 @@ class CoursePlanRead(CoreModel):
 class CoursePlanCreate(CoreModel):
     description: str
     name: str
+    year: int
 
 
 class CoursePlanUpdate(CoreModel):
