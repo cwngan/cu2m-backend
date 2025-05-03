@@ -82,7 +82,7 @@ def logged_in_client_2(test_user_2: User, client_2: FlaskClient):
     [
         ("GET", "id"),
         ("POST", ""),
-        ("PUT", "id"),
+        ("PATCH", "id"),
         ("DELETE", "id"),
     ],
 )
@@ -155,10 +155,11 @@ def test_update_semester_plan(
     created_data = create_response.get_json()["data"]
 
     updated_data = {
+        "courses": ["ENGG1110", "CSCI1130"],
         "semester": 2,
         "year": 2026,
     }
-    response = logged_in_client.put(
+    response = logged_in_client.patch(
         f"/api/semester-plans/{created_data['_id']}", json=updated_data
     )
     assert response.status_code == 200
@@ -166,6 +167,7 @@ def test_update_semester_plan(
     assert data["status"] == "OK"
     assert data["data"]["semester"] == updated_data["semester"]
     assert data["data"]["year"] == updated_data["year"]
+    assert data["data"]["courses"] == ["ENGG1110", "CSCI1130"]
 
 
 def test_delete_semester_plan(
@@ -268,7 +270,7 @@ def test_update_invalid_semester_number(
             "semester": num,
             "year": 2026,
         }
-        response = logged_in_client.put(
+        response = logged_in_client.patch(
             f"/api/semester-plans/{created_data['_id']}", json=updated_data
         )
         assert response.status_code == 400
@@ -325,7 +327,7 @@ def test_different_user_access_same_semester_plan(
 
     def _cross_access(malicious_client: FlaskClient, innocent_plan: SemesterPlanRead):
         get_response = malicious_client.get(f"/api/semester-plans/{innocent_plan.id}")
-        put_response = malicious_client.put(
+        patch_response = malicious_client.patch(
             f"/api/semester-plans/{innocent_plan.id}", json={"semester": 2}
         )
         delete_response = malicious_client.delete(
@@ -333,12 +335,12 @@ def test_different_user_access_same_semester_plan(
         )
         assert (
             get_response.status_code == 404
-            and put_response.status_code == 404
+            and patch_response.status_code == 404
             and delete_response.status_code == 404
         )
         assert (
             get_response.get_json()["status"] == "ERROR"
-            and put_response.get_json()["status"] == "ERROR"
+            and patch_response.get_json()["status"] == "ERROR"
             and delete_response.get_json()["status"] == "ERROR"
         )
 
