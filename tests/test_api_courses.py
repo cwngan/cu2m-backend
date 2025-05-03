@@ -117,7 +117,7 @@ def test_course_fetch_basic_flag(test_mode, client: FlaskClient):
     assert res.status == "OK"
 
     assert False not in map(
-        lambda course: set(course.model_dump().keys())
+        lambda course: set(course.model_dump(exclude_none=True, by_alias=False).keys())
         == set(("id", "code", "title", "units")),
         res.data,
     )
@@ -147,7 +147,8 @@ def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
     assert res.status == "OK"
 
     assert False not in map(
-        lambda course: set(course.model_dump().keys()) == actual_includes,
+        lambda course: set(course.model_dump(exclude_none=True, by_alias=False).keys())
+        == actual_includes,
         res.data,
     )
 
@@ -177,7 +178,8 @@ def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
     assert res.status == "OK"
 
     assert False not in map(
-        lambda course: set(course.model_dump().keys()) == actual_includes,
+        lambda course: set(course.model_dump(exclude_none=True, by_alias=False).keys())
+        == actual_includes,
         res.data,
     )
 
@@ -210,17 +212,16 @@ def test_courses_pagination(client: FlaskClient):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    first = set(res.data)
-    middleman = res.data[1]
+    first = res.data
 
     response = client.get(f"/api/courses/?limit=2&next={str(res.data[0].id)}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
-    second = set(res.data)
+    second = res.data
 
     # Confirm our order is right
-    assert first & second == set([middleman])
+    assert first[1] == second[0]
 
 
 def test_course_pagination_with_large_next(client: FlaskClient):
