@@ -33,15 +33,18 @@ jobs:
         if: steps.cache-docker-mongo.outputs.cache-hit == 'true'
         run: docker image load --input ./ci/cache/docker/mongo/mongo-8.0.9.tar
 
-      - name: docker compose up
-        run: docker compose up -d mongodb
-
       - name: Install poetry
         run: pipx install poetry
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: 'poetry'
+
+      - name: docker compose up
+        run: docker compose up -d mongodb
+      - name: Check running containers
+        run: docker ps -a
+
       - name: install dependencies and run tests
         run: |
           poetry env use 3.12
