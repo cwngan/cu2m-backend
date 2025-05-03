@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from typing import ClassVar, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic.functional_serializers import model_serializer
 from pydantic_mongo import PydanticObjectId
 
 
