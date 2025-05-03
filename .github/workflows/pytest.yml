@@ -12,21 +12,22 @@ jobs:
       MONGO_DB_HOST: localhost
       MONGO_DB_PORT: 27017
       COURSE_DATA_FILENAME: ${{ vars.COURSE_DATA_FILENAME }}
+    services:
+      mongo:
+        image: mongo
+        ports:
+          - 27017:27017
+        env:
+          MONGO_INITDB_ROOT_USERNAME: tmp
+          MONGO_INITDB_ROOT_PASSWORD: tmp
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: docker compose up
-        run: docker compose up -d mongodb
-      - name: Check running containers
-        run: docker ps -a
-      - name: Check logs
-        run: docker compose logs
+          cache: 'poetry'
       - name: Create virtual env and run test
         run: |
-          python -m venv ./venv
-          source ./venv/bin/activate
           pip install poetry
           poetry install
           pytest --log-cli-level=INFO
