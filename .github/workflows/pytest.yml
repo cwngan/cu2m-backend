@@ -12,16 +12,30 @@ jobs:
       MONGO_DB_HOST: localhost
       MONGO_DB_PORT: 27017
       COURSE_DATA_FILENAME: ${{ vars.COURSE_DATA_FILENAME }}
-    services:
-      mongo:
-        image: mongo:8.0.9
-        ports:
-          - 27017:27017
-        env:
-          MONGO_INITDB_ROOT_USERNAME: tmp
-          MONGO_INITDB_ROOT_PASSWORD: tmp
     steps:
       - uses: actions/checkout@v4
+
+      - name: Restore Mongo Image Cache if it exists
+        id: cache-docker-mongo
+        uses: actions/cache@v3
+        with:
+          path: ci/cache/docker/mongo
+          key: cache-docker-mongo-8.0.9
+
+      - name: Update Mongo Image Cache if cache miss
+        if: steps.cache-docker-mongo.outputs.cache-hit != 'true'
+        run: |
+          docker pull mongo:8.0.9
+          mkdir -p ci/cache/docker/mongo
+          docker image save mongo:8.0.9 --output ./ci/cache/docker/mongo/mongo-8.0.9.tar
+
+      - name: Use Mongo Image Cache if cache hit
+        if: steps.cache-docker-mongo.outputs.cache-hit == 'true'
+        run: docker image load --input ./ci/cache/docker/mongo/mongo-8.0.9.tar
+
+      - name: docker compose up
+        run: docker compose up -d mongodb
+
       - name: Install poetry
         run: pipx install poetry
       - uses: actions/setup-python@v5
