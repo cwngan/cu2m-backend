@@ -4,7 +4,7 @@ import os
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.errors import ResponseError
+from flaskr.api.APIExceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
 
 
@@ -86,10 +86,10 @@ def test_invalid_prefix_course_code(client: FlaskClient, input: list[str]):
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
     response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
-    assert response.status_code == 400
+    assert response.status_code == BadRequest.status_code
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == ResponseError.BadRequest
+    assert isinstance(res.error, BadRequest)
 
 
 def test_all_courses_match_schema(client: FlaskClient):
