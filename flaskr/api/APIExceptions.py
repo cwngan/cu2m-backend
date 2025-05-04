@@ -39,17 +39,20 @@ class APIException(Exception, ABC):
 
     @classmethod
     def validate(cls, value: T):
+        if ABC in cls.__bases__:
+            raise ValueError("Cannot instantiate abstract class")
+
         if isinstance(value, cls):
             return value
 
         if not isinstance(value, dict):
-            raise ValueError()
+            raise ValueError("Expected a dictionary")
 
         if value.get("kind") != cls.__name__:
-            raise ValueError()
+            raise ValueError("Missing kind attribute or wrong kind")
 
         if not isinstance(value.get("message"), str):
-            raise ValueError()
+            raise ValueError("Missing message attribute")
 
         nw = cls()
         nw.message = value["message"]
@@ -87,6 +90,11 @@ class BadRequest(ResponseError):
 class DuplicateResource(ResponseError):
     status_code = HTTPStatus.CONFLICT
     message = "A resource with these properties already exists"
+
+
+class InternalError(ResponseError):
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR
+    message = "An internal server error occurred"
 
 
 class UserAuthErrors(APIException, ABC):
@@ -138,10 +146,12 @@ class UnionExeptionAnnotation:
 
 APIExceptions: TypeAlias = Annotated[
     Union[
+        APIException,
         Unauthorized,
         NotFound,
         BadRequest,
         DuplicateResource,
+        InternalError,
         InvalidCredentials,
         PreRegistrationNotFound,
         InvalidLicenseKey,
