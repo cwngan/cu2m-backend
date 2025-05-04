@@ -1,5 +1,6 @@
 services:
   mongodb:
+    profiles: [dev, prod]
     image: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=tmp
@@ -9,21 +10,34 @@ services:
     volumes:
       - './database/data:/data/db'
     command: --quiet
-  cu2m-backend:
-    build: .
+  cu2m-backend-dev:
+    profiles: [dev]
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       - COURSE_DATA_FILENAME=courses.json
       - MONGO_DB_HOST=mongodb
       - MONGO_DB_PORT=27017
+      - LOGGING_LEVEL=DEBUG
     ports:
-      - 8080:8080
+      - 5000:5000
+    volumes:
+      - './flaskr:/app/flaskr'
     develop:
       watch:
-        - action: sync+restart
-          path: ./flaskr
-          target: /app/flaskr
-          ignore:
-            - __pycache__/
         - action: rebuild
           path: pyproject.toml
+  cu2m-backend:
+    profiles: [prod]
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    environment:
+      - COURSE_DATA_FILENAME=courses.json
+      - MONGO_DB_HOST=mongodb
+      - MONGO_DB_PORT=27017
+      - LOGGING_LEVEL=INFO
+    ports:
+      - 8080:8080
 

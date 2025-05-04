@@ -1,8 +1,42 @@
+import logging
 import os
 import secrets
 import string
 from base64 import b64decode, b64encode
 from hashlib import scrypt, sha256
+
+from colorama import Style, Fore, Back
+
+
+class RequestFormatter(logging.Formatter):
+    default_custom_fmt = (
+        "{bold}%(asctime)s{reset} [%(levelname)s] - [%(name)s]: %(message)s".format(
+            bold=Style.BRIGHT, reset=Style.RESET_ALL
+        )
+    )
+
+    FORMATS = {
+        logging.DEBUG: Fore.WHITE,
+        logging.INFO: Fore.CYAN,
+        logging.WARNING: Fore.YELLOW,
+        logging.ERROR: Fore.RED,
+        logging.CRITICAL: Fore.WHITE + Back.RED,
+    }
+
+    def __init__(
+        self, fmt=None, datefmt=None, style="%", validate=True, *, defaults=None
+    ):
+        super().__init__(
+            self.default_custom_fmt, datefmt, style, validate, defaults=defaults
+        )
+
+    def format(self, record):
+        record.levelname = "{color}{levelname}{reset}".format(
+            color=self.FORMATS.get(record.levelno),
+            levelname=record.levelname,
+            reset=Style.RESET_ALL,
+        )
+        return super().format(record)
 
 
 class KeyGenerator:

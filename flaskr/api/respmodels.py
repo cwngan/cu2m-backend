@@ -1,8 +1,8 @@
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 
 from pydantic import BaseModel
 
-from flaskr.db.models import Course, CoursePlanRead, UserRead
+from flaskr.db.models import Course, CoursePlanRead, UserRead, SemesterPlanRead
 
 
 class ResponseModel(BaseModel):
@@ -30,5 +30,18 @@ class UserResponseModel(ResponseModel):
     data: UserRead | None = None
 
 
+class SemesterPlanResponseModel(ResponseModel):
+    data: SemesterPlanRead | None = None
+
+
 class CoursePlanResponseModel(ResponseModel):
     data: CoursePlanRead | list[CoursePlanRead] | None = None
+
+
+class CoursePlanWithSemestersData(BaseModel):
+    course_plan: CoursePlanRead
+    semester_plans: List[SemesterPlanRead]
+
+
+class CoursePlanWithSemestersResponseModel(ResponseModel):
+    data: CoursePlanWithSemestersData | None = None
