@@ -55,7 +55,7 @@ docker compose --profile prod up
 
 # Testing Procedure
 1. Ensure you have `pytest`.
-2. Use the following command to start testing with `pytest`.
+2. Use the following command to start testing with `pytest` (or you can just run with `./run_test.sh`).
 ```bash
 MONGO_DB_USERNAME=tmp MONGO_DB_PASSWORD=tmp MONGO_DB_HOST=localhost MONGO_DB_PORT=27017 COURSE_DATA_FILENAME=courses_test.json pytest --show-capture=stderr
 ```
