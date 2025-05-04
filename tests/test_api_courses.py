@@ -214,7 +214,7 @@ def test_courses_pagination(client: FlaskClient):
     assert res.status == "OK"
     first = res.data
 
-    response = client.get(f"/api/courses/?limit=2&next={str(res.data[0].id)}")
+    response = client.get(f"/api/courses/?limit=2&after={str(res.data[0].id)}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
@@ -224,16 +224,16 @@ def test_courses_pagination(client: FlaskClient):
     assert first[1] == second[0]
 
 
-def test_course_pagination_with_large_next(client: FlaskClient):
-    response = client.get("/api/courses/?next=ffffffffffffffffffff0000")
+def test_course_pagination_with_large_after(client: FlaskClient):
+    response = client.get("/api/courses/?after=ffffffffffffffffffff0000")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     assert res.data == []
 
 
-def test_course_pagination_with_invalid_next(client: FlaskClient):
-    response = client.get("/api/courses/?next=foobar")
+def test_course_pagination_with_invalid_after(client: FlaskClient):
+    response = client.get("/api/courses/?after=foobar")
     assert response.status_code == 400
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"

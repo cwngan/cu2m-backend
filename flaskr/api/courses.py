@@ -16,7 +16,7 @@ def courses():
     patterns = request.args.getlist("code")
     excludes = request.args.getlist("excludes")
     includes = request.args.getlist("includes")
-    next = request.args.get("next", default="0" * 24)
+    after = request.args.get("after", default="0" * 24)
     limit = request.args.get("limit", default="100")
 
     # A flag for frontend developers' convenience sake
@@ -32,14 +32,14 @@ def courses():
     else:
         basic = bool(basic)
 
-    # Verify next value
-    if not ObjectId.is_valid(next):
+    # Verify after value
+    if not ObjectId.is_valid(after):
         return (
-            CoursesResponseModel(status="ERROR", error="Invalid next value."),
+            CoursesResponseModel(status="ERROR", error="Invalid after value."),
             400,
         )
     else:
-        next = ObjectId(next)
+        after = ObjectId(after)
 
     # Verify limit value
     if not limit.isdigit() or not (0 < int(limit) < 2**63):
@@ -97,7 +97,7 @@ def courses():
 
     courses = None
     if not patterns:
-        courses = get_all_courses(projection, next, limit)
+        courses = get_all_courses(projection, after, limit)
         return CoursesResponseModel(data=courses)
     else:
         for pattern in patterns:
@@ -110,6 +110,6 @@ def courses():
                     ),
                     400,
                 )
-        courses = get_courses(patterns, projection, next, limit)
+        courses = get_courses(patterns, projection, after, limit)
 
     return CoursesResponseModel(data=courses)
