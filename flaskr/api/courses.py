@@ -3,7 +3,7 @@ import re
 from flask import Blueprint, request
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.errors import ResponseError
+from flaskr.api.APIExceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.courses import get_all_courses, get_courses
 
@@ -22,11 +22,6 @@ def courses():
             if not re.fullmatch(
                 "[A-Z]{1,4}|[A-Z]{4}[0-9]{1,4}", pattern, flags=re.IGNORECASE
             ):
-                return (
-                    CoursesResponseModel(
-                        status="ERROR", error=ResponseError.BadRequest
-                    ),
-                    400,
-                )
+                raise BadRequest()
         courses = get_courses(patterns)
         return CoursesResponseModel(data=courses)
