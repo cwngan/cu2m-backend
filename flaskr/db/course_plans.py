@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+
 from bson import ObjectId
 from pymongo import ReturnDocument
+
 from flaskr.db.database import get_db
 from flaskr.db.models import CoursePlan, CoursePlanUpdate
 

@@ -30,6 +30,7 @@ def get_db(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr("flaskr.db.user.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.course_plans.get_db", mock_get_db)
     monkeypatch.setattr("flaskr.db.courses.get_db", mock_get_db)
+    monkeypatch.setattr("flaskr.db.semester_plans.get_db", mock_get_db)
 
     yield mock_get_db
     # Clean up the test database after tests
@@ -53,5 +54,13 @@ def app():
 def client(app: Flask):
     """
     Provide a test client for the Flask app.
+    """
+    return app.test_client()
+
+
+@pytest.fixture
+def client_2(app: Flask):
+    """
+    Provide another test client for the Flask app.
     """
     return app.test_client()
