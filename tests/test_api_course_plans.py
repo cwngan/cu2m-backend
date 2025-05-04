@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.errors import ResponseError
+from flaskr.api.APIExceptions import NotFound, Unauthorized
 from flaskr.api.respmodels import (
     CoursePlanResponseModel,
     CoursePlanWithSemestersResponseModel,
@@ -71,10 +71,10 @@ def logged_in_client(test_user: User, client: FlaskClient):
 def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str):
     base_url = "/api/course-plans/"
     response = client.open(f"{base_url}{endpoint}", method=method)
-    assert response.status_code == 401
+    assert response.status_code == Unauthorized.status_code
     course_plan_response = ResponseModel.model_validate(response.json)
     assert course_plan_response.status == "ERROR"
-    assert course_plan_response.error == ResponseError.Unauthorized
+    assert isinstance(course_plan_response.error, Unauthorized)
 
 
 def test_create_course_plan(logged_in_client: FlaskClient, test_user: User):
@@ -269,9 +269,10 @@ def test_delete_course_plan(
 
         # Test deleting non-existing documents
         response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
-        assert response.status_code == 404
+        assert response.status_code == NotFound.status_code
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
         assert course_plan_response.status == "ERROR"
+        assert isinstance(course_plan_response.error, NotFound)
 
     # Test getting all course plans after deletion
     response = logged_in_client.get("/api/course-plans/")
