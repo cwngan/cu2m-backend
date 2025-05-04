@@ -2,7 +2,7 @@ from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, computed_field
 
-from flaskr.api.APIException import APIExceptions
+from flaskr.api.APIExceptions import APIExceptions
 from flaskr.db.models import Course, CoursePlanRead, SemesterPlanRead, UserRead
 
 
@@ -10,6 +10,7 @@ class ResponseModel(BaseModel):
     error: Optional[APIExceptions] = None
 
     @computed_field
+    @property
     def status(self) -> Literal["OK", "ERROR"]:
         return "OK" if self.error is None else "ERROR"
 
