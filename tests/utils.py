@@ -1,3 +1,5 @@
+import logging
+import os
 import random
 import string
 from datetime import datetime, timezone
@@ -7,6 +9,10 @@ from typing import Any, Callable, TypeAlias
 from pymongo.database import Database
 
 from flaskr.db.models import User
+from flaskr.utils import RequestFormatter
+
+
+_pytest_logger: logging.Logger | None = None
 
 
 def random_user():
@@ -40,6 +46,20 @@ def random_string(length: int = 10):
     :return: Random string.
     """
     return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+def get_pytest_logger():
+    global _pytest_logger
+    if not _pytest_logger:
+        _pytest_logger = logging.getLogger("pytest")
+        _pytest_logger.setLevel(
+            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+        )
+
+        console_handler = logging.StreamHandler()
+        console_handler.setFormatter(RequestFormatter())
+        _pytest_logger.addHandler(console_handler)
+    return _pytest_logger
 
 
 GetDatabase: TypeAlias = Callable[[], Database[dict[str, Any]]]
