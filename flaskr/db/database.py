@@ -1,13 +1,11 @@
-import logging
 import json
+import logging
 import os
 from types import SimpleNamespace
 from typing import Any
 
 from jsonschema import validate
 from pymongo import MongoClient
-from types import SimpleNamespace
-from jsonschema import validate
 
 from flaskr.utils import RequestFormatter
 
@@ -122,7 +120,7 @@ def get_db_logger():
     if not _db_logger:
         _db_logger = logging.getLogger("database")
         _db_logger.setLevel(
-            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO")) # type: ignore
         )
 
         console_handler = logging.StreamHandler()
