@@ -9,7 +9,7 @@ route = Blueprint("courses", __name__, url_prefix="/courses")
 
 
 @route.route("/", methods=["GET"])
-@validate()
+@validate(response_by_alias=True)
 def courses():
     patterns = request.args.getlist("code")
     if not patterns:
