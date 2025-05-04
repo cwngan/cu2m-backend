@@ -4,13 +4,13 @@ import secrets
 import string
 from base64 import b64decode, b64encode
 from hashlib import scrypt, sha256
-from typing import Any
+from logging import LogRecord
+from typing import Any, Literal, Mapping
 
 from bson import ObjectId
+from colorama import Back, Fore, Style
 from pydantic_core import core_schema
 from typing_extensions import Annotated
-
-from colorama import Style, Fore, Back
 
 
 class RequestFormatter(logging.Formatter):
@@ -29,13 +29,19 @@ class RequestFormatter(logging.Formatter):
     }
 
     def __init__(
-        self, fmt=None, datefmt=None, style="%", validate=True, *, defaults=None
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
+        style: Literal["%", "{", "$"] = "%",
+        validate: bool = True,
+        *,
+        defaults: Mapping[str, Any] | None = None,
     ):
         super().__init__(
             self.default_custom_fmt, datefmt, style, validate, defaults=defaults
         )
 
-    def format(self, record):
+    def format(self, record: LogRecord):
         record.levelname = "{color}{levelname}{reset}".format(
             color=self.FORMATS.get(record.levelno),
             levelname=record.levelname,
