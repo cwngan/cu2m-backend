@@ -4,7 +4,7 @@ from datetime import datetime
 from conftest import TEST_DB_NAME
 from flask.testing import FlaskClient
 
-from flaskr.api.errors import ResponseError
+from flaskr.api.APIExceptions import InternalError, NotFound
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.utils import GetDatabase
@@ -69,8 +69,14 @@ def test_global_error_handler(client: FlaskClient):
     """
     Tests if the global error handler is working correctly.
     """
-    response = client.get("/api/throw/")
-    assert response.status_code == 500
+    response = client.get("/api/throw")
+    assert response.status_code == InternalError.status_code
     data = ResponseModel.model_validate(response.json)
     assert data.status == "ERROR"
-    assert data.error == ResponseError.InternalError
+    assert isinstance(data.error, InternalError)
+
+    response = client.get("/api/doesntexist")
+    assert response.status_code == NotFound.status_code
+    data = ResponseModel.model_validate(response.json)
+    assert data.status == "ERROR"
+    assert isinstance(data.error, NotFound)
