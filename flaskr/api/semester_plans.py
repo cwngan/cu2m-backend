@@ -74,10 +74,10 @@ def post_one_semester_plan(body: SemesterPlanCreateRequestModel, user: User):
     return SemesterPlanResponseModel(data=semester_read), 200
 
 
-@route.route("/<semester_plan_id>", methods=["PUT"])
+@route.route("/<semester_plan_id>", methods=["PATCH"])
 @auth_guard
 @validate(response_by_alias=True)
-def put_one_semester_plan(
+def patch_one_semester_plan(
     semester_plan_id: PydanticObjectId, body: SemesterPlanUpdateRequestModel, user: User
 ):
     assert user.id is not None, "User ID will never be None here"
