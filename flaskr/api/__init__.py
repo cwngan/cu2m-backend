@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api import health, ping, user, courses, course_plans, semester_plans
+from flaskr.api import course_plans, courses, health, ping, semester_plans, user
 from flaskr.api.respmodels import RootResponseModel
 
 route = Blueprint("api", __name__, url_prefix="/api")

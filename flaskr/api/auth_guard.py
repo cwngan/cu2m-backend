@@ -3,15 +3,14 @@ from typing import Callable, ParamSpec, TypeVar
 
 from flask import session
 
-from flaskr.api.errors import ResponseError
-from flaskr.api.respmodels import ResponseModel
+from flaskr.api.APIExceptions import Unauthorized
 from flaskr.db.user import get_user_by_username
 
 P = ParamSpec("P")
 R = TypeVar("R")
 
 
-def auth_guard(func: Callable[P, R]):
+def auth_guard(func: Callable[P, R]) -> Callable[P, R]:
     """
     Decorator to check if the user is logged in before executing the route function.
 
@@ -28,12 +27,7 @@ def auth_guard(func: Callable[P, R]):
         username = session.get("username")
         user = get_user_by_username(username=username) if username else None
         if not user:
-            return (
-                ResponseModel(
-                    status="ERROR", error=ResponseError.Unauthorized
-                ).model_dump(),
-                401,
-            )
+            raise Unauthorized()
         if has_user:
             kwargs["user"] = user
         return func(*args, **kwargs)
