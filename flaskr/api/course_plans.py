@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.APIExceptions import InternalError, NotFound
 from flaskr.api.auth_guard import auth_guard
-from flaskr.api.errors import ResponseError
 from flaskr.api.reqmodels import (
     CoursePlanCreateRequestModel,
     CoursePlanUpdateRequestModel,
@@ -35,7 +35,7 @@ def read_all(user: User):
         CoursePlanRead.model_validate(plan.model_dump())
         for plan in get_all_course_plans(user.id)
     ]
-    return CoursePlanResponseModel(status="OK", data=res), 200
+    return CoursePlanResponseModel(data=res), 200
 
 
 @route.route("/<course_plan_id>", methods=["GET"])
@@ -45,10 +45,7 @@ def read_one(course_plan_id: PydanticObjectId, user: User):
     assert user.id is not None, "User ID will never be None here"
     course_plan = get_course_plan(course_plan_id, user.id)
     if not course_plan:
-        return (
-            CoursePlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
+        raise NotFound()
     course_plan_read = CoursePlanRead.model_validate(course_plan.model_dump())
 
     assert course_plan_read.id is not None, "Course plan ID will never be None here"
@@ -58,7 +55,6 @@ def read_one(course_plan_id: PydanticObjectId, user: User):
     ]
     return (
         CoursePlanWithSemestersResponseModel(
-            status="OK",
             data=CoursePlanWithSemestersData(
                 course_plan=course_plan_read,
                 semester_plans=semester_plans_read,
@@ -77,13 +73,10 @@ def create(body: CoursePlanCreateRequestModel, user: User):
         description=body.description, name=body.name, user_id=user.id
     )
     if not res:
-        return (
-            CoursePlanResponseModel(status="ERROR", error=ResponseError.InternalError),
-            500,
-        )
+        raise InternalError()
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
     return (
-        CoursePlanResponseModel(status="OK", data=course_plan_read),
+        CoursePlanResponseModel(data=course_plan_read),
         200,
     )
 
@@ -103,12 +96,9 @@ def update(
         user_id=user.id,
     )
     if not res:
-        return (
-            CoursePlanResponseModel(status="ERROR", error=ResponseError.InternalError),
-            500,
-        )
+        raise InternalError()
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
-    return CoursePlanResponseModel(status="OK", data=course_plan_read), 200
+    return CoursePlanResponseModel(data=course_plan_read), 200
 
 
 @route.route("/<course_plan_id>", methods=["DELETE"])
@@ -118,8 +108,5 @@ def delete(course_plan_id: PydanticObjectId, user: User):
     assert user.id is not None, "User ID will never be None here"
     res = delete_course_plan(course_plan_id=course_plan_id, user_id=user.id)
     if not res:
-        return (
-            CoursePlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
-    return CoursePlanResponseModel(status="OK"), 200
+        raise NotFound()
+    return CoursePlanResponseModel(), 200
