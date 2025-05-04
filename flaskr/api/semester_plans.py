@@ -3,8 +3,8 @@
 from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.APIExceptions import DuplicateResource, NotFound
 from flaskr.api.auth_guard import auth_guard
-from flaskr.api.errors import ResponseError
 from flaskr.api.reqmodels import (
     SemesterPlanCreateRequestModel,
     SemesterPlanUpdateRequestModel,
@@ -35,10 +35,7 @@ def get_one_semester_plan(semester_plan_id: PydanticObjectId, user: User):
 
     # Ensure the semester plan exists or the course plan belongs to the user
     if not semester_plan or not get_course_plan(semester_plan.course_plan_id, user.id):
-        return (
-            SemesterPlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
+        raise NotFound()
     semester_read = SemesterPlanRead.model_construct(**semester_plan.model_dump())
     return SemesterPlanResponseModel(data=semester_read), 200
 
@@ -54,22 +51,13 @@ def post_one_semester_plan(body: SemesterPlanCreateRequestModel, user: User):
     # Ensure the course plan exists and belongs to the user
     course_plan = get_course_plan(body.course_plan_id, user.id)
     if not course_plan:
-        return (
-            SemesterPlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
+        raise NotFound()
 
     semester_plan = create_semester_plan(
         course_plan_id=body.course_plan_id, semester=body.semester, year=body.year
     )
     if not semester_plan:
-        return (
-            SemesterPlanResponseModel(
-                status="ERROR",
-                error=ResponseError.DuplicateResource,
-            ),
-            400,
-        )
+        raise DuplicateResource()
     semester_read = SemesterPlanRead.model_construct(**semester_plan.model_dump())
     return SemesterPlanResponseModel(data=semester_read), 200
 
@@ -84,10 +72,7 @@ def patch_one_semester_plan(
     # Ensure the semester plan exists or the course plan belongs to the user
     semester_plan = get_semester_plan(semester_plan_id)
     if not semester_plan or not get_course_plan(semester_plan.course_plan_id, user.id):
-        return (
-            SemesterPlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
+        raise NotFound()
 
     updated_plan = update_semester_plan(semester_plan_id, body)
     semester_read = (
@@ -106,10 +91,7 @@ def delete_one_semester_plan(semester_plan_id: PydanticObjectId, user: User):
     semester_plan = get_semester_plan(semester_plan_id)
     # Ensure the semester plan exists or the course plan belongs to the user
     if not semester_plan or not get_course_plan(semester_plan.course_plan_id, user.id):
-        return (
-            SemesterPlanResponseModel(status="ERROR", error=ResponseError.NotFound),
-            404,
-        )
+        raise NotFound()
 
     deleted_plan = delete_semester_plan(semester_plan_id)
     semester_read = (
