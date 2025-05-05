@@ -19,14 +19,13 @@ from flaskr.db.models import Course
 )
 def test_single_exact_course_code(client: FlaskClient, input, expected):
     """
-    Test if the given exact course code returns the exact expected name
+    Test if the given exact course code returns the exact expected name for the first entry
     """
-    response = client.get(f"/api/courses/?code={input}")
+    response = client.get(f"/api/courses/?keywords={input}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     courses = res.data
-    assert len(courses) == 1
     assert courses[0].code == input
     assert courses[0].title == expected
 
@@ -36,61 +35,35 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     [
         (["ENGG1110", "CSCI3100"]),
         (["ENGG", "CSCI", "CENG", "MATH"]),
-        (["E", "C"]),
+        (["engiNEERing", "matheMAtics"]),
     ],
 )
-def test_multiple_prefix_course_code(client: FlaskClient, input):
+def test_multiple_keywords(client: FlaskClient, input):
     """
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
-    response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
+    response = client.get(f"/api/courses/?{'&'.join(f'keywords={x}' for x in input)}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     assert len(res.data) >= 1
     for course in res.data:
         ok = False
-        for prefix in input:
-            if course.code.startswith(prefix):
+        for keyword in input:
+            if course.code.startswith(keyword):
+                ok = True
+                break
+            elif (
+                keyword.lower() in course.description.lower()
+                or keyword.lower() in course.title.lower()
+            ):
                 ok = True
                 break
         assert ok
 
 
-def test_empty_course_code(client: FlaskClient):
-    """
-    Test if unused course code returns nothing
-    """
-    response = client.get("/api/courses/?code=ZZZZ")
-    assert response.status_code == 200
-    res = CoursesResponseModel.model_validate(response.json)
-    assert res.status == "OK"
-    assert len(res.data) == 0
-
-
-@pytest.mark.parametrize(
-    "input",
-    [
-        (["ENGG11101"]),
-        (["ENGG11101", "CENG"]),
-        (["ENGGG"]),
-        (["ENG1"]),
-        (["", "CSCI"]),
-    ],
-)
-def test_invalid_prefix_course_code(client: FlaskClient, input):
-    """
-    Test if the multiple prefix course code returns the all the courses with either prefix
-    """
-    response = client.get(f"/api/courses/?{'&'.join(f'code={x}' for x in input)}")
-    assert response.status_code == 400
-    res = CoursesResponseModel.model_validate(response.json)
-    assert res.status == "ERROR"
-    assert res.error == "Invalid course code prefix."
-
-
 def test_all_courses_match_schema(client: FlaskClient):
-    response = client.get("/api/courses/?limit=9223372036854775807")
+    response = client.get("/api/courses/?limit=2147483647")
 
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
@@ -214,18 +187,24 @@ def test_courses_pagination(client: FlaskClient):
     assert res.status == "OK"
     first = res.data
 
-    response = client.get(f"/api/courses/?limit=2&after={str(res.data[0].id)}")
+    response = client.get("/api/courses/?limit=2&page=2")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     second = res.data
 
+    response = client.get("/api/courses/?limit=4")
+    assert response.status_code == 200
+    res = CoursesResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    answer = res.data
+
     # Confirm our order is right
-    assert first[1] == second[0]
+    assert first + second == answer
 
 
 def test_course_pagination_with_large_after(client: FlaskClient):
-    response = client.get("/api/courses/?after=ffffffffffffffffffff0000")
+    response = client.get("/api/courses/?page=2147483647")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
@@ -233,26 +212,28 @@ def test_course_pagination_with_large_after(client: FlaskClient):
 
 
 def test_course_pagination_with_invalid_after(client: FlaskClient):
-    response = client.get("/api/courses/?after=foobar")
+    response = client.get("/api/courses/?page=foobar")
     assert response.status_code == 400
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
 
 
 @pytest.mark.parametrize(
-    "limit, valid",
+    "limit, page, valid",
     [
-        (1, True),
-        (4, True),
-        (9, True),
-        (9223372036854775807, True),
-        (9223372036854775808, False),
-        (0, False),
-        (-9223372036854775808, False),
+        (1, 1, True),
+        (1, 0, False),
+        (0, 1, False),
+        (2147483647, 1, True),
+        (1, 2147483647, True),
+        (2147483648, 1, False),
+        (1, 2147483648, False),
+        (-1, 1, False),
+        (1, -1, False),
     ],
 )
-def test_course_fetch_limit_value(limit, valid, client: FlaskClient):
-    response = client.get(f"/api/courses/?limit={limit}")
+def test_course_fetch_limit_value(limit, page, valid, client: FlaskClient):
+    response = client.get(f"/api/courses/?limit={limit}&page={page}")
     res = CoursesResponseModel.model_validate(response.json)
     if valid:
         assert response.status_code == 200
