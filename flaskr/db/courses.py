@@ -54,7 +54,7 @@ def get_courses(
                 }
             }
         },
-        {"$sort": {"overall_score": -1}},
+        {"$sort": {"overall_score": -1, "code": 1}},
         {"$skip": (page - 1) * limit},
         {"$limit": limit},
     ]
