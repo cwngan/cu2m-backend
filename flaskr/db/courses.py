@@ -1,52 +1,77 @@
-from bson import ObjectId
+from time import time
 from flaskr.db.database import get_db
+from flaskr.db.database import get_db_logger
 
 
-def get_all_courses(projection: dict[str, bool], after: ObjectId, limit: int):
+def get_all_courses(projection: dict[str, bool], page: int, limit: int):
     courses_collection = get_db().courses
-    return courses_collection.find(
-        {"_id": {"$gt": after}}, projection=projection
-    ).limit(limit)
+    return (
+        courses_collection.find({}, projection=projection)
+        .skip((page - 1) * limit)
+        .limit(limit)
+    )
 
 
 def get_courses(
-    keywords: list[str], projection: dict[str, bool], after: ObjectId, limit: int
+    keywords: list[str], projection: dict[str, bool], page: int, limit: int
 ):
     courses_collection = get_db().courses
-    result = []
+
+    # Time our search for research purpose
+    start_time = time()
+
     # Search priority: first by code, then by title, then by description
-
-    # Search by code
-    if limit > 0:
-        result += (
-            courses_collection.find(
-                {
-                    "code": {
-                        "$regex": "|".join(["^" + keyword for keyword in keywords]),
-                        "$options": "i",
+    pipeline = [
+        {
+            "$match": {
+                "$or": [
+                    {
+                        "code": {
+                            "$regex": "|".join(["^" + keyword for keyword in keywords]),
+                            "$options": "i",
+                        }
                     },
-                    "_id": {"$gt": after},
-                },
-                projection=projection,
-            )
-            .limit(limit)
-            .to_list()
-        )
-    limit -= len(result)
-
-    if limit > 0:
-        result += (
-            courses_collection.find(
-                {
-                    "$text": {
-                        "$search": " ".join(f'"{keyword}"' for keyword in keywords)
+                    {
+                        "$text": {
+                            "$search": " ".join(f'"{keyword}"' for keyword in keywords)
+                        }
+                    },
+                ]
+            }
+        },
+        {
+            "$addFields": {
+                "overall_score": {
+                    "$cond": {
+                        "if": {
+                            "$regexMatch": {
+                                "input": "$code",
+                                "regex": "|".join(
+                                    ["^" + keyword for keyword in keywords]
+                                ),
+                                "options": "i",
+                            }
+                        },
+                        "then": 0x3F3F3F3F,
+                        "else": {"$meta": "textScore"},
                     }
-                },
-                projection=projection,
-            )
-            .sort({"score": {"$meta": "textScore"}})
-            .limit(limit)
-            .to_list()
-        )
+                }
+            }
+        },
+        {"$sort": {"overall_score": -1}},
+        {"$skip": (page - 1) * limit},
+        {"$limit": limit},
+    ]
+    if projection:
+        pipeline.append({"$project": projection})
 
+    result = courses_collection.aggregate(pipeline).to_list()
+
+    end_time = time()
+
+    get_db_logger().info(
+        "Executed course search on keywords {keywords} with limit {limit} on page {page} using {exec_time:.3f}s".format(
+            keywords=keywords, limit=limit, page=page, exec_time=end_time - start_time
+        )
+    )
     return result
