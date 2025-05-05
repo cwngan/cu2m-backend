@@ -6,8 +6,6 @@ from typing import Any
 
 from jsonschema import validate
 from pymongo import MongoClient
-from types import SimpleNamespace
-from jsonschema import validate
 
 from flaskr.utils import RequestFormatter
 
