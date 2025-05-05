@@ -31,11 +31,7 @@ def get_courses(
                             "$options": "i",
                         }
                     },
-                    {
-                        "$text": {
-                            "$search": " ".join(f'"{keyword}"' for keyword in keywords)
-                        }
-                    },
+                    {"$text": {"$search": " ".join(keyword for keyword in keywords)}},
                 ]
             }
         },
