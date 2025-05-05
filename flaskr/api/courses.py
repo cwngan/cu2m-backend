@@ -13,7 +13,7 @@ route = Blueprint("courses", __name__, url_prefix="/courses")
 @route.route("/", methods=["GET"])
 @validate(response_by_alias=True, exclude_none=True)
 def courses():
-    patterns = request.args.getlist("code")
+    keywords = request.args.getlist("keywords")
     excludes = request.args.getlist("excludes")
     includes = request.args.getlist("includes")
     after = request.args.get("after", default="0" * 24)
@@ -96,20 +96,10 @@ def courses():
         projection["_id"] = True
 
     courses = None
-    if not patterns:
+    if not keywords:
         courses = get_all_courses(projection, after, limit)
         return CoursesResponseModel(data=courses)
     else:
-        for pattern in patterns:
-            if not re.fullmatch(
-                "[A-Z]{1,4}|[A-Z]{4}[0-9]{1,4}", pattern, flags=re.IGNORECASE
-            ):
-                return (
-                    CoursesResponseModel(
-                        status="ERROR", error="Invalid course code prefix."
-                    ),
-                    400,
-                )
-        courses = get_courses(patterns, projection, after, limit)
+        courses = get_courses(keywords, projection, after, limit)
 
     return CoursesResponseModel(data=courses)
