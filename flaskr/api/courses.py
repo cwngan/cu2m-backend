@@ -1,10 +1,8 @@
-import re
 from flask import Blueprint, request
 from flask_pydantic import validate
 
-from bson import ObjectId
 from flaskr.api.respmodels import CoursesResponseModel
-from flaskr.db.courses import get_all_courses, get_courses
+from flaskr.db.courses import get_courses, get_all_courses
 from flaskr.db.models import Course
 
 route = Blueprint("courses", __name__, url_prefix="/courses")
@@ -16,7 +14,7 @@ def courses():
     keywords = request.args.getlist("keywords")
     excludes = request.args.getlist("excludes")
     includes = request.args.getlist("includes")
-    after = request.args.get("after", default="0" * 24)
+    page = request.args.get("page", default="1")
     limit = request.args.get("limit", default="100")
 
     # A flag for frontend developers' convenience sake
@@ -32,15 +30,6 @@ def courses():
     else:
         basic = bool(basic)
 
-    # Verify after value
-    if not ObjectId.is_valid(after):
-        return (
-            CoursesResponseModel(status="ERROR", error="Invalid after value."),
-            400,
-        )
-    else:
-        after = ObjectId(after)
-
     # Verify limit value
     if not limit.isdigit() or not (0 < int(limit) < 2**63):
         return (
@@ -52,6 +41,15 @@ def courses():
         )
     else:
         limit = int(limit)
+
+    # Verify page value
+    if not page.isdigit() or not (0 < int(page) < 2**63 // limit):
+        return (
+            CoursesResponseModel(status="ERROR", error="Invalid page value."),
+            400,
+        )
+    else:
+        page = int(page)
 
     # Includes and excludes list cannot exist together due to potential conflict
     if includes and excludes:
@@ -97,9 +95,8 @@ def courses():
 
     courses = None
     if not keywords:
-        courses = get_all_courses(projection, after, limit)
-        return CoursesResponseModel(data=courses)
+        courses = get_all_courses(projection, page, limit)
     else:
-        courses = get_courses(keywords, projection, after, limit)
+        courses = get_courses(keywords, projection, page, limit)
 
     return CoursesResponseModel(data=courses)
