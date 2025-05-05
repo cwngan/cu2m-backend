@@ -31,25 +31,25 @@ def courses():
         basic = bool(basic)
 
     # Verify limit value
-    if not limit.isdigit() or not (0 < int(limit) < 2**63):
+    if not limit.isdigit() or not page.isdigit():
         return (
             CoursesResponseModel(
                 status="ERROR",
-                error="Invalid limit value (should be a positive 8-byte integer).",
+                error="Invalid limit or page value (should be a positive 8-byte integer).",
             ),
             400,
         )
     else:
-        limit = int(limit)
+        limit, page = int(limit), int(page)
 
-    # Verify page value
-    if not page.isdigit() or not (0 < int(page) < 2**63 // limit):
+    # Verify page * limit - 1 value
+    if not (0 < page < 2**31) or not (0 < limit < 2**31):
         return (
-            CoursesResponseModel(status="ERROR", error="Invalid page value."),
+            CoursesResponseModel(
+                status="ERROR", error="Invalid page and/or limit value."
+            ),
             400,
         )
-    else:
-        page = int(page)
 
     # Includes and excludes list cannot exist together due to potential conflict
     if includes and excludes:
