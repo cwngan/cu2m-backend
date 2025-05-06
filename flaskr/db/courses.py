@@ -27,7 +27,7 @@ def get_courses(
                 "$or": [
                     {
                         "code": {
-                            "$regex": "|".join(["^" + keyword for keyword in keywords]),
+                            "$regex": "|".join([keyword for keyword in keywords]),
                             "$options": "i",
                         }
                     },
