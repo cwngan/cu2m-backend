@@ -20,9 +20,13 @@ class APIException(Exception, ABC):
     def kind(self) -> str:
         return self.__class__.__name__
 
-    def __init__(self, message: str | None = None):
+    def __init__(
+        self, message: str | None = None, status_code: HTTPStatus | None = None
+    ):
         if message:
             self.message = message
+        if status_code:
+            self.status_code = status_code
         super().__init__(self.message)
 
     @classmethod
@@ -54,15 +58,18 @@ class APIException(Exception, ABC):
         if not isinstance(value.get("message"), str):
             raise ValueError("Missing message attribute")
 
-        nw = cls()
-        nw.message = value["message"]
+        if not isinstance(value.get("status_code"), int):
+            raise ValueError("Missing status_code attribute")
+
+        nw = cls(value["message"], value["status_code"])
         return nw
 
     @staticmethod
-    def to_dict(obj: "APIException"):
+    def to_dict(obj: "APIException") -> dict[str, Any]:
         return {
             "message": obj.message,
             "kind": obj.kind,
+            "status_code": obj.status_code,
         }
 
 
