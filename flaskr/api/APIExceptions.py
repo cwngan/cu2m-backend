@@ -1,6 +1,6 @@
 from abc import ABC
 from http import HTTPStatus
-from typing import Annotated, Any, TypeAlias, Union
+from typing import Annotated, Any, TypeAlias, Union, get_args
 
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
@@ -142,7 +142,8 @@ class UnionExeptionAnnotation:
     ) -> core_schema.CoreSchema:
         choices: dict[str, core_schema.CoreSchema] = {
             o.__name__: o.__get_pydantic_core_schema__(o, handler)
-            for o in source.__args__
+            for o in get_args(source)
+            if ABC not in o.__bases__
         }
         return core_schema.tagged_union_schema(
             choices,
