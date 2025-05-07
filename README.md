@@ -57,7 +57,7 @@ docker compose --profile prod up
 1. Ensure you have `pytest`.
 2. Use the following command to start testing with `pytest` (or you can just run with `./run_test.sh`).
 ```bash
-MONGO_DB_USERNAME=tmp MONGO_DB_PASSWORD=tmp MONGO_DB_HOST=localhost MONGO_DB_PORT=27017 COURSE_DATA_FILENAME=courses_test.json pytest --cov=flaskr --cov-report json --show-capture=stderr 
+MONGO_DB_USERNAME=tmp MONGO_DB_PASSWORD=tmp MONGO_DB_HOST=localhost MONGO_DB_PORT=27017 COURSE_DATA_FILENAME=courses_test.json pytest --cov=flaskr --cov-report=html --show-capture=stderr 
 ```
 3. To run a specific test file, just mention test file path.
 4. To run a specific test name, just add `-k` flag with the test function name
