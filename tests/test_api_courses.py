@@ -26,6 +26,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     courses = res.data
+    assert len(courses) == 1
     assert courses[0].code == input
     assert courses[0].title == expected
 
@@ -158,19 +159,20 @@ def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
 
 
 @pytest.mark.parametrize(
-    "basic, valid",
+    "value, valid",
     [("true", True), ("FaLsE", True), ("Flase", False), ("Bruh", False)],
 )
-def test_basic_flag_validation(basic, valid, client: FlaskClient):
-    response = client.get(f"/api/courses/?basic={basic}")
+def test_flag_boolean_validation(value, valid, client: FlaskClient):
+    for flag in ["basic", "strict"]:
+        response = client.get(f"/api/courses/?{flag}={value}")
 
-    res = CoursesResponseModel.model_validate(response.json)
-    if valid:
-        assert response.status_code == 200
-        assert res.status == "OK"
-    else:
-        assert response.status_code == 400
-        assert res.status == "ERROR"
+        res = CoursesResponseModel.model_validate(response.json)
+        if valid:
+            assert response.status_code == 200
+            assert res.status == "OK"
+        else:
+            assert response.status_code == 400
+            assert res.status == "ERROR"
 
 
 def test_includes_excludes_conflict(client: FlaskClient):
