@@ -30,6 +30,19 @@ def courses():
     else:
         basic = bool(basic)
 
+    # A flag for comparing course code only
+    strict = request.args.get("strict")
+    if strict and strict.lower() not in ["true", "false"]:
+        return (
+            CoursesResponseModel(
+                status="ERROR",
+                error="Strict flag can only be a boolean value (true or false).",
+            ),
+            400,
+        )
+    else:
+        strict = bool(strict)
+
     # Verify limit value
     if not limit.isdigit() or not page.isdigit():
         return (
@@ -97,6 +110,6 @@ def courses():
     if not keywords:
         courses = get_all_courses(projection, page, limit)
     else:
-        courses = get_courses(keywords, projection, page, limit)
+        courses = get_courses(keywords, projection, page, limit, strict)
 
     return CoursesResponseModel(data=courses)
