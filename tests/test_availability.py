@@ -4,6 +4,7 @@ from datetime import datetime
 from conftest import TEST_DB_NAME
 from flask.testing import FlaskClient
 
+from flaskr.api.respmodels import HealthResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.utils import GetDatabase
 
@@ -61,3 +62,11 @@ def test_db_rw(get_db: GetDatabase):
 
     userdb.delete_many({})
     assert get_precreated_user(TEST_EMAIL) is None
+
+
+def test_api_health(client: FlaskClient):
+    response = client.get("/api/health/")
+    assert response.status_code == 200
+    res = HealthResponseModel.model_validate(response.json)
+    assert res.status == "OK"
+    assert res.data == {"server": True, "db": True}
