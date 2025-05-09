@@ -3,7 +3,7 @@ from typing import Any, List, Literal, Optional
 from pydantic import BaseModel, computed_field
 
 from flaskr.api.APIExceptions import APIExceptions
-from flaskr.db.models import Course, CoursePlanRead, SemesterPlanRead, UserRead
+from flaskr.db.models import CoursePlanRead, CourseRead, SemesterPlanRead, UserRead
 
 
 class ResponseModel(BaseModel):
@@ -28,7 +28,7 @@ class HealthResponseModel(ResponseModel):
 
 
 class CoursesResponseModel(ResponseModel):
-    data: Optional[list[Course]] = None
+    data: list[CourseRead] | None = None
 
 
 class UserResponseModel(ResponseModel):

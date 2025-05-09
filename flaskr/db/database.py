@@ -77,6 +77,11 @@ def init_db():
         )
         db.courses.drop()
         db.courses.create_index("code", unique=True)
+        db.courses.create_index(
+            [("title", "text"), ("description", "text")],
+            default_language="en",
+            weights={"title": 2, "description": 1},
+        )
         json_courses = course_data.get("data")
         insert_data: list[JSON] = []
         for json_course in json_courses.values():

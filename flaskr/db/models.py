@@ -68,6 +68,21 @@ class Course(CoreModel):
     units: float
 
 
+class CourseRead(CoreModel):
+    id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
+    code: Optional[str] = None
+    corequisites: Optional[str] = None
+    description: Optional[str] = None
+    is_graded: Optional[bool] = None
+    not_for_major: Optional[str] = None
+    not_for_taken: Optional[str] = None
+    original: Optional[str] = None
+    parsed: Optional[bool] = None
+    prerequisites: Optional[str] = None
+    title: Optional[str] = None
+    units: Optional[float] = None
+
+
 class SemesterPlan(CoreModel):
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     course_plan_id: PydanticObjectId
