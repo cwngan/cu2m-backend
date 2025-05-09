@@ -104,33 +104,33 @@ class InternalError(ResponseError):
     message = "An internal server error occurred"
 
 
-class UserAuthErrors(APIException, ABC):
+class UserAuthError(APIException, ABC):
     """
     Authentication and registration errors.
     """
 
 
-class InvalidCredentials(UserAuthErrors):
+class InvalidCredentials(UserAuthError):
     status_code = HTTPStatus.UNAUTHORIZED
     message = "Invalid username or password"
 
 
-class PreRegistrationNotFound(UserAuthErrors):
+class PreRegistrationNotFound(UserAuthError):
     status_code = HTTPStatus.NOT_FOUND
     message = "Pre-registration not found"
 
 
-class InvalidLicenseKey(UserAuthErrors):
+class InvalidLicenseKey(UserAuthError):
     status_code = HTTPStatus.UNAUTHORIZED
     message = "Invalid license key"
 
 
-class UsernameTaken(UserAuthErrors):
+class UsernameTaken(UserAuthError):
     status_code = HTTPStatus.CONFLICT
     message = "Username already taken"
 
 
-class InvalidResetToken(UserAuthErrors):
+class InvalidResetToken(UserAuthError):
     status_code = HTTPStatus.UNAUTHORIZED
     message = "Invalid reset token"
 
@@ -155,6 +155,8 @@ class UnionExeptionAnnotation:
 APIExceptions: TypeAlias = Annotated[
     Union[
         APIException,
+        UserAuthError,
+        ResponseError,
         Unauthorized,
         NotFound,
         BadRequest,
