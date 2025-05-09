@@ -11,9 +11,9 @@ route = Blueprint("courses", __name__, url_prefix="/courses")
 @route.route("/", methods=["GET"])
 @validate(response_by_alias=True, exclude_none=True)
 def courses():
-    keywords = request.args.getlist("keywords")
-    excludes = request.args.getlist("excludes")
-    includes = request.args.getlist("includes")
+    keywords = request.args.getlist("keywords[]")
+    excludes = request.args.getlist("excludes[]")
+    includes = request.args.getlist("includes[]")
     page = request.args.get("page", default="1")
     limit = request.args.get("limit", default="100")
 
