@@ -43,7 +43,7 @@ def test_multiple_keywords(client: FlaskClient, input):
     """
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
-    response = client.get(f"/api/courses/?{'&'.join(f'keywords={x}' for x in input)}")
+    response = client.get(f"/api/courses/?{'&'.join(f'keywords[]={x}' for x in input)}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
@@ -107,7 +107,7 @@ def test_course_fetch_basic_flag(test_mode, client: FlaskClient):
 def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
     response = client.get(
         "/api/courses/?{includes}".format(
-            includes="&".join(f"includes={include}" for include in includes)
+            includes="&".join(f"includes[]={include}" for include in includes)
         )
     )
 
@@ -138,7 +138,7 @@ def test_course_fetch_includes_list(includes: list[str], client: FlaskClient):
 def test_course_fetch_excludes_list(excludes: list[str], client: FlaskClient):
     response = client.get(
         "/api/courses/?{excludes}".format(
-            excludes="&".join(f"excludes={exclude}" for exclude in excludes)
+            excludes="&".join(f"excludes[]={exclude}" for exclude in excludes)
         )
     )
 
@@ -176,7 +176,7 @@ def test_flag_boolean_validation(value, valid, client: FlaskClient):
 
 
 def test_includes_excludes_conflict(client: FlaskClient):
-    response = client.get("/api/courses/?includes=hello&excludes=world")
+    response = client.get("/api/courses/?includes[]=hello&excludes[]=world")
     assert response.status_code == 400
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
