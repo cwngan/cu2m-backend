@@ -21,7 +21,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     """
     Test if the given exact course code returns the exact expected name for the first entry
     """
-    response = client.get(f"/api/courses/?keywords={input}")
+    response = client.get(f"/api/courses/?keywords[]={input}")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"

@@ -49,13 +49,13 @@ def test_courses_version_upgrade(client: FlaskClient):
     assert res.status == "OK"
     assert len(res.data) == 1
 
-    response = client.get("/api/courses/?keywords=ZZZZ9999")
+    response = client.get("/api/courses/?keywords[]=ZZZZ9999")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     assert len(res.data) == 1
 
-    response = client.get("/api/courses/?keywords=CSCI3100")
+    response = client.get("/api/courses/?keywords[]=CSCI3100")
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
