@@ -6,10 +6,10 @@ from pydantic import BaseModel, ValidationError, field_validator
 from pydantic_core import PydanticCustomError
 
 from flaskr.db.models import (
+    CoursePlanCreate,
     SemesterPlanCreate,
     SemesterPlanUpdate,
     UserCreate,
-    CoursePlanCreate,
 )
 
 USERNAME_REGEX = re.compile(r"^[a-zA-Z0-9_]{5,20}$")
@@ -84,7 +84,6 @@ class UserForgotPasswordModel(BaseModel):
 
 
 class UserVerifyTokenModel(BaseModel):
-    username: str
     token: str
 
 
