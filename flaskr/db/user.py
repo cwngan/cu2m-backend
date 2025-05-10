@@ -156,4 +156,8 @@ def get_reset_token(token_hashkey: str):
     """
     tokendb = get_db().tokens
     doc = tokendb.find_one({"token_hashkey": token_hashkey})
-    return ResetToken.model_validate(doc) if doc else None
+    token = ResetToken.model_validate(doc) if doc else None
+    if token and token.expires_at <= datetime.now(tz=timezone.utc):
+        print(token.expires_at)
+        token = None
+    return token
