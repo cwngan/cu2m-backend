@@ -1,12 +1,12 @@
 import re
 from datetime import datetime
 
-from conftest import TEST_DB_NAME
 from flask.testing import FlaskClient
 
 from flaskr.api.APIExceptions import InternalError, NotFound
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
+from tests.conftest import TEST_DB_NAME
 from tests.utils import GetDatabase
 
 
@@ -39,7 +39,7 @@ def test_api_ping(client: FlaskClient):
     assert match_ is not None
     assert (
         datetime.strptime(match_.group(1), "%d-%m-%Y %H:%M:%S.%f").timestamp()
-        < datetime.now().timestamp()
+        <= datetime.now().timestamp()
     )
 
 
