@@ -45,7 +45,7 @@ def read_one(course_plan_id: PydanticObjectId, user: User):
     assert user.id is not None, "User ID will never be None here"
     course_plan = get_course_plan(course_plan_id, user.id)
     if not course_plan:
-        raise NotFound()
+        raise NotFound(debug_info="Course plan not found")
     course_plan_read = CoursePlanRead.model_validate(course_plan.model_dump())
 
     assert course_plan_read.id is not None, "Course plan ID will never be None here"
@@ -73,7 +73,7 @@ def create(body: CoursePlanCreateRequestModel, user: User):
         description=body.description, name=body.name, user_id=user.id
     )
     if not res:
-        raise InternalError()
+        raise InternalError(debug_info="Unexpected Error: Course plan not created")
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
     return (
         CoursePlanResponseModel(data=course_plan_read),
@@ -96,7 +96,7 @@ def update(
         user_id=user.id,
     )
     if not res:
-        raise InternalError()
+        raise NotFound(debug_info="Course plan not found")
     course_plan_read = CoursePlanRead.model_validate(res.model_dump())
     return CoursePlanResponseModel(data=course_plan_read), 200
 
@@ -108,5 +108,5 @@ def delete(course_plan_id: PydanticObjectId, user: User):
     assert user.id is not None, "User ID will never be None here"
     res = delete_course_plan(course_plan_id=course_plan_id, user_id=user.id)
     if not res:
-        raise NotFound()
+        raise NotFound(debug_info="Course plan not found")
     return CoursePlanResponseModel(), 200

@@ -65,7 +65,7 @@ def signup(body: UserCreateRequestModel):
     user = activate_user(pre_created, user_create)
     if not user:
         # this case cannot happen under normal circumstances
-        raise InternalError()
+        raise InternalError(debug_info="Unexpected Error: User not created")
 
     session["username"] = user.username
     user_read = UserRead.model_validate(user.model_dump())
