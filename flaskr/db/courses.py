@@ -66,7 +66,7 @@ def get_courses(
                                 "$regexMatch": {
                                     "input": "$code",
                                     "regex": "|".join(
-                                        ["^" + keyword for keyword in keywords]
+                                        keyword for keyword in keywords
                                     ),
                                     "options": "i",
                                 }
@@ -87,6 +87,8 @@ def get_courses(
         result = courses_collection.aggregate(pipeline).to_list()
 
     end_time = time()
+    
+    get_db_logger().info(result)
 
     get_db_logger().info(
         "Executed course search on keywords {keywords} with limit {limit} on page {page} with strict mode {strict} using {exec_time:.3f}s".format(
