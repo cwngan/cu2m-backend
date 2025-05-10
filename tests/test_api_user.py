@@ -2,7 +2,7 @@ from flask.testing import FlaskClient
 from pytest import MonkeyPatch
 from werkzeug.test import TestResponse
 
-from flaskr.api.APIExceptions import (
+from flaskr.api.exceptions import (
     BadRequest,
     InvalidCredentials,
     InvalidLicenseKey,

@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.APIExceptions import BadRequest
+from flaskr.api.exceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.courses import get_all_courses, get_courses
 from flaskr.db.models import Course

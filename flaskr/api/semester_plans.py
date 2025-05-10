@@ -3,8 +3,8 @@
 from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.APIExceptions import DuplicateResource, NotFound
 from flaskr.api.auth_guard import auth_guard
+from flaskr.api.exceptions import DuplicateResource, NotFound
 from flaskr.api.reqmodels import (
     SemesterPlanCreateRequestModel,
     SemesterPlanUpdateRequestModel,

@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask.testing import FlaskClient
 
-from flaskr.api.APIExceptions import InternalError, NotFound
+from flaskr.api.exceptions import InternalError, NotFound
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.conftest import TEST_DB_NAME

@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api.APIExceptions import InternalError, NotFound
 from flaskr.api.auth_guard import auth_guard
+from flaskr.api.exceptions import InternalError, NotFound
 from flaskr.api.reqmodels import (
     CoursePlanCreateRequestModel,
     CoursePlanUpdateRequestModel,

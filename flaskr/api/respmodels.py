@@ -2,7 +2,7 @@ from typing import Any, List, Literal, Optional
 
 from pydantic import BaseModel, computed_field
 
-from flaskr.api.APIExceptions import APIExceptions
+from flaskr.api.exceptions import APIExceptions
 from flaskr.db.models import CoursePlanRead, CourseRead, SemesterPlanRead, UserRead
 
 

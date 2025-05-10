@@ -4,7 +4,7 @@ import os
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.APIExceptions import BadRequest
+from flaskr.api.exceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.models import Course
 

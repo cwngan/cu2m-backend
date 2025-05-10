@@ -4,12 +4,7 @@ from typing import Any
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.APIExceptions import (
-    BadRequest,
-    DuplicateResource,
-    NotFound,
-    Unauthorized,
-)
+from flaskr.api.exceptions import BadRequest, DuplicateResource, NotFound, Unauthorized
 from flaskr.api.respmodels import ResponseModel, SemesterPlanResponseModel
 from flaskr.db.models import CoursePlan, SemesterPlanCreate, SemesterPlanRead, User
 from tests.utils import GetDatabase, random_string, random_user

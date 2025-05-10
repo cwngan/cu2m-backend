@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
-from flaskr.api.APIExceptions import NotFound, Unauthorized
+from flaskr.api.exceptions import NotFound, Unauthorized
 from flaskr.api.respmodels import (
     CoursePlanResponseModel,
     CoursePlanWithSemestersResponseModel,

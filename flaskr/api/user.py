@@ -4,7 +4,8 @@ from flask import Blueprint, session
 from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
-from flaskr.api.APIExceptions import (
+from flaskr.api.auth_guard import auth_guard
+from flaskr.api.exceptions import (
     InternalError,
     InvalidCredentials,
     InvalidLicenseKey,
@@ -12,7 +13,6 @@ from flaskr.api.APIExceptions import (
     PreRegistrationNotFound,
     UsernameTaken,
 )
-from flaskr.api.auth_guard import auth_guard
 from flaskr.api.reqmodels import (
     UserCreateRequestModel,
     UserForgotPasswordModel,

@@ -3,7 +3,7 @@ from typing import Callable, ParamSpec, TypeVar
 
 from flask import session
 
-from flaskr.api.APIExceptions import Unauthorized
+from flaskr.api.exceptions import Unauthorized
 from flaskr.db.user import get_user_by_username
 
 P = ParamSpec("P")

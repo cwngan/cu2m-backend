@@ -8,7 +8,7 @@ from flask_pydantic import ValidationError, validate  # type: ignore
 from werkzeug import exceptions
 
 from flaskr import api
-from flaskr.api.APIExceptions import APIException, BadRequest, InternalError, NotFound
+from flaskr.api.exceptions import APIException, BadRequest, InternalError, NotFound
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
 from flaskr.utils import RequestFormatter
