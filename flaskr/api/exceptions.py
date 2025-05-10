@@ -11,6 +11,11 @@ T = Union["APIException", dict[str, Any]]
 class APIException(Exception, ABC):
     """
     Base class for all API errors.
+
+    Attributes:
+        status_code: HTTP status code for the error
+        message: User-facing error message
+        debug_info: Developer-only debug information, not exposed to API
     """
 
     status_code: HTTPStatus
@@ -21,12 +26,17 @@ class APIException(Exception, ABC):
         return self.__class__.__name__
 
     def __init__(
-        self, message: str | None = None, status_code: HTTPStatus | None = None
+        self,
+        message: str | None = None,
+        status_code: HTTPStatus | None = None,
+        *,
+        debug_info: str = "",
     ):
         if message:
             self.message = message
         if status_code:
             self.status_code = status_code
+        self.debug_info = debug_info
         super().__init__(self.message)
 
     @classmethod
@@ -71,6 +81,12 @@ class APIException(Exception, ABC):
             "kind": obj.kind,
             "status_code": obj.status_code,
         }
+
+    def __str__(self) -> str:
+        err = super().__str__()
+        if self.debug_info:
+            err += f" ({self.debug_info})"
+        return err
 
 
 class ResponseError(APIException, ABC):
