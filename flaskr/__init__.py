@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Any
 
-from flask import Flask, Response, request
+from flask import Flask, Response, current_app, request
 from flask.logging import default_handler
 from flask_pydantic import ValidationError, validate  # type: ignore
 from werkzeug import exceptions
@@ -17,13 +17,19 @@ from flaskr.utils import RequestFormatter
 def exception_handler(e: Exception):
     try:
         if isinstance(e, exceptions.NotFound):
-            raise NotFound()
+            raise NotFound(debug_info="An undefined api path was requested") from e
         if isinstance(e, ValidationError):
-            raise BadRequest()
+            raise BadRequest(debug_info="Pydantic validation error") from e
         if isinstance(e, APIException):
             raise e
-        raise InternalError()
+        raise InternalError(debug_info="An unhandled exception has occured") from e
+
     except APIException as e:
+        if isinstance(e, InternalError):
+            current_app.logger.exception(e)
+        else:
+            current_app.logger.warning(e, exc_info=True)
+
         return ResponseModel(error=e).model_dump(mode="json"), e.status_code
 
 
