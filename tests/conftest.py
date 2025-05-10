@@ -1,3 +1,5 @@
+import random
+
 import pytest
 from flask import Flask
 
@@ -6,6 +8,15 @@ from flaskr.db.database import get_mongo_client
 
 # Use a separate database name for testing to avoid clashing with production data.
 TEST_DB_NAME = "TESTDB"
+
+
+def pytest_runtest_logstart():
+    """
+    pytest per-test start hook
+    """
+
+    # set the random seed for reproducibility
+    random.seed(68419)
 
 
 @pytest.fixture(autouse=True)

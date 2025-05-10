@@ -3,7 +3,6 @@ import os
 import random
 import string
 from datetime import datetime, timezone
-from os import urandom
 from typing import Any, Callable, TypeAlias
 
 from pymongo.database import Database
@@ -11,14 +10,13 @@ from pymongo.database import Database
 from flaskr.db.models import User
 from flaskr.utils import RequestFormatter
 
-
 _pytest_logger: logging.Logger | None = None
 
 
 def random_user():
     now = int(datetime.now().timestamp())
     return User(
-        email=urandom(16).hex(),
+        email=random_string(),
         username="".join(
             random.choices(
                 string.ascii_letters + string.digits + "_", k=random.randint(5, 20)
@@ -30,9 +28,9 @@ def random_user():
         last_name="".join(
             random.choices(string.ascii_letters, k=random.randint(2, 20))
         ),
-        major=urandom(16).hex(),
-        password_hash=urandom(16).hex(),
-        license_key_hash=urandom(16).hex(),
+        major=random_string(),
+        password_hash=random_string(),
+        license_key_hash=random_string(),
         last_login=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
         activated_at=datetime.fromtimestamp(random.randint(0, now), timezone.utc),
     )
