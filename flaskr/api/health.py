@@ -11,4 +11,4 @@ route = Blueprint("health", __name__, url_prefix="/health")
 @validate()
 def health():
     db = get_db()
-    return HealthResponseModel(data={"server": True, "db": db})
+    return HealthResponseModel(data={"server": True, "db": db is not None}) # type: ignore
