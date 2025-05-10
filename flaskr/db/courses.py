@@ -1,6 +1,7 @@
 from time import time
-from flaskr.db.database import get_db
-from flaskr.db.database import get_db_logger
+
+from flaskr.db.database import get_db, get_db_logger
+from flaskr.db.models import Course
 
 
 def get_all_courses(projection: dict[str, bool], page: int, limit: int):

@@ -1,8 +1,9 @@
 from flask import Blueprint, request
-from flask_pydantic import validate
+from flask_pydantic import validate  # type: ignore
 
+from flaskr.api.exceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
-from flaskr.db.courses import get_courses, get_all_courses
+from flaskr.db.courses import get_all_courses, get_courses
 from flaskr.db.models import Course
 
 route = Blueprint("courses", __name__, url_prefix="/courses")
@@ -20,12 +21,8 @@ def courses():
     # A flag for frontend developers' convenience sake
     basic = request.args.get("basic")
     if basic and basic.lower() not in ["true", "false"]:
-        return (
-            CoursesResponseModel(
-                status="ERROR",
-                error="Basic flag can only be a boolean value (true or false).",
-            ),
-            400,
+        raise BadRequest(
+            debug_info="Basic flag can only be a boolean value (true or false)."
         )
     else:
         basic = bool(basic)
@@ -33,45 +30,28 @@ def courses():
     # A flag for comparing course code only
     strict = request.args.get("strict")
     if strict and strict.lower() not in ["true", "false"]:
-        return (
-            CoursesResponseModel(
-                status="ERROR",
-                error="Strict flag can only be a boolean value (true or false).",
-            ),
-            400,
+        raise BadRequest(
+            debug_info="Strict flag can only be a boolean value (true or false)."
         )
     else:
         strict = bool(strict)
 
     # Verify limit value
     if not limit.isdigit() or not page.isdigit():
-        return (
-            CoursesResponseModel(
-                status="ERROR",
-                error="Invalid limit or page value (should be a positive 8-byte integer).",
-            ),
-            400,
+        raise BadRequest(
+            debug_info="Invalid limit or page value (should be a positive 8-byte integer)."
         )
     else:
         limit, page = int(limit), int(page)
 
     # Verify page * limit - 1 value
     if not (0 < page < 2**31) or not (0 < limit < 2**31):
-        return (
-            CoursesResponseModel(
-                status="ERROR", error="Invalid page and/or limit value."
-            ),
-            400,
-        )
+        raise BadRequest(debug_info="Invalid page and/or limit value.")
 
     # Includes and excludes list cannot exist together due to potential conflict
     if includes and excludes:
-        return (
-            CoursesResponseModel(
-                status="ERROR",
-                error="You cannot use both includes and excludes argument at the same time.",
-            ),
-            400,
+        raise BadRequest(
+            debug_info="You cannot use both includes and excludes argument at the same time."
         )
 
     course_attributes = Course.model_fields.keys()
@@ -87,13 +67,7 @@ def courses():
     elif includes:
         excludes = list(filter(lambda attr: attr not in includes, course_attributes))
     elif set(excludes) == set(course_attributes):
-        return (
-            CoursesResponseModel(
-                status="ERROR",
-                error="You cannot exclude all attributes.",
-            ),
-            400,
-        )
+        raise BadRequest(debug_info="You cannot exclude all attributes.")
 
     # Cleanse all fields to the ones the system accepts
     projection = {
@@ -112,4 +86,8 @@ def courses():
     else:
         courses = get_courses(keywords, projection, page, limit, strict)
 
-    return CoursesResponseModel(data=courses)
+    return CoursesResponseModel.model_validate(
+        {
+            "data": courses,
+        }
+    )

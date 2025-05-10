@@ -3,6 +3,8 @@ from datetime import datetime
 
 from flask.testing import FlaskClient
 
+from flaskr.api.exceptions import InternalError, NotFound
+from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.conftest import TEST_DB_NAME
 from tests.utils import GetDatabase
@@ -61,3 +63,20 @@ def test_db_rw(get_db: GetDatabase):
 
     userdb.delete_many({})
     assert get_precreated_user(TEST_EMAIL) is None
+
+
+def test_global_error_handler(client: FlaskClient):
+    """
+    Tests if the global error handler is working correctly.
+    """
+    response = client.get("/api/throw")
+    assert response.status_code == InternalError.status_code
+    data = ResponseModel.model_validate(response.json)
+    assert data.status == "ERROR"
+    assert isinstance(data.error, InternalError)
+
+    response = client.get("/api/doesntexist")
+    assert response.status_code == NotFound.status_code
+    data = ResponseModel.model_validate(response.json)
+    assert data.status == "ERROR"
+    assert isinstance(data.error, NotFound)

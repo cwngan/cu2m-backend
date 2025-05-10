@@ -1,13 +1,18 @@
-from typing import Literal, Optional, List
+from typing import Any, List, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
-from flaskr.db.models import CourseRead, CoursePlanRead, UserRead, SemesterPlanRead
+from flaskr.api.exceptions import APIExceptions
+from flaskr.db.models import CoursePlanRead, CourseRead, SemesterPlanRead, UserRead
 
 
 class ResponseModel(BaseModel):
-    status: Literal["OK", "ERROR"] = "OK"
-    error: Optional[str] = None
+    error: Optional[APIExceptions] = None
+
+    @computed_field
+    @property
+    def status(self) -> Literal["OK", "ERROR"]:
+        return "OK" if self.error is None else "ERROR"
 
 
 class RootResponseModel(ResponseModel):
@@ -19,7 +24,7 @@ class PingResponseModel(ResponseModel):
 
 
 class HealthResponseModel(ResponseModel):
-    data: dict[str, bool]
+    data: dict[str, Any]
 
 
 class CoursesResponseModel(ResponseModel):

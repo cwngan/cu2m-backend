@@ -4,8 +4,13 @@ import secrets
 import string
 from base64 import b64decode, b64encode
 from hashlib import scrypt, sha256
+from logging import LogRecord
+from typing import Any, Literal, Mapping
 
-from colorama import Style, Fore, Back
+from bson import ObjectId
+from colorama import Back, Fore, Style
+from pydantic_core import core_schema
+from typing_extensions import Annotated
 
 
 class RequestFormatter(logging.Formatter):
@@ -24,13 +29,19 @@ class RequestFormatter(logging.Formatter):
     }
 
     def __init__(
-        self, fmt=None, datefmt=None, style="%", validate=True, *, defaults=None
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
+        style: Literal["%", "{", "$"] = "%",
+        validate: bool = True,
+        *,
+        defaults: Mapping[str, Any] | None = None,
     ):
         super().__init__(
             self.default_custom_fmt, datefmt, style, validate, defaults=defaults
         )
 
-    def format(self, record):
+    def format(self, record: LogRecord):
         record.levelname = "{color}{levelname}{reset}".format(
             color=self.FORMATS.get(record.levelno),
             levelname=record.levelname,
@@ -98,3 +109,36 @@ class PasswordHasher:
 
 class DataProjection:
     user = {"license_key_hash": False, "password_hash": False}
+
+
+# copy pasted from pydantic_mongo.fields
+class ObjectIdAnnotation:
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, _source_type: Any, _handler: Any
+    ) -> core_schema.CoreSchema:
+        object_id_schema = core_schema.chain_schema(
+            [
+                core_schema.str_schema(),
+                core_schema.no_info_plain_validator_function(cls.validate),
+            ]
+        )
+        return core_schema.json_or_python_schema(
+            json_schema=core_schema.str_schema(),
+            python_schema=core_schema.union_schema(
+                [core_schema.is_instance_schema(ObjectId), object_id_schema]
+            ),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                str, when_used="json"  # added when_used="json"
+            ),
+        )
+
+    @classmethod
+    def validate(cls, value: Any):
+        if not ObjectId.is_valid(value):
+            raise ValueError("Invalid id")
+
+        return ObjectId(value)
+
+
+PydanticObjectId = Annotated[ObjectId, ObjectIdAnnotation]
