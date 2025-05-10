@@ -176,13 +176,13 @@ def test_flag_boolean_validation(value, valid, client: FlaskClient):
             assert response.status_code == 200
             assert res.status == "OK"
         else:
-            assert response.status_code == 400
+            assert response.status_code == BadRequest.status_code
             assert res.status == "ERROR"
 
 
 def test_includes_excludes_conflict(client: FlaskClient):
     response = client.get("/api/courses/?includes[]=hello&excludes[]=world")
-    assert response.status_code == 400
+    assert response.status_code == BadRequest.status_code
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
 
@@ -220,7 +220,7 @@ def test_course_pagination_with_large_after(client: FlaskClient):
 
 def test_course_pagination_with_invalid_after(client: FlaskClient):
     response = client.get("/api/courses/?page=foobar")
-    assert response.status_code == 400
+    assert response.status_code == BadRequest.status_code
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
 
@@ -247,5 +247,5 @@ def test_course_fetch_limit_value(limit, page, valid, client: FlaskClient):
         assert res.status == "OK"
         assert len(res.data) <= limit
     else:
-        assert response.status_code == 400
+        assert response.status_code == BadRequest.status_code
         assert res.status == "ERROR"
