@@ -86,16 +86,23 @@ def update_course_plan(
 
 def delete_course_plan(course_plan_id: ObjectId, user_id: ObjectId):
     """
-    Delete CoursePlan of specified ID.
+    Delete CoursePlan of specified ID and all its associated semester plans.
 
     :param course_plan_id: the ID of the target CoursePlan.
+    :param user_id: the ID of the user who owns the course plan.
     :return: the deleted CoursePlan object or None if not found.
     """
-    course_plans_collection = get_db().course_plans
+    db = get_db()
+    course_plans_collection = db.course_plans
+    semester_plans_collection = db.semester_plans
+
     course_plan = course_plans_collection.find_one(
         {"_id": course_plan_id, "user_id": user_id}
     )
     if course_plan:
+        # Delete all semester plans associated with this course plan
+        semester_plans_collection.delete_many({"course_plan_id": course_plan_id})
+        # Delete the course plan
         doc = course_plans_collection.find_one_and_delete({"_id": course_plan_id})
         return CoursePlan.model_validate(doc) if doc else None
     return None
