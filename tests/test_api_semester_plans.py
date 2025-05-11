@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from flask.testing import FlaskClient
 
+from flaskr.api.exceptions import BadRequest, DuplicateResource, NotFound, Unauthorized
 from flaskr.api.respmodels import ResponseModel, SemesterPlanResponseModel
 from flaskr.db.models import CoursePlan, SemesterPlanCreate, SemesterPlanRead, User
 from tests.utils import GetDatabase, random_string, random_user
@@ -89,10 +90,10 @@ def logged_in_client_2(test_user_2: User, client_2: FlaskClient):
 def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str):
     base_url = "/api/semester-plans/"
     response = client.open(f"{base_url}{endpoint}", method=method)
-    assert response.status_code == 401
+    assert response.status_code == Unauthorized.status_code
     course_plan_response = ResponseModel.model_validate(response.json)
     assert course_plan_response.status == "ERROR"
-    assert course_plan_response.error == "Unauthorized"
+    assert isinstance(course_plan_response.error, Unauthorized)
 
 
 def test_create_semester_plan(
@@ -154,7 +155,7 @@ def test_update_semester_plan(
     assert create_response.status_code == 200
     created_data = create_response.get_json()["data"]
 
-    updated_data = {
+    updated_data: JSON = {
         "courses": ["ENGG1110", "CSCI1130"],
         "semester": 2,
         "year": 2026,
@@ -191,8 +192,10 @@ def test_delete_semester_plan(
 
     # Try to delete the same thing to ensure the system is working properly
     response = logged_in_client.delete(f"/api/semester-plans/{created_data['_id']}")
-    assert response.status_code == 404
-    assert response.get_json()["status"] == "ERROR"
+    assert response.status_code == NotFound.status_code
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
+    assert isinstance(res.error, NotFound)
 
 
 def test_semester_plan_uniqueness(
@@ -213,8 +216,9 @@ def test_semester_plan_uniqueness(
     create_response = logged_in_client.post(
         "/api/semester-plans/", json=semester_plan_data.model_dump(mode="json")
     )
-    assert create_response.status_code == 400
-    assert create_response.get_json()["status"] == "ERROR"
+    assert create_response.status_code == DuplicateResource.status_code
+    res = SemesterPlanResponseModel.model_validate(create_response.json)
+    assert isinstance(res.error, DuplicateResource)
 
 
 def test_creating_all_valid_semesters(
@@ -246,8 +250,10 @@ def test_creating_invalid_semesters(
         create_response = logged_in_client.post(
             "/api/semester-plans/", json=semester_plan_data
         )
-        assert create_response.status_code == 400
-        assert create_response.get_json()["status"] == "ERROR"
+        assert create_response.status_code == BadRequest.status_code
+        res = SemesterPlanResponseModel.model_validate(create_response.json)
+        assert res.status == "ERROR"
+        assert isinstance(res.error, BadRequest)
 
 
 def test_update_invalid_semester_number(
@@ -273,8 +279,10 @@ def test_update_invalid_semester_number(
         response = logged_in_client.patch(
             f"/api/semester-plans/{created_data['_id']}", json=updated_data
         )
-        assert response.status_code == 400
-        assert response.get_json()["status"] == "ERROR"
+        assert response.status_code == BadRequest.status_code
+        res = SemesterPlanResponseModel.model_validate(response.json)
+        assert res.status == "ERROR"
+        assert isinstance(res.error, BadRequest)
 
 
 def test_different_user_access_same_semester_plan(
@@ -303,8 +311,14 @@ def test_different_user_access_same_semester_plan(
     response_2 = logged_in_client_2.post(
         "/api/semester-plans/", json=semester_plan.model_dump(mode="json")
     )
-    assert response.status_code == 404 and response_2.status_code == 404
-    assert response.get_json()["status"] == response_2.get_json()["status"] == "ERROR"
+    assert (
+        response.status_code == NotFound.status_code
+        and response_2.status_code == NotFound.status_code
+    )
+    res = SemesterPlanResponseModel.model_validate(response.json)
+    res_2 = SemesterPlanResponseModel.model_validate(response_2.json)
+    assert res.status == "ERROR" and res_2.status == "ERROR"
+    assert isinstance(res.error, NotFound) and isinstance(res_2.error, NotFound)
 
     # Normal creation for later tests
     response = logged_in_client.post(
@@ -333,16 +347,12 @@ def test_different_user_access_same_semester_plan(
         delete_response = malicious_client.delete(
             f"/api/semester-plans/{innocent_plan.id}"
         )
-        assert (
-            get_response.status_code == 404
-            and patch_response.status_code == 404
-            and delete_response.status_code == 404
-        )
-        assert (
-            get_response.get_json()["status"] == "ERROR"
-            and patch_response.get_json()["status"] == "ERROR"
-            and delete_response.get_json()["status"] == "ERROR"
-        )
+        responses = [get_response, patch_response, delete_response]
+        for response in responses:
+            assert response.status_code == NotFound.status_code
+            res = SemesterPlanResponseModel.model_validate(response.json)
+            assert res.status == "ERROR"
+            assert isinstance(res.error, NotFound)
 
     # User 2 access user 1 semester plan should get error
     _cross_access(logged_in_client_2, semester_plan)

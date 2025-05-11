@@ -1,9 +1,16 @@
-import json
-
 from flask.testing import FlaskClient
 from pytest import MonkeyPatch
 from werkzeug.test import TestResponse
 
+from flaskr.api.exceptions import (
+    BadRequest,
+    InvalidCredentials,
+    InvalidLicenseKey,
+    InvalidResetToken,
+    PreRegistrationNotFound,
+    Unauthorized,
+    UsernameTaken,
+)
 from flaskr.api.reqmodels import (
     UserForgotPasswordModel,
     UserLoginRequestModel,
@@ -22,7 +29,7 @@ def test_signup(client: FlaskClient):
     def _send_request(usr: User, key: str):
         user_create = UserCreate.model_validate(
             {
-                **usr.model_dump(),
+                **usr.model_dump(mode="json"),
                 "license_key": key,
                 "password": usr.password_hash,
             }
@@ -30,22 +37,19 @@ def test_signup(client: FlaskClient):
 
         return client.post(
             "/api/user/signup",
-            json=user_create.model_dump(),
+            json=user_create.model_dump(mode="json"),
         )
 
     def _test_fail_ret_res(response: TestResponse):
-        assert response.status_code == 400
         res = ResponseModel.model_validate(response.json)
         assert res.status == "ERROR"
         assert res.error is not None
         return res
 
-    def _validation_test_fail(usr: User, s: set[str]):
+    def _validation_test_fail(usr: User):
         response = _send_request(usr, "asd")
         res = _test_fail_ret_res(response)
-        assert res.error is not None
-        json_data = json.loads(res.error)
-        assert s == set(e["loc"][0] for e in json_data)
+        assert isinstance(res.error, BadRequest)
 
     response = client.post(
         "/api/user/signup",
@@ -58,36 +62,36 @@ def test_signup(client: FlaskClient):
     # length checks
     TEST_USER.username = "012345678901234567890"
     TEST_USER.first_name = "abcdefghijklmnopqrstu"
-    _validation_test_fail(TEST_USER, {"username", "first_name"})
+    _validation_test_fail(TEST_USER)
 
     TEST_USER.username = "012_"
     TEST_USER.first_name = "A"
-    _validation_test_fail(TEST_USER, {"username", "first_name"})
+    _validation_test_fail(TEST_USER)
 
     # character checks
     TEST_USER.username = "0123456789-"
     TEST_USER.first_name = "Ac"
-    _validation_test_fail(TEST_USER, {"username"})
+    _validation_test_fail(TEST_USER)
 
     TEST_USER.username = "0123_"
     TEST_USER.first_name = "ABc1"
-    _validation_test_fail(TEST_USER, {"first_name"})
+    _validation_test_fail(TEST_USER)
 
     TEST_USER.username = "!@#$%^&*()_+{}:?<>"
     TEST_USER.first_name = "!@#$%^&*()_+{}:?<>"
-    _validation_test_fail(TEST_USER, {"username", "first_name"})
+    _validation_test_fail(TEST_USER)
 
     TEST_USER.username = "0123456789012345678_"
     TEST_USER.first_name = "abcdefghijklmnopqrst"
     response = _send_request(TEST_USER, "asd")
     res = _test_fail_ret_res(response)
-    assert res.error == "Pre-registration not found."
+    assert isinstance(res.error, PreRegistrationNotFound)
 
     key, preuser = create_precreated_user(TEST_USER.email)
     assert preuser is not None
     response = _send_request(TEST_USER, "asd")
     res = _test_fail_ret_res(response)
-    assert res.error == "Invalid license key."
+    assert isinstance(res.error, InvalidLicenseKey)
 
     response = _send_request(TEST_USER, key)
     assert response.status_code == 201
@@ -104,7 +108,7 @@ def test_signup(client: FlaskClient):
     key, preuser = create_precreated_user(TEST_USER.email)
     response = _send_request(TEST_USER, key)
     res = _test_fail_ret_res(response)
-    assert res.error == "Username already taken."
+    assert isinstance(res.error, UsernameTaken)
 
 
 def test_login(client: FlaskClient):
@@ -148,10 +152,10 @@ def test_login(client: FlaskClient):
         },
     )
 
-    assert response.status_code == 401
+    assert response.status_code == InvalidCredentials.status_code
     res = UserResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == "Invalid username or password."
+    assert isinstance(res.error, InvalidCredentials)
     assert res.data is None
 
     response = client.post(
@@ -161,10 +165,10 @@ def test_login(client: FlaskClient):
             "password": "wrong_password",
         },
     )
-    assert response.status_code == 401
+    assert response.status_code == InvalidCredentials.status_code
     res = UserResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == "Invalid username or password."
+    assert isinstance(res.error, InvalidCredentials)
     assert res.data is None
 
 
@@ -177,13 +181,13 @@ def test_sessions(client: FlaskClient):
                 assert session.get("username") == user.username
         response = client.get("/api/user/me")
         if user is None:
-            assert response.status_code == 401
+            assert response.status_code == InvalidCredentials.status_code
         else:
             assert response.status_code == 200
         res = UserResponseModel.model_validate(response.json)
         if user is None:
             assert res.status == "ERROR"
-            assert res.error == "Unauthorized"
+            assert isinstance(res.error, Unauthorized)
         else:
             assert res.status == "OK"
             assert res.data is not None
@@ -300,10 +304,10 @@ def test_forgot_verify_reset_password(
             username=TEST_USER.username, token="fake_token"
         ).model_dump(),
     )
-    assert response.status_code == 400
+    assert response.status_code == InvalidResetToken.status_code
     res = ResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == "Invalid token"
+    assert isinstance(res.error, InvalidResetToken)
 
     response = client.post(
         "/api/user/verify-token",
@@ -331,42 +335,27 @@ def test_forgot_verify_reset_password(
 
     response = client.post(
         "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username=TEST_USER.username, token=prev_token
-        ).model_dump(),
+        json=UserVerifyTokenModel(token=prev_token).model_dump(),
     )
-    assert response.status_code == 400
+    assert response.status_code == InvalidResetToken.status_code
     res = ResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == "Invalid token"
+    assert isinstance(res.error, InvalidResetToken)
 
     response = client.post(
         "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username="wrong_username", token=curr_token
-        ).model_dump(),
+        json=UserVerifyTokenModel(token="wrong_token").model_dump(),
     )
-    assert response.status_code == 400
+    assert response.status_code == InvalidResetToken.status_code
     res = ResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
-    assert res.error == "Invalid token"
-
-    response = client.post(
-        "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username="wrong_username", token="wrong_token"
-        ).model_dump(),
-    )
-    assert response.status_code == 400
-    res = ResponseModel.model_validate(response.json)
-    assert res.status == "ERROR"
-    assert res.error == "Invalid token"
+    assert isinstance(res.error, InvalidResetToken)
 
     # assume reset password invalid token handling the exact same as verify
     response = client.put(
         "/api/user/reset-password",
         json=UserResetPasswordModel(
-            username=TEST_USER.username, token=curr_token, password="new_password"
+            token=curr_token, password="new_password"
         ).model_dump(),
     )
     assert response.status_code == 200

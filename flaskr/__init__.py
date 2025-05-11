@@ -1,37 +1,36 @@
-import json
 import logging
 import os
 from typing import Any
 
-from flask import Flask, request, Response
+from flask import Flask, Response, current_app, request
 from flask.logging import default_handler
 from flask_pydantic import ValidationError, validate  # type: ignore
+from werkzeug import exceptions
 
 from flaskr import api
+from flaskr.api.exceptions import APIException, BadRequest, InternalError, NotFound
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
 from flaskr.utils import RequestFormatter
 
 
-def validation_error_handler(e: ValidationError):
-    errs: list[list[dict[Any, Any]] | None] = [
-        e.body_params,  # type: ignore
-        e.form_params,  # type: ignore
-        e.query_params,  # type: ignore
-        e.path_params,  # type: ignore
-    ]
-    err = None
-    for err_list in errs:
-        if err_list is not None:
-            err = err_list
-            break
-    return (
-        ResponseModel(
-            status="ERROR",
-            error=json.dumps(err),
-        ).model_dump(),
-        400,
-    )
+def exception_handler(e: Exception):
+    try:
+        if isinstance(e, exceptions.NotFound):
+            raise NotFound(debug_info="An undefined api path was requested") from e
+        if isinstance(e, ValidationError):
+            raise BadRequest(debug_info="Pydantic validation error") from e
+        if isinstance(e, APIException):
+            raise e
+        raise InternalError(debug_info="An unhandled exception has occured") from e
+
+    except APIException as e:
+        if isinstance(e, InternalError):
+            current_app.logger.exception(e)
+        else:
+            current_app.logger.warning(e, exc_info=True)
+
+        return ResponseModel(error=e).model_dump(mode="json"), e.status_code
 
 
 def create_app(test_config: dict[str, Any] | None = None):
@@ -45,7 +44,7 @@ def create_app(test_config: dict[str, Any] | None = None):
     # Initalize logging
     default_handler.setFormatter(RequestFormatter())
     app.logger.setLevel(
-        logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+        logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))  # type: ignore
     )
     app.logger.info("Logging level: %s", logging.getLevelName(app.logger.level))
 
@@ -75,7 +74,7 @@ def create_app(test_config: dict[str, Any] | None = None):
         return ResponseModel()
 
     @app.after_request
-    def logging_request(response: Response):
+    def logging_request(response: Response):  # type: ignore
         app.logger.debug(
             '{remote_addr} -> "{method} {endpoint} {protocol}" {status_code}'.format(
                 remote_addr=request.remote_addr,
@@ -87,7 +86,7 @@ def create_app(test_config: dict[str, Any] | None = None):
         )
         return response
 
-    app.register_error_handler(ValidationError, validation_error_handler)
+    app.register_error_handler(Exception, exception_handler)
     app.register_blueprint(api.route)
 
     return app
