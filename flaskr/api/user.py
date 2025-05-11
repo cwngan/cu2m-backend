@@ -133,11 +133,14 @@ def forgot_password(body: UserForgotPasswordModel):
 
 
 def _verify_token(body: UserVerifyTokenModel):
-    token = get_reset_token(body.username)
-    if not token or not KeyGenerator.verify_key(body.token, token.token_hash):
-        return False
-
-    return True
+    try:
+        key, hashkey = body.token.split(".")
+    except ValueError:
+        return None
+    token = get_reset_token(hashkey)
+    if not token or not KeyGenerator.verify_key(key, token.token_hash):
+        return None
+    return token
 
 
 @route.route("/verify-token", methods=["POST"])
@@ -154,14 +157,15 @@ def verify_token(body: UserVerifyTokenModel):
 @route.route("/reset-password", methods=["PUT"])
 @validate()
 def reset_password(body: UserResetPasswordModel):
-    if not _verify_token(body):
+    token = _verify_token(body)
+    if not token:
         return (
             ResponseModel(status="ERROR", error="Invalid token"),
             400,
         )
 
     update_user(
-        body.username,
+        token.username,
         UserUpdate(password=body.password),
     )
 

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from hashlib import sha256
 
 from pymongo.collection import ReturnDocument
 
@@ -129,10 +130,12 @@ def create_reset_token(email: str):
 
     tokendb = get_db().tokens
     key_hash, key = KeyGenerator.generate_new_key()
+    token_hashkey = sha256(key_hash.encode("utf-8")).hexdigest()
 
     token = ResetToken(
         token_hash=key_hash,
         username=user.username,
+        token_hashkey=token_hashkey,
         expires_at=datetime.fromtimestamp(
             datetime.now().timestamp() + ResetToken.TTL, timezone.utc
         ),
@@ -144,16 +147,17 @@ def create_reset_token(email: str):
         upsert=True,
     )
 
-    return key, user
+    return f"{key}.{token_hashkey}", user
 
 
-def get_reset_token(username: str):
+def get_reset_token(token_hashkey: str):
     """
     Get forgot password tokens for the user.
     """
     tokendb = get_db().tokens
-    doc = tokendb.find_one({"username": username})
-    if not doc:
-        return None
-    token = ResetToken.model_validate(doc)
-    return token if token.is_valid() else None
+    doc = tokendb.find_one({"token_hashkey": token_hashkey})
+    token = ResetToken.model_validate(doc) if doc else None
+    if token and token.expires_at <= datetime.now(tz=timezone.utc):
+        print(token.expires_at)
+        token = None
+    return token
