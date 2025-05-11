@@ -1,6 +1,6 @@
 from time import time
-from flaskr.db.database import get_db
-from flaskr.db.database import get_db_logger
+
+from flaskr.db.database import get_db, get_db_logger
 
 
 def get_all_courses(projection: dict[str, bool], page: int, limit: int):
@@ -65,9 +65,7 @@ def get_courses(
                             "if": {
                                 "$regexMatch": {
                                     "input": "$code",
-                                    "regex": "|".join(
-                                        ["^" + keyword for keyword in keywords]
-                                    ),
+                                    "regex": "|".join(keywords),
                                     "options": "i",
                                 }
                             },
@@ -87,6 +85,8 @@ def get_courses(
         result = courses_collection.aggregate(pipeline).to_list()
 
     end_time = time()
+
+    get_db_logger().info(result)
 
     get_db_logger().info(
         "Executed course search on keywords {keywords} with limit {limit} on page {page} with strict mode {strict} using {exec_time:.3f}s".format(
