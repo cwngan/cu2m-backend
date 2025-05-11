@@ -180,6 +180,7 @@ APIExceptions: TypeAlias = Annotated[
         APIException,
         UserAuthError,
         ResponseError,
+        MethodNotAllowed,
         Unauthorized,
         NotFound,
         BadRequest,
