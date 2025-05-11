@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from flask.testing import FlaskClient
 
+from flaskr.api.exceptions import NotFound, Unauthorized
 from flaskr.api.respmodels import (
     CoursePlanResponseModel,
     CoursePlanWithSemestersResponseModel,
@@ -70,10 +71,10 @@ def logged_in_client(test_user: User, client: FlaskClient):
 def test_unauthenticated_access(client: FlaskClient, method: str, endpoint: str):
     base_url = "/api/course-plans/"
     response = client.open(f"{base_url}{endpoint}", method=method)
-    assert response.status_code == 401
+    assert response.status_code == Unauthorized.status_code
     course_plan_response = ResponseModel.model_validate(response.json)
     assert course_plan_response.status == "ERROR"
-    assert course_plan_response.error == "Unauthorized"
+    assert isinstance(course_plan_response.error, Unauthorized)
 
 
 def test_create_course_plan(logged_in_client: FlaskClient, test_user: User):
@@ -91,7 +92,7 @@ def test_create_course_plan(logged_in_client: FlaskClient, test_user: User):
         assert response.status_code == 200
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
         assert course_plan_response.status == "OK"
-        assert type(course_plan_response.data) == CoursePlanRead
+        assert isinstance(course_plan_response.data, CoursePlanRead)
         assert abs(course_plan_response.data.updated_at - plan.updated_at) < timedelta(
             seconds=1
         )
@@ -268,16 +269,17 @@ def test_delete_course_plan(
 
         # Test deleting non-existing documents
         response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
-        assert response.status_code == 404
+        assert response.status_code == NotFound.status_code
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
         assert course_plan_response.status == "ERROR"
+        assert isinstance(course_plan_response.error, NotFound)
 
     # Test getting all course plans after deletion
     response = logged_in_client.get("/api/course-plans/")
     assert response.status_code == 200
     course_plan_response = CoursePlanResponseModel.model_validate(response.json)
     assert course_plan_response.status == "OK"
-    assert type(course_plan_response.data) == list
+    assert isinstance(course_plan_response.data, list)
     assert len(course_plan_response.data) == 0
 
 
@@ -290,7 +292,7 @@ def test_unauthorised_access(logged_in_client: FlaskClient, test_user2: User):
     get_all_res = CoursePlanResponseModel.model_validate(
         logged_in_client.get("/api/course-plans/").json
     )
-    assert type(get_all_res.data) == list
+    assert isinstance(get_all_res.data, list)
     assert unauthorised_plan.id not in [plan.id for plan in get_all_res.data]
     get_res = logged_in_client.get(f"/api/course-plans/{unauthorised_plan.id}")
     patch_res = logged_in_client.patch(

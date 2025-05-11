@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 import os
 from types import SimpleNamespace
 from typing import Any
@@ -125,7 +125,7 @@ def get_db_logger():
     if not _db_logger:
         _db_logger = logging.getLogger("database")
         _db_logger.setLevel(
-            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))
+            logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO")) # type: ignore
         )
 
         console_handler = logging.StreamHandler()

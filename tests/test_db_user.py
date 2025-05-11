@@ -178,11 +178,13 @@ def test_reset_token(get_db: GetDatabase):
 
     key, user = pkg.create_reset_token(TEST_USER.email)
 
+    assert user is not None and key is not None
+
+    key, hashkey = key.split(".")
     assert tokendb.count_documents({}) == 1
     assert user == TEST_USER
-    assert key is not None
 
-    token = pkg.get_reset_token(TEST_USER.username)
+    token = pkg.get_reset_token(hashkey)
     assert token is not None
     assert token.username == TEST_USER.username
     assert KeyGenerator.verify_key(key, token.token_hash) is True
@@ -192,23 +194,26 @@ def test_reset_token(get_db: GetDatabase):
         {"_id": token.id},
         {"$set": {"expires_at": datetime.fromtimestamp(0, timezone.utc)}},
     )
-    token = pkg.get_reset_token(TEST_USER.username)
+    token = pkg.get_reset_token(hashkey)
     assert token is None
 
-    assert pkg.get_reset_token("wrong_username") is None
+    assert pkg.get_reset_token("bad.token") is None
+    assert pkg.get_reset_token("badformat") is None
     assert pkg.create_reset_token("wrong_email") == (None, None)
 
     key1, user1 = pkg.create_reset_token(TEST_USER.email)
     assert user1 == TEST_USER
     assert key1 is not None
+    key1, hashkey1 = key1.split(".")
 
     key2, user2 = pkg.create_reset_token(TEST_USER.email)
-    assert user2 == TEST_USER
     assert key2 is not None
-    assert key1 != key2
+    assert user2 == TEST_USER
+    key2, hashkey2 = key2.split(".")
+    assert key1 != key2 and hashkey1 != hashkey2
     assert tokendb.count_documents({}) == 1
 
-    token = pkg.get_reset_token(TEST_USER.username)
+    token = pkg.get_reset_token(hashkey2)
     assert token is not None
     assert KeyGenerator.verify_key(key1, token.token_hash) is False
     assert KeyGenerator.verify_key(key2, token.token_hash) is True
