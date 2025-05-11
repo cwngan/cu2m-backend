@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from flask import Blueprint, session, current_app
+from flask import Blueprint, session, request
 from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
-from flaskr.api.exceptions import DuplicateResource, NotFound
+from flaskr.api.exceptions import DuplicateResource, MethodNotAllowed
 from flaskr.api.auth_guard import auth_guard
 from flaskr.api.exceptions import (
     InternalError,
@@ -166,14 +166,12 @@ def reset_password(body: UserResetPasswordModel):
 @route.route("/license", methods=["POST"])
 @validate()
 def generate_license(body: LicenseGenerationRequestModel):
-    if current_app.debug:
+    if request.remote_addr == "127.0.0.1":
         preuser = get_precreated_user(body.email)
         if preuser is None:
             license_key, _ = create_precreated_user(body.email)
             return LicenseKeyResponseModel(data=license_key)
-        # TODO: To be replaced by an error
         raise DuplicateResource(debug_info="Duplicat email during creation process")
-    # TODO: To be replaced by an error
-    raise NotFound(
+    raise MethodNotAllowed(
         debug_info="User attempt to access license generation endpoint while the app is running in production"
     )
