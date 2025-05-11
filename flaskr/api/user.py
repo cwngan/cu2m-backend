@@ -174,6 +174,6 @@ def generate_license(body: LicenseGenerationRequestModel):
         # TODO: To be replaced by an error
         raise DuplicateResource(debug_info="Duplicat email during creation process")
     # TODO: To be replaced by an error
-    return NotFound(
+    raise NotFound(
         debug_info="User attempt to access license generation endpoint while the app is running in production"
     )
