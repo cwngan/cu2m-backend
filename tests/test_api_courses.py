@@ -1,9 +1,10 @@
 import json
 import os
-import pytest
 
+import pytest
 from flask.testing import FlaskClient
 
+from flaskr.api.exceptions import BadRequest
 from flaskr.api.respmodels import CoursesResponseModel
 from flaskr.db.models import Course
 
@@ -17,7 +18,7 @@ from flaskr.db.models import Course
         ("CSCI3100", "Software Engineering"),
     ],
 )
-def test_single_exact_course_code(client: FlaskClient, input, expected):
+def test_single_exact_course_code(client: FlaskClient, input: str, expected: str):
     """
     Test if the given exact course code returns the exact expected name for the first entry
     """
@@ -26,6 +27,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
     courses = res.data
+    assert courses is not None
     assert len(courses) == 1
     assert courses[0].code == input
     assert courses[0].title == expected
@@ -39,7 +41,7 @@ def test_single_exact_course_code(client: FlaskClient, input, expected):
         (["engiNEERing", "matheMAtics"]),
     ],
 )
-def test_multiple_keywords(client: FlaskClient, input):
+def test_multiple_keywords(client: FlaskClient, input: list[str]):
     """
     Test if the multiple prefix course code returns the all the courses with either prefix
     """
@@ -47,6 +49,7 @@ def test_multiple_keywords(client: FlaskClient, input):
     assert response.status_code == 200
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "OK"
+    assert res.data is not None
     assert len(res.data) >= 1
     for course in res.data:
         ok = False
@@ -71,7 +74,9 @@ def test_all_courses_match_schema(client: FlaskClient):
     assert res.status == "OK"
 
     course_data_filename = os.getenv("COURSE_DATA_FILENAME")
+    assert course_data_filename is not None, "COURSE_DATA_FILENAME is not set"
     course_data = json.load(open(course_data_filename))
+    assert res.data is not None
     assert len(course_data.get("data").items()) == len(res.data)
 
 
@@ -171,13 +176,13 @@ def test_flag_boolean_validation(value, valid, client: FlaskClient):
             assert response.status_code == 200
             assert res.status == "OK"
         else:
-            assert response.status_code == 400
+            assert response.status_code == BadRequest.status_code
             assert res.status == "ERROR"
 
 
 def test_includes_excludes_conflict(client: FlaskClient):
     response = client.get("/api/courses/?includes[]=hello&excludes[]=world")
-    assert response.status_code == 400
+    assert response.status_code == BadRequest.status_code
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
 
@@ -215,7 +220,7 @@ def test_course_pagination_with_large_after(client: FlaskClient):
 
 def test_course_pagination_with_invalid_after(client: FlaskClient):
     response = client.get("/api/courses/?page=foobar")
-    assert response.status_code == 400
+    assert response.status_code == BadRequest.status_code
     res = CoursesResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
 
@@ -242,5 +247,5 @@ def test_course_fetch_limit_value(limit, page, valid, client: FlaskClient):
         assert res.status == "OK"
         assert len(res.data) <= limit
     else:
-        assert response.status_code == 400
+        assert response.status_code == BadRequest.status_code
         assert res.status == "ERROR"

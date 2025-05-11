@@ -1,7 +1,9 @@
 from flask import Blueprint
+from flask import current_app as app
 from flask_pydantic import validate  # type: ignore
 
-from flaskr.api import health, ping, user, courses, course_plans, semester_plans
+from flaskr.api import course_plans, courses, health, ping, semester_plans, user
+from flaskr.api.exceptions import NotFound
 from flaskr.api.respmodels import RootResponseModel
 
 route = Blueprint("api", __name__, url_prefix="/api")
@@ -11,6 +13,13 @@ route = Blueprint("api", __name__, url_prefix="/api")
 @validate()
 def root():
     return RootResponseModel()
+
+
+@route.route("/throw", methods=["GET"])
+def throw_error():  # type: ignore
+    if app.testing:
+        raise Exception("This is a test error")
+    raise NotFound(debug_info="Should not be accessed in production")
 
 
 route.register_blueprint(ping.route)
