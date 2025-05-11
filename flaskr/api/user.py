@@ -4,6 +4,7 @@ from flask import Blueprint, session, current_app
 from flask_pydantic import validate  # type: ignore
 
 from flaskr.api import email_service
+from flaskr.api.exceptions import DuplicateResource, NotFound
 from flaskr.api.auth_guard import auth_guard
 from flaskr.api.exceptions import (
     InternalError,
@@ -171,6 +172,8 @@ def generate_license(body: LicenseGenerationRequestModel):
             license_key, _ = create_precreated_user(body.email)
             return LicenseKeyResponseModel(data=license_key)
         # TODO: To be replaced by an error
-        return LicenseKeyResponseModel(data="")
+        raise DuplicateResource(debug_info="Duplicat email during creation process")
     # TODO: To be replaced by an error
-    return LicenseKeyResponseModel(data="")
+    return NotFound(
+        debug_info="User attempt to access license generation endpoint while the app is running in production"
+    )
