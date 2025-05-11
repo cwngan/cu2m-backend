@@ -36,6 +36,12 @@ def exception_handler(e: Exception):
 def create_app(test_config: dict[str, Any] | None = None):
     app = Flask(__name__, instance_relative_config=True)
 
+    # Load test config
+    if test_config is None:
+        app.config.from_pyfile("config.py", silent=True)
+    else:
+        app.config.from_mapping(test_config)
+
     # Initalize logging
     default_handler.setFormatter(RequestFormatter())
     app.logger.setLevel(
@@ -44,7 +50,7 @@ def create_app(test_config: dict[str, Any] | None = None):
     app.logger.info("Logging level: %s", logging.getLevelName(app.logger.level))
 
     # Configure Flask app
-    secret_key = "dev" if app.debug else os.getenv("SECRET_KEY")
+    secret_key = "dev" if app.debug or app.testing else os.getenv("SECRET_KEY")
     if secret_key is None:
         app.logger.critical("Flask secret key is not set. Exiting.")
         exit(0)
@@ -60,12 +66,6 @@ def create_app(test_config: dict[str, Any] | None = None):
 
     # Initialize database
     init_db()
-
-    # Load test config
-    if test_config is None:
-        app.config.from_pyfile("config.py", silent=True)
-    else:
-        app.config.from_mapping(test_config)
 
     try:
         os.makedirs(app.instance_path)
