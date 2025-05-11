@@ -3,7 +3,7 @@ from datetime import datetime
 
 from flask.testing import FlaskClient
 
-from flaskr.api.exceptions import InternalError, NotFound
+from flaskr.api.exceptions import InternalError, NotFound, MethodNotAllowed
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.user import create_precreated_user, get_precreated_user
 from tests.conftest import TEST_DB_NAME
@@ -80,3 +80,9 @@ def test_global_error_handler(client: FlaskClient):
     data = ResponseModel.model_validate(response.json)
     assert data.status == "ERROR"
     assert isinstance(data.error, NotFound)
+
+    response = client.post("/api/throw")
+    assert response.status_code == MethodNotAllowed.status_code
+    data = ResponseModel.model_validate(response.json)
+    assert data.status == "ERROR"
+    assert isinstance(data.error, MethodNotAllowed)
