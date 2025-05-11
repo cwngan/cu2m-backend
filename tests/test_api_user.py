@@ -335,9 +335,7 @@ def test_forgot_verify_reset_password(
 
     response = client.post(
         "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username=TEST_USER.username, token=prev_token
-        ).model_dump(),
+        json=UserVerifyTokenModel(token=prev_token).model_dump(),
     )
     assert response.status_code == InvalidResetToken.status_code
     res = ResponseModel.model_validate(response.json)
@@ -346,20 +344,7 @@ def test_forgot_verify_reset_password(
 
     response = client.post(
         "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username="wrong_username", token=curr_token
-        ).model_dump(),
-    )
-    assert response.status_code == InvalidResetToken.status_code
-    res = ResponseModel.model_validate(response.json)
-    assert res.status == "ERROR"
-    assert isinstance(res.error, InvalidResetToken)
-
-    response = client.post(
-        "/api/user/verify-token",
-        json=UserVerifyTokenModel(
-            username="wrong_username", token="wrong_token"
-        ).model_dump(),
+        json=UserVerifyTokenModel(token="wrong_token").model_dump(),
     )
     assert response.status_code == InvalidResetToken.status_code
     res = ResponseModel.model_validate(response.json)
@@ -370,7 +355,7 @@ def test_forgot_verify_reset_password(
     response = client.put(
         "/api/user/reset-password",
         json=UserResetPasswordModel(
-            username=TEST_USER.username, token=curr_token, password="new_password"
+            token=curr_token, password="new_password"
         ).model_dump(),
     )
     assert response.status_code == 200

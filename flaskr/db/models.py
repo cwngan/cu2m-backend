@@ -148,6 +148,7 @@ class ResetToken(CoreModel):
 
     id: Optional[PydanticObjectId] = Field(alias="_id", default=None)
     username: str
+    token_hashkey: str
     token_hash: str
     ttl: int = TTL
     expires_at: datetime
