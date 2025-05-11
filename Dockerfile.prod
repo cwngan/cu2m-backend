@@ -5,13 +5,13 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 RUN pip install poetry
 
 WORKDIR /app
-COPY courses*.json .
 COPY pyproject.toml poetry.lock ./
 RUN poetry install
+COPY courses*.json .
 
 WORKDIR /app/flaskr
 COPY flaskr .
 
 WORKDIR /app
 ENV PORT=8080
-CMD ["gunicorn", "-w", "4", "flaskr:create_app()"]
+CMD ["gunicorn", "-w", "4", "flaskr:create_app()", "-b", "0.0.0.0:5000"]
