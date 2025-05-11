@@ -5,9 +5,11 @@ from werkzeug.test import TestResponse
 
 from flaskr.api.exceptions import (
     BadRequest,
+    DuplicateResource,
     InvalidCredentials,
     InvalidLicenseKey,
     InvalidResetToken,
+    NotFound,
     PreRegistrationNotFound,
     Unauthorized,
     UsernameTaken,
@@ -395,12 +397,31 @@ def test_license_generation(debug_client: FlaskClient):
 
     assert response.status_code == 200
     res = LicenseKeyResponseModel.model_validate(response.json)
-
     assert res.status == "OK"
     assert (
         re.fullmatch(r"[A-Z\d]{4}-[A-Z\d]{4}-[A-Z\d]{4}-[A-Z\d]{4}", res.data)
         is not None
     )
 
+    response = debug_client.post(
+        "/api/user/license",
+        json=LicenseGenerationRequestModel.model_validate(
+            {"email": "email@example.com"}
+        ).model_dump(),
+    )
+    assert response.status_code == DuplicateResource.status_code
+    res = ResponseModel.model_validate(response.json)
+    assert res.status == "ERROR"
 
-# TODO: add tests for guarding license endpoint to prevent being used during production
+
+def test_license_endpoint_access_in_production(client: FlaskClient):
+    response = client.post(
+        "/api/user/license",
+        json=LicenseGenerationRequestModel.model_validate(
+            {"email": "email@example.com"}
+        ).model_dump(),
+    )
+
+    assert response.status_code == NotFound.status_code
+    res = ResponseModel.model_validate(response.json)
+    assert res == "ERROR"
