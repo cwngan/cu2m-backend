@@ -97,6 +97,11 @@ class ResponseError(APIException, ABC):
     """
 
 
+class MethodNotAllowed(ResponseError):
+    status_code = HTTPStatus.METHOD_NOT_ALLOWED
+    message = "The requested method is not allowed for this endpoint"
+
+
 class Unauthorized(ResponseError):
     status_code = HTTPStatus.UNAUTHORIZED
     message = "Please log in to access this resource"

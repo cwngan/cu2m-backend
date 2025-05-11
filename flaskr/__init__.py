@@ -8,7 +8,13 @@ from flask_pydantic import ValidationError, validate  # type: ignore
 from werkzeug import exceptions
 
 from flaskr import api
-from flaskr.api.exceptions import APIException, BadRequest, InternalError, NotFound
+from flaskr.api.exceptions import (
+    APIException,
+    BadRequest,
+    InternalError,
+    MethodNotAllowed,
+    NotFound,
+)
 from flaskr.api.respmodels import ResponseModel
 from flaskr.db.database import init_db
 from flaskr.utils import RequestFormatter
@@ -16,12 +22,21 @@ from flaskr.utils import RequestFormatter
 
 def exception_handler(e: Exception):
     try:
+        # Map exceptions from Flask
         if isinstance(e, exceptions.NotFound):
             raise NotFound(debug_info="An undefined api path was requested") from e
+        if isinstance(e, exceptions.MethodNotAllowed):
+            raise MethodNotAllowed() from e
+
+        # Errors by Flask-Pydantic
         if isinstance(e, ValidationError):
             raise BadRequest(debug_info="Pydantic validation error") from e
+
+        # Errors thrown by the app
         if isinstance(e, APIException):
             raise e
+
+        # unhandled exceptions
         raise InternalError(debug_info="An unhandled exception has occured") from e
 
     except APIException as e:
