@@ -62,17 +62,6 @@ def app():
 
 
 @pytest.fixture
-def debug_app():
-    test_config = {
-        "TESTING": True,
-        "debug": True,
-    }
-    app = create_app(test_config)
-    app.debug = True
-    yield app
-
-
-@pytest.fixture
 def client(app: Flask):
     """
     Provide a test client for the Flask app.
@@ -86,8 +75,3 @@ def client_2(app: Flask):
     Provide another test client for the Flask app.
     """
     return app.test_client()
-
-
-@pytest.fixture
-def debug_client(debug_app: Flask):
-    return debug_app.test_client()
