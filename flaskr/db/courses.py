@@ -86,7 +86,7 @@ def get_courses(
 
     end_time = time()
 
-    get_db_logger().info(result)
+    get_db_logger().debug(result)
 
     get_db_logger().info(
         "Executed course search on keywords {keywords} with limit {limit} on page {page} with strict mode {strict} using {exec_time:.3f}s".format(
