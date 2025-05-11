@@ -424,4 +424,4 @@ def test_license_endpoint_access_in_production(client: FlaskClient):
 
     assert response.status_code == NotFound.status_code
     res = ResponseModel.model_validate(response.json)
-    assert res == "ERROR"
+    assert res.status == "ERROR"
