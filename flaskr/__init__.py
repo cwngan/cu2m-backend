@@ -34,12 +34,7 @@ def exception_handler(e: Exception):
 
 
 def create_app(test_config: dict[str, Any] | None = None):
-    # Configure Flask app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY="dev" if app.debug else os.urandom(32),
-        FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True,
-    )
 
     # Initalize logging
     default_handler.setFormatter(RequestFormatter())
@@ -47,6 +42,16 @@ def create_app(test_config: dict[str, Any] | None = None):
         logging.getLevelNamesMapping().get(os.getenv("LOGGING_LEVEL", "INFO"))  # type: ignore
     )
     app.logger.info("Logging level: %s", logging.getLevelName(app.logger.level))
+
+    # Configure Flask app
+    secret_key = "dev" if app.debug else os.getenv("SECRET_KEY")
+    if secret_key is None:
+        app.logger.critical("Flask secret key is not set. Exiting.")
+        exit(0)
+    app.config.from_mapping(
+        SECRET_KEY=secret_key,
+        FLASK_PYDANTIC_VALIDATION_ERROR_RAISE=True,
+    )
 
     # Test logging color formats during debug mode
     if app.debug:
