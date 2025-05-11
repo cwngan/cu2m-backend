@@ -109,3 +109,11 @@ class CoursePlanUpdateRequestModel(BaseModel):
     description: Optional[str] = None
     favourite: Optional[bool] = None
     name: Optional[str] = None
+
+
+class LicenseGenerationRequestModel(BaseModel):
+    """
+    Model for generating a license key
+    """
+
+    email: str

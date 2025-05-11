@@ -50,3 +50,7 @@ class CoursePlanWithSemestersData(BaseModel):
 
 class CoursePlanWithSemestersResponseModel(ResponseModel):
     data: CoursePlanWithSemestersData | None = None
+
+
+class LicenseKeyResponseModel(ResponseModel):
+    data: str
