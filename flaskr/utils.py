@@ -77,7 +77,10 @@ class PasswordHasher:
 
     @classmethod
     def verify_password(cls, hash: str, password: str):
-        return cls.argon.verify(hash, password)
+        try:
+            return cls.argon.verify(hash, password)
+        except Exception:
+            return False
 
 
 class DataProjection:
