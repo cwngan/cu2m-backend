@@ -40,22 +40,26 @@ class UserNameValidator(BaseModel):
 
 
 class UserCreateRequestModel(UserCreate, UserNameValidator):
-    @field_validator("first_name", mode="before")
-    def validate_firstname(cls, first_name: str) -> str:
-        if not NAME_REGEX.match(first_name) or not NAME_REGEX.match(first_name):
-            raise ValidationError.from_exception_data(
-                title="validation_error",
-                line_errors=[
-                    {
-                        "type": PydanticCustomError(
-                            "value_error",
-                            "Names must contain only letters and be of proper length",
-                        ),
-                        "input": first_name,
-                    }
-                ],
-            )
-        return first_name
+    """
+    Model for UserCreate request body.
+    """
+
+    # @field_validator("first_name", mode="before")
+    # def validate_firstname(cls, first_name: str) -> str:
+    #     if not NAME_REGEX.match(first_name) or not NAME_REGEX.match(first_name):
+    #         raise ValidationError.from_exception_data(
+    #             title="validation_error",
+    #             line_errors=[
+    #                 {
+    #                     "type": PydanticCustomError(
+    #                         "value_error",
+    #                         "Names must contain only letters and be of proper length",
+    #                     ),
+    #                     "input": first_name,
+    #                 }
+    #             ],
+    #         )
+    #     return first_name
 
 
 class UserDeleteRequestModel(UserNameValidator):
