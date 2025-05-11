@@ -73,12 +73,6 @@ def create_app(test_config: dict[str, Any] | None = None):
     def root():  # type: ignore
         return ResponseModel()
 
-    if app.testing:
-
-        @app.route("/api/throw", methods=["GET"])
-        def throw_error():  # type: ignore
-            raise Exception("This is a test error")
-
     @app.after_request
     def logging_request(response: Response):  # type: ignore
         app.logger.debug(
