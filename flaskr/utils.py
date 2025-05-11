@@ -1,12 +1,11 @@
 import logging
-import os
 import secrets
 import string
-from base64 import b64decode, b64encode
-from hashlib import scrypt, sha256
+from hashlib import sha256
 from logging import LogRecord
 from typing import Any, Literal, Mapping
 
+from argon2 import PasswordHasher as ArgonPasswordHasher
 from bson import ObjectId
 from colorama import Back, Fore, Style
 from pydantic_core import core_schema
@@ -81,28 +80,16 @@ class KeyGenerator:
 
 
 class PasswordHasher:
-    n = 16384
-    r = 8
-    p = 1
-
-    @classmethod
-    def __hash_password(cls, password: str, salt: bytes, n: int, r: int, p: int):
-        return scrypt(password.encode("ascii"), salt=b64encode(salt), n=n, r=r, p=p)
+    argon = ArgonPasswordHasher()
 
     @classmethod
     def hash_password(cls, password: str):
-        salt = os.urandom(16)
-        password_hash = cls.__hash_password(password, salt, cls.n, cls.r, cls.p)
-        return f"16384$8$1${b64encode(salt).decode('ascii')}${b64encode(password_hash).decode('ascii')}"
+        return cls.argon.hash(password)
 
     @classmethod
     def verify_password(cls, hash: str, password: str):
         try:
-            n, r, p, salt, password_hash = hash.split("$")
-            n, r, p = int(n), int(r), int(p)
-            return cls.__hash_password(
-                password, b64decode(salt.encode("ascii")), n, r, p
-            ) == b64decode(password_hash.encode("ascii"))
+            return cls.argon.verify(hash, password)
         except Exception:
             return False
 

@@ -55,20 +55,5 @@ def test_password_hasher():
         utils.PasswordHasher.verify_password(password_hash, "wrong_password") is False
     )
     assert (
-        utils.PasswordHasher.verify_password(
-            f"16384$8$1${password_hash.split('$')[-2]}${b64encode(b'wronghash').decode('ascii')}",
-            TEST_PASSWORD,
-        )
-        is False
-    )  # wrong hash
-    assert (
-        utils.PasswordHasher.verify_password(
-            f"16384$8$1${b64encode(b'wrong_salt').decode('ascii')}${password_hash.split('$')[-1]}",
-            TEST_PASSWORD,
-        )
-        is False
-    )  # wrong salt
-
-    assert (
         utils.PasswordHasher.verify_password("123k12op3123qk123", "asdl120123") is False
     )  # garbage
