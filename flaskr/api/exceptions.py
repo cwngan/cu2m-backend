@@ -32,6 +32,8 @@ class APIException(Exception, ABC):
         *,
         debug_info: str = "",
     ):
+        if ABC in self.__class__.__bases__:
+            raise TypeError("Cannot instantiate abstract Exception class")
         if message:
             self.message = message
         if status_code:
@@ -54,7 +56,7 @@ class APIException(Exception, ABC):
     @classmethod
     def validate(cls, value: T):
         if ABC in cls.__bases__:
-            raise ValueError("Cannot instantiate abstract class")
+            raise TypeError("Cannot instantiate abstract Exception class")
 
         if isinstance(value, cls):
             return value
