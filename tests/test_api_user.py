@@ -387,8 +387,8 @@ def test_forgot_verify_reset_password(
     assert res.data == UserRead.model_validate(TEST_USER.model_dump())
 
 
-def test_license_generation(debug_client: FlaskClient):
-    response = debug_client.post(
+def test_license_generation(client: FlaskClient):
+    response = client.post(
         "/api/user/license",
         json=LicenseGenerationRequestModel.model_validate(
             {"email": "email@example.com"}
@@ -403,25 +403,12 @@ def test_license_generation(debug_client: FlaskClient):
         is not None
     )
 
-    response = debug_client.post(
-        "/api/user/license",
-        json=LicenseGenerationRequestModel.model_validate(
-            {"email": "email@example.com"}
-        ).model_dump(),
-    )
-    assert response.status_code == DuplicateResource.status_code
-    res = ResponseModel.model_validate(response.json)
-    assert res.status == "ERROR"
-
-
-def test_license_endpoint_access_in_production(client: FlaskClient):
     response = client.post(
         "/api/user/license",
         json=LicenseGenerationRequestModel.model_validate(
             {"email": "email@example.com"}
         ).model_dump(),
     )
-
-    assert response.status_code == NotFound.status_code
+    assert response.status_code == DuplicateResource.status_code
     res = ResponseModel.model_validate(response.json)
     assert res.status == "ERROR"
