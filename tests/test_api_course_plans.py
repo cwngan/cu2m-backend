@@ -11,6 +11,7 @@ from flaskr.api.respmodels import (
     ResponseModel,
 )
 from flaskr.db.course_plans import create_course_plan
+from flaskr.db.semester_plans import create_semester_plan
 from flaskr.db.models import CoursePlan, CoursePlanRead, CoursePlanUpdate, User
 from tests.utils import GetDatabase, random_string, random_user
 
@@ -261,6 +262,27 @@ def test_delete_course_plan(
     logged_in_client: FlaskClient, course_plans: list[CoursePlan]
 ):
     for plan in course_plans:
+        # Create some semester plans for this course plan
+        semester_plans = []
+        for semester in range(1, 4):  # Create plans for semesters 1, 2, and 3
+            semester_plan = create_semester_plan(
+                course_plan_id=plan.id,
+                semester=semester,
+                year=2025,
+            )
+            assert semester_plan is not None
+            semester_plans.append(semester_plan)
+
+        # Get semester plans before deletion to verify they exist
+        pre_delete_response = logged_in_client.get(f"/api/course-plans/{plan.id}")
+        assert pre_delete_response.status_code == 200
+        pre_delete_data = CoursePlanWithSemestersResponseModel.model_validate(
+            pre_delete_response.json
+        )
+        assert isinstance(pre_delete_data.data.semester_plans, list)
+        assert len(pre_delete_data.data.semester_plans) == 3
+
+        # Delete the course plan
         response = logged_in_client.delete(f"/api/course-plans/{plan.id}")
         assert response.status_code == 200
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
@@ -273,6 +295,15 @@ def test_delete_course_plan(
         course_plan_response = CoursePlanResponseModel.model_validate(response.json)
         assert course_plan_response.status == "ERROR"
         assert isinstance(course_plan_response.error, NotFound)
+
+        # Verify that associated semester plans are also deleted
+        post_delete_response = logged_in_client.get(f"/api/course-plans/{plan.id}")
+        assert post_delete_response.status_code == NotFound.status_code
+
+        # All semester plans should be deleted
+        for semester_plan in semester_plans:
+            response = logged_in_client.get(f"/api/semester-plans/{semester_plan.id}")
+            assert response.status_code == NotFound.status_code
 
     # Test getting all course plans after deletion
     response = logged_in_client.get("/api/course-plans/")
