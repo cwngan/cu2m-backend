@@ -297,8 +297,8 @@ def test_delete_course_plan(
         assert isinstance(course_plan_response.error, NotFound)
 
         # Verify that associated semester plans are also deleted
-        pre_delete_response = logged_in_client.get(f"/api/course-plans/{plan.id}")
-        assert pre_delete_response.status_code == NotFound.status_code
+        post_delete_response = logged_in_client.get(f"/api/course-plans/{plan.id}")
+        assert post_delete_response.status_code == NotFound.status_code
 
         # All semester plans should be deleted
         for semester_plan in semester_plans:
