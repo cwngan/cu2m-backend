@@ -6,6 +6,7 @@ from flask import Flask, Response, current_app, request
 from flask.logging import default_handler
 from flask_pydantic import ValidationError, validate  # type: ignore
 from werkzeug import exceptions
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flaskr import api
 from flaskr.api.exceptions import (
@@ -50,6 +51,8 @@ def exception_handler(e: Exception):
 
 def create_app(test_config: dict[str, Any] | None = None):
     app = Flask(__name__, instance_relative_config=True)
+
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_host=1, x_proto=1)
 
     # Load test config
     if test_config is None:
